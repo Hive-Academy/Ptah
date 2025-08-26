@@ -1,0 +1,252 @@
+{
+  "name": "ptah-claude-code",
+  "displayName": "Ptah - Claude Code GUI",
+  "description": "Complete visual interface for Claude Code CLI with chat, command building, and intelligent context management",
+  "version": "0.1.0",
+  "publisher": "ptah-extensions",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hive-Academy/Ptah.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hive-Academy/Ptah/issues"
+  },
+  "homepage": "https://github.com/Hive-Academy/Ptah#readme",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "AI",
+    "Machine Learning",
+    "Chat",
+    "Other"
+  ],
+  "keywords": [
+    "claude",
+    "ai",
+    "chat",
+    "code-review",
+    "assistant",
+    "anthropic",
+    "cli-gui"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "icon": "images/ptah-icon.png",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ptah",
+          "title": "Ptah - Claude Code",
+          "icon": "$(scroll)"
+        }
+      ]
+    },
+    "views": {
+      "ptah": [
+        {
+          "type": "webview",
+          "id": "ptah.chatSidebar",
+          "name": "Chat",
+          "icon": "$(comment-discussion)",
+          "contextualTitle": "Claude Code Chat"
+        },
+        {
+          "type": "tree",
+          "id": "ptah.contextTree",
+          "name": "Context Files",
+          "icon": "$(files)",
+          "contextualTitle": "Context Management"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ptah.quickChat",
+        "title": "Quick Chat",
+        "category": "Ptah",
+        "icon": "$(comment)"
+      },
+      {
+        "command": "ptah.reviewCurrentFile",
+        "title": "Review Current File",
+        "category": "Ptah",
+        "icon": "$(search-review)"
+      },
+      {
+        "command": "ptah.generateTests",
+        "title": "Generate Tests",
+        "category": "Ptah",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "ptah.buildCommand",
+        "title": "Build Command",
+        "category": "Ptah",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "ptah.newSession",
+        "title": "New Session",
+        "category": "Ptah",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ptah.includeFile",
+        "title": "Include in Context",
+        "category": "Ptah",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ptah.excludeFile",
+        "title": "Exclude from Context",
+        "category": "Ptah",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "ptah.showAnalytics",
+        "title": "Show Analytics",
+        "category": "Ptah",
+        "icon": "$(graph)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "ptah.quickChat"
+        },
+        {
+          "command": "ptah.reviewCurrentFile",
+          "when": "editorIsOpen"
+        },
+        {
+          "command": "ptah.generateTests",
+          "when": "editorIsOpen"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "ptah.reviewCurrentFile",
+          "group": "ptah@1"
+        },
+        {
+          "command": "ptah.generateTests",
+          "group": "ptah@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ptah.includeFile",
+          "when": "!ptah.fileIncluded",
+          "group": "ptah@1"
+        },
+        {
+          "command": "ptah.excludeFile",
+          "when": "ptah.fileIncluded",
+          "group": "ptah@1"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "ptah.newSession",
+          "when": "view == ptah.chatSidebar",
+          "group": "navigation"
+        },
+        {
+          "command": "ptah.showAnalytics",
+          "when": "view == ptah.chatSidebar",
+          "group": "navigation"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "ptah.quickChat",
+        "key": "ctrl+shift+p ctrl+shift+c",
+        "mac": "cmd+shift+p cmd+shift+c"
+      },
+      {
+        "command": "ptah.reviewCurrentFile",
+        "key": "ctrl+shift+p ctrl+shift+r",
+        "mac": "cmd+shift+p cmd+shift+r",
+        "when": "editorIsOpen"
+      },
+      {
+        "command": "ptah.buildCommand",
+        "key": "ctrl+shift+p ctrl+shift+b",
+        "mac": "cmd+shift+p cmd+shift+b"
+      }
+    ],
+    "configuration": {
+      "title": "Ptah - Claude Code",
+      "properties": {
+        "ptah.claudeCliPath": {
+          "type": "string",
+          "default": "claude",
+          "description": "Path to Claude Code CLI executable"
+        },
+        "ptah.defaultProvider": {
+          "type": "string",
+          "enum": [
+            "anthropic",
+            "bedrock",
+            "vertex"
+          ],
+          "default": "anthropic",
+          "description": "Default Claude provider"
+        },
+        "ptah.maxTokens": {
+          "type": "number",
+          "default": 200000,
+          "description": "Maximum tokens per session"
+        },
+        "ptah.autoIncludeOpenFiles": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically include open files in context"
+        },
+        "ptah.contextOptimization": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable automatic context optimization suggestions"
+        },
+        "ptah.analyticsEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable usage analytics tracking"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "compile:test": "tsc -p ./tsconfig.test.json",
+    "watch": "tsc -watch -p ./",
+    "watch:test": "tsc -watch -p ./tsconfig.test.json",
+    "pretest": "npm run compile && npm run compile:test && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "test:standalone": "npm run compile:test && node ./out/test-detection.js",
+    "build:webview": "cd webview && npm run build",
+    "dev:webview": "cd webview && npm run build -- --watch"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "16.x",
+    "@types/uuid": "^9.0.0",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "mocha": "^11.7.1",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.0",
+    "uuid": "^9.0.0"
+  }
+}
