@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npx nx *)",
+      "WebSearch",
+      "Bash(npx nx build:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__filesystem__read_text_file",
+      "mcp__filesystem__list_directory",
+      "mcp__filesystem__write_file",
+      "Bash(npx nx run-many:*)",
+      "Bash(npx nx show:*)",
+      "Bash(npx nx typecheck:*)",
+      "mcp__nx-mcp__nx_workspace",
+      "Bash(git push:*)",
+      "mcp__filesystem__read_multiple_files",
+      "mcp__filesystem__edit_file",
+      "mcp__nx-mcp__nx_docs",
+      "mcp__filesystem__create_directory",
+      "Bash(git commit:*)",
+      "Bash(npx nx test:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx nx:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm publish:*)"
+    ],
+    "additionalDirectories": [
+      "d:\\projects\\Ptah"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "browser",
+    "sequential-thinking",
+    "nx-mcp",
+    "angular-cli",
+    "neo4j-graph-data-modeling",
+    "chroma"
+  ],
+  "statusLine": {
+    "type": "command",
+    "command": "powershell.exe -ExecutionPolicy Bypass -File \"D:\\projects\\Ptah\\.claude\\status-line.ps1\""
+  },
+  "enableAllProjectMcpServers": true
+}
