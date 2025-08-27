@@ -1,0 +1,64 @@
+/* Command Builder Component - Egyptian Theme with Tailwind CSS */
+
+/* Custom Egyptian-themed components */
+.egyptian-card {
+  @apply bg-gradient-to-br from-papyrus-100 to-sand-50 border border-papyrus-300 rounded-egyptian shadow-papyrus transition-all duration-300 hover:shadow-hieroglyph hover:border-papyrus-400;
+}
+
+.pharaoh-button {
+  @apply bg-gradient-to-r from-gold-500 to-gold-600 text-white font-semibold px-6 py-3 rounded-egyptian shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 focus:ring-2 focus:ring-gold-400 focus:ring-opacity-50;
+}
+
+.hieroglyph-input {
+  @apply bg-papyrus-50 border border-papyrus-300 rounded-egyptian px-4 py-2 focus:ring-2 focus:ring-lapis-400 focus:border-lapis-500 transition-all duration-200 vscode-input-fg;
+}
+
+.ankh-accent {
+  @apply border-l-4 border-ankh-500 pl-4 bg-gradient-to-r from-ankh-50 to-transparent;
+}
+
+.papyrus-scroll {
+  @apply bg-papyrus-texture relative overflow-hidden;
+  &::before {
+    content: '';
+    @apply absolute inset-0 bg-hieroglyph-pattern opacity-5 pointer-events-none;
+  }
+}
+
+.gold-shimmer {
+  @apply bg-gradient-to-r from-gold-400 via-gold-500 to-gold-400 bg-clip-text text-transparent animate-glow;
+  background-size: 200% 100%;
+}
+
+.floating-element {
+  @apply animate-float;
+}
+
+/* Theme adaptations for VS Code */
+.vscode-dark .egyptian-card {
+  @apply bg-gradient-to-br from-hieroglyph-800 to-hieroglyph-900 border-hieroglyph-600 text-papyrus-100;
+}
+
+.vscode-dark .hieroglyph-input {
+  @apply bg-hieroglyph-800 border-hieroglyph-600 text-papyrus-100 placeholder-hieroglyph-400;
+}
+
+.vscode-light .egyptian-card {
+  @apply bg-gradient-to-br from-papyrus-50 to-sand-25 border-papyrus-200 text-hieroglyph-800;
+}
+
+.vscode-light .hieroglyph-input {
+  @apply bg-white border-papyrus-200 text-hieroglyph-800 placeholder-hieroglyph-500;
+}
+
+.vscode-high-contrast .egyptian-card {
+  @apply bg-black border-white text-white;
+}
+
+.vscode-high-contrast .pharaoh-button {
+  @apply bg-white text-black border-2 border-white;
+}
+
+.vscode-high-contrast .hieroglyph-input {
+  @apply bg-black border-white text-white;
+}

@@ -1,0 +1,238 @@
+<div class="chat-container h-full flex flex-col">
+  <!-- Chat Header -->
+  <header class="chat-header bg-papyrus-100 border-b border-hieroglyph-200 p-3 flex justify-between items-center">
+    <div class="session-info">
+      <h3 class="text-sm font-semibold text-hieroglyph-800 m-0">
+        {{ currentSession()?.name || 'New Session' }}
+      </h3>
+      @if (workspaceInfo()) {
+        <div class="text-xs text-hieroglyph-600 mt-1">
+          {{ workspaceInfo()!.name }} • {{ workspaceInfo()!.projectType }}
+        </div>
+      }
+    </div>
+
+    <div class="session-actions flex gap-1">
+      <app-egyptian-button
+        size="sm"
+        variant="secondary"
+        (click)="newSession()"
+        title="New Session">
+        <lucide-angular [img]="PlusIcon" size="16"></lucide-angular>
+      </app-egyptian-button>
+
+      <app-egyptian-button
+        size="sm"
+        variant="secondary"
+        (click)="switchSession()"
+        title="Switch Session">
+        <lucide-angular [img]="HistoryIcon" size="16"></lucide-angular>
+      </app-egyptian-button>
+
+      <app-egyptian-button
+        size="sm"
+        variant="secondary"
+        (click)="showSettings()"
+        title="Chat Settings">
+        <lucide-angular [img]="SettingsIcon" size="16"></lucide-angular>
+      </app-egyptian-button>
+    </div>
+  </header>
+
+  <!-- Token Usage Bar -->
+  @if (currentSession()?.tokenUsage) {
+    <div class="token-usage-bar h-1 bg-hieroglyph-200">
+      <div
+        class="usage-fill h-full transition-all duration-300"
+        [class.bg-gold-500]="currentSession()!.tokenUsage!.percentage <= 80"
+        [class.bg-orange-500]="currentSession()!.tokenUsage!.percentage > 80 && currentSession()!.tokenUsage!.percentage <= 90"
+        [class.bg-red-500]="currentSession()!.tokenUsage!.percentage > 90"
+        [style.width.%]="currentSession()!.tokenUsage!.percentage">
+      </div>
+    </div>
+  }
+
+  <!-- Message List -->
+  <div class="message-list flex-1 overflow-y-auto p-4 space-y-3" #messageContainer>
+    @if (isLoading()) {
+      <div class="loading text-center py-8">
+        <app-loading-spinner size="md" message="Initializing Ptah Chat..."></app-loading-spinner>
+      </div>
+    } @else if (messages().length === 0) {
+      <div class="welcome-message text-center py-8">
+        <div class="text-6xl mb-4">💬</div>
+        <h3 class="text-lg font-semibold text-hieroglyph-700 mb-2">Welcome to Ptah Chat</h3>
+        <p class="text-hieroglyph-600 mb-4">Ask Claude about your code, get help with debugging, or generate documentation.</p>
+
+        <div class="quick-actions flex flex-wrap gap-2 justify-center">
+          <app-egyptian-button
+            size="sm"
+            variant="secondary"
+            (click)="sendQuickMessage('Please review the current file for potential improvements.')">
+            Review Code
+          </app-egyptian-button>
+
+          <app-egyptian-button
+            size="sm"
+            variant="secondary"
+            (click)="sendQuickMessage('Generate unit tests for the current file.')">
+            Generate Tests
+          </app-egyptian-button>
+
+          <app-egyptian-button
+            size="sm"
+            variant="secondary"
+            (click)="sendQuickMessage('Find potential bugs and issues in the current code.')">
+            Find Bugs
+          </app-egyptian-button>
+        </div>
+      </div>
+    } @else {
+      @for (message of messages(); track message.id) {
+        <div class="message" [class]="'message-' + message.type">
+          @if (message.type === 'user') {
+            <div class="user-message flex justify-end">
+              <div class="message-content bg-lapis-500 text-white p-3 rounded-lg max-w-[80%] word-wrap">
+                <div class="content" [innerHTML]="formatMessageContent(message.content)"></div>
+
+                @if (message.files && message.files.length > 0) {
+                  <div class="attached-files mt-2 flex flex-wrap gap-1">
+                    @for (file of message.files; track file) {
+                      <span class="file-tag bg-lapis-600 text-white text-xs px-2 py-1 rounded">
+                        📄 {{ getFileName(file) }}
+                      </span>
+                    }
+                  </div>
+                }
+
+                <div class="message-timestamp text-xs opacity-70 text-right mt-1">
+                  {{ formatTimestamp(message.timestamp) }}
+                </div>
+              </div>
+            </div>
+          } @else if (message.type === 'assistant') {
+            <div class="assistant-message flex justify-start">
+              <div class="message-content bg-papyrus-100 border border-hieroglyph-200 p-3 rounded-lg max-w-[90%] word-wrap"
+                   [class.border-red-300]="message.isError"
+                   [class.bg-red-50]="message.isError">
+                <div class="content" [innerHTML]="formatMessageContent(message.content)"></div>
+
+                @if (message.streaming) {
+                  <div class="streaming-indicator flex items-center gap-2 mt-2 text-hieroglyph-500">
+                    <div class="typing-dots flex gap-1">
+                      <span class="w-1 h-1 bg-current rounded-full animate-pulse"></span>
+                      <span class="w-1 h-1 bg-current rounded-full animate-pulse" style="animation-delay: 0.2s"></span>
+                      <span class="w-1 h-1 bg-current rounded-full animate-pulse" style="animation-delay: 0.4s"></span>
+                    </div>
+                    <span class="text-xs">Claude is thinking...</span>
+                  </div>
+                }
+
+                <div class="message-timestamp text-xs opacity-70 text-left mt-1">
+                  {{ formatTimestamp(message.timestamp) }}
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="system-message flex justify-center">
+              <div class="message-content bg-hieroglyph-100 text-hieroglyph-700 p-2 rounded text-sm text-center"
+                   [class.bg-red-100]="message.isError"
+                   [class.text-red-700]="message.isError">
+                {{ message.content }}
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    @if (isStreaming()) {
+      <div class="streaming-placeholder">
+        <div class="assistant-message flex justify-start">
+          <div class="message-content bg-papyrus-100 border border-hieroglyph-200 p-3 rounded-lg">
+            <div class="streaming-indicator flex items-center gap-2 text-hieroglyph-500">
+              <div class="typing-dots flex gap-1">
+                <span class="w-1 h-1 bg-current rounded-full animate-pulse"></span>
+                <span class="w-1 h-1 bg-current rounded-full animate-pulse" style="animation-delay: 0.2s"></span>
+                <span class="w-1 h-1 bg-current rounded-full animate-pulse" style="animation-delay: 0.4s"></span>
+              </div>
+              <span class="text-sm">Claude is thinking...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area border-t border-hieroglyph-200 bg-papyrus-50 p-4">
+    <div class="message-input-container flex gap-3 items-end">
+      <div class="flex-1">
+        <textarea
+          [(ngModel)]="currentMessage"
+          (keydown)="onKeyDown($event)"
+          (input)="adjustTextareaHeight($event)"
+          placeholder="Ask Claude about your code..."
+          rows="1"
+          class="message-input w-full bg-white border border-hieroglyph-300 rounded-lg p-3 resize-none focus:border-lapis-500 focus:ring-2 focus:ring-lapis-200 text-hieroglyph-800"
+          [disabled]="isStreaming()"
+          #messageTextarea>
+        </textarea>
+      </div>
+
+      <app-egyptian-button
+        [disabled]="!canSendMessage()"
+        (click)="sendMessage()"
+        variant="primary">
+        <lucide-angular [img]="SendIcon" size="16" class="mr-1"></lucide-angular>
+        Send
+      </app-egyptian-button>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions mt-3 flex flex-wrap gap-2">
+      <app-egyptian-button
+        size="sm"
+        variant="secondary"
+        (click)="sendQuickMessage('Please review the current file for potential improvements.')"
+        [disabled]="isStreaming()">
+        <lucide-angular [img]="FileTextIcon" size="14" class="mr-1"></lucide-angular>
+        Review Code
+      </app-egyptian-button>
+
+      <app-egyptian-button
+        size="sm"
+        variant="secondary"
+        (click)="sendQuickMessage('Generate comprehensive unit tests for the current file.')"
+        [disabled]="isStreaming()">
+        <lucide-angular [img]="ZapIcon" size="14" class="mr-1"></lucide-angular>
+        Generate Tests
+      </app-egyptian-button>
+
+      <app-egyptian-button
+        size="sm"
+        variant="secondary"
+        (click)="sendQuickMessage('Analyze the current code for potential bugs and issues.')"
+        [disabled]="isStreaming()">
+        <lucide-angular [img]="CodeIcon" size="14" class="mr-1"></lucide-angular>
+        Find Bugs
+      </app-egyptian-button>
+
+      <app-egyptian-button
+        size="sm"
+        variant="secondary"
+        (click)="sendQuickMessage('Add comprehensive documentation to the current code.')"
+        [disabled]="isStreaming()">
+        Add Docs
+      </app-egyptian-button>
+
+      <app-egyptian-button
+        size="sm"
+        variant="secondary"
+        (click)="sendQuickMessage('Suggest performance optimizations for the current code.')"
+        [disabled]="isStreaming()">
+        Optimize
+      </app-egyptian-button>
+    </div>
+  </div>
+</div>

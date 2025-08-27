@@ -147,6 +147,29 @@ export class ClaudeCliService implements vscode.Disposable {
     });
   }
 
+  /**
+   * Send a message to an active Claude CLI session
+   */
+  async sendMessageToSession(sessionId: string, message: string): Promise<void> {
+    const process = this.activeProcesses.get(sessionId);
+    
+    if (!process || process.killed) {
+      throw new Error(`No active Claude CLI process found for session: ${sessionId}`);
+    }
+
+    if (!process.stdin) {
+      throw new Error('Claude CLI process stdin is not available');
+    }
+
+    try {
+      process.stdin.write(message + '\n');
+      Logger.info(`Message sent to Claude CLI session ${sessionId}: ${message.substring(0, 100)}...`);
+    } catch (error) {
+      Logger.error(`Failed to send message to Claude CLI session ${sessionId}:`, error);
+      throw error;
+    }
+  }
+
   endSession(sessionId: string): void {
     const process = this.activeProcesses.get(sessionId);
     if (process && !process.killed) {

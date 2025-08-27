@@ -23,6 +23,12 @@ export class ContextManager implements vscode.Disposable {
       return; // Already included
     }
 
+    // Validate file path
+    if (!filePath || filePath.trim() === '' || filePath === 'tasks') {
+      Logger.warn(`Invalid file path provided: ${filePath}`);
+      return;
+    }
+
     // Check if file exists and is readable
     try {
       await fs.promises.access(filePath, fs.constants.R_OK);

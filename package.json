@@ -41,7 +41,7 @@
         {
           "id": "ptah",
           "title": "Ptah - Claude Code",
-          "icon": "$(scroll)"
+          "icon": "images/ptah-icon.png"
         }
       ]
     },
@@ -49,17 +49,10 @@
       "ptah": [
         {
           "type": "webview",
-          "id": "ptah.chatSidebar",
-          "name": "Chat",
-          "icon": "$(comment-discussion)",
-          "contextualTitle": "Claude Code Chat"
-        },
-        {
-          "type": "tree",
-          "id": "ptah.contextTree",
-          "name": "Context Files",
-          "icon": "$(files)",
-          "contextualTitle": "Context Management"
+          "id": "ptah.main",
+          "name": "Claude Code Assistant",
+          "icon": "$(robot)",
+          "contextualTitle": "Ptah - Claude Code Assistant"
         }
       ]
     },
@@ -74,7 +67,7 @@
         "command": "ptah.reviewCurrentFile",
         "title": "Review Current File",
         "category": "Ptah",
-        "icon": "$(search-review)"
+        "icon": "$(file-code)"
       },
       {
         "command": "ptah.generateTests",
@@ -86,7 +79,7 @@
         "command": "ptah.buildCommand",
         "title": "Build Command",
         "category": "Ptah",
-        "icon": "$(tools)"
+        "icon": "$(terminal)"
       },
       {
         "command": "ptah.newSession",
@@ -111,6 +104,12 @@
         "title": "Show Analytics",
         "category": "Ptah",
         "icon": "$(graph)"
+      },
+      {
+        "command": "ptah.openFullPanel",
+        "title": "Open Full Ptah Panel",
+        "category": "Ptah",
+        "icon": "$(split-horizontal)"
       }
     ],
     "menus": {
@@ -152,12 +151,17 @@
       "view/title": [
         {
           "command": "ptah.newSession",
-          "when": "view == ptah.chatSidebar",
+          "when": "view == ptah.main",
           "group": "navigation"
         },
         {
           "command": "ptah.showAnalytics",
-          "when": "view == ptah.chatSidebar",
+          "when": "view == ptah.main",
+          "group": "navigation"
+        },
+        {
+          "command": "ptah.openFullPanel",
+          "when": "view == ptah.main",
           "group": "navigation"
         }
       ]
@@ -222,7 +226,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run build:webview",
     "compile": "tsc -p ./",
     "compile:test": "tsc -p ./tsconfig.test.json",
     "watch": "tsc -watch -p ./",
@@ -231,8 +235,10 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "test:standalone": "npm run compile:test && node ./out/test-detection.js",
-    "build:webview": "cd webview && npm run build",
-    "dev:webview": "cd webview && npm run build -- --watch"
+    "build:webview": "cd webview/ptah-webview && npm run build:webview",
+    "dev:webview": "cd webview/ptah-webview && npm run watch:webview",
+    "install:webview": "cd webview/ptah-webview && npm install",
+    "build:all": "npm run compile && npm run build:webview"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

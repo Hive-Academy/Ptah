@@ -19,6 +19,27 @@
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ]
+    },
+
+    
+    "filesystem": {
+      "command": "cmd.exe",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "D:\\projects"
+      ]
+    },
+
+
+    "anubis": {
+      "command": "npx",
+      "args": ["-y", "@hive-academy/anubis@latest"],
+      "env": {
+        "PROJECT_ROOT": "D://projects/ptah"
+      }
     }
   }
 }

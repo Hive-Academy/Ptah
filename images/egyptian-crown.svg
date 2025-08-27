@@ -1,0 +1,11 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <!-- Egyptian crown/headdress -->
+  <path d="M3 5 L8 2 L13 5 L13 8 L11 10 L11 14 L5 14 L5 10 L3 8 Z" 
+        fill="currentColor" 
+        opacity="0.9"/>
+  <!-- Crown jewel -->
+  <circle cx="8" cy="6" r="1.5" fill="currentColor"/>
+  <!-- Side decorations -->
+  <path d="M3 7 L2 9 L4 9 Z" fill="currentColor" opacity="0.7"/>
+  <path d="M13 7 L14 9 L12 9 Z" fill="currentColor" opacity="0.7"/>
+</svg>
