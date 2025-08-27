@@ -67,3 +67,8 @@ Notes
 
 - Follow `.github/instructions/project.instructions.md` (registry pattern, CLI detection, streaming, Angular standalone)
 - Memory bank docs are concise, skimmable, and link to real files
+
+TODOs
+
+- Add diagram image linking to docs once finalized
+- Add links to specific Angular components when stabilized

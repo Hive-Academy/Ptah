@@ -70,3 +70,8 @@ Links
 - `src/providers/angular-webview.provider.ts`
 - `webview/ptah-webview/src/app/*`
 - `docs/angular-webview-setup.md`
+
+TODOs
+
+- Add screenshots of the webview and context panel
+- Provide a sample command addition PR as reference

@@ -78,3 +78,8 @@ References
 - `.github/instructions/project.instructions.md` — mandatory patterns
 - `docs/angular-webview-setup.md` — Angular SPA guidance
 - `docs/webview-debugging-guide.md` — debugging
+
+TODOs
+
+- Add sequence diagram for message routing and streaming
+- Add disposal order diagram for services/providers
