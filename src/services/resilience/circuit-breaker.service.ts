@@ -24,6 +24,18 @@ export interface CircuitBreakerConfig {
 }
 
 /**
+ * Circuit breaker status information
+ */
+export interface CircuitBreakerStatus {
+  readonly state: CircuitBreakerState;
+  readonly failureCount: number;
+  readonly lastFailureTime: number;
+  readonly nextAttemptTime: number;
+  readonly halfOpenCallCount: number;
+  readonly config: CircuitBreakerConfig;
+}
+
+/**
  * Circuit breaker failure information
  */
 export interface CircuitFailure {
@@ -153,7 +165,7 @@ export class CircuitBreakerService {
 
     // Execute the operation
     try {
-      Logger.debug(`Executing operation through circuit breaker: ${this.serviceName}`, {
+      Logger.info(`Executing operation through circuit breaker: ${this.serviceName}`, {
         state: this.state,
         failureCount: this.failureCount,
         correlationId
@@ -198,14 +210,7 @@ export class CircuitBreakerService {
   /**
    * Get current circuit breaker status
    */
-  getStatus(): {
-    state: CircuitBreakerState;
-    failureCount: number;
-    lastFailureTime: number;
-    nextAttemptTime: number;
-    halfOpenCallCount: number;
-    config: CircuitBreakerConfig;
-  } {
+  getStatus(): CircuitBreakerStatus {
     return {
       state: this.state,
       failureCount: this.failureCount,
@@ -347,7 +352,7 @@ export class CircuitBreakerService {
       this.failureCount = this.failures.length;
       
       if (initialFailureCount !== this.failures.length) {
-        Logger.debug(`Cleaned expired failures for ${this.serviceName}`, {
+        Logger.info(`Cleaned expired failures for ${this.serviceName}`, {
           removed: initialFailureCount - this.failures.length,
           remaining: this.failures.length
         });

@@ -13,13 +13,13 @@ import { MessageValidatorService, ValidationError } from '../validation/message-
  * Follows Open/Closed Principle - new handlers can be added without modifying this class
  */
 export class WebviewMessageRouter {
-  private handlers: IWebviewMessageHandler<StrictMessageType>[] = [];
+  private handlers: IWebviewMessageHandler<keyof MessagePayloadMap>[] = [];
 
   /**
    * Register a message handler
    * Follows Dependency Inversion Principle - depends on abstraction, not concrete classes
    */
-  registerHandler<T extends StrictMessageType>(handler: IWebviewMessageHandler<T>): void {
+  registerHandler<T extends keyof MessagePayloadMap>(handler: IWebviewMessageHandler<T>): void {
     this.handlers.push(handler);
     Logger.info(`Registered message handler for: ${handler.messageType}`);
   }
@@ -27,7 +27,7 @@ export class WebviewMessageRouter {
   /**
    * Route a message to the appropriate handler
    */
-  async routeMessage<T extends StrictMessageType>(
+  async routeMessage<T extends keyof MessagePayloadMap>(
     messageType: T, 
     payload: MessagePayloadMap[T],
     correlationId?: CorrelationId
@@ -102,7 +102,7 @@ export class WebviewMessageRouter {
   /**
    * Find appropriate handler for message type
    */
-  private findHandler(messageType: string): IWebviewMessageHandler<StrictMessageType> | undefined {
+  private findHandler(messageType: string): IWebviewMessageHandler<keyof MessagePayloadMap> | undefined {
     return this.handlers.find(handler => handler.canHandle(messageType));
   }
 

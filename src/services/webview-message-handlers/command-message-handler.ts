@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
-import { StrictMessageType, MessagePayloadMap, MessageResponse } from '../../types/message.types';
+import { StrictMessageType, MessagePayloadMap, MessageResponse, CommandsGetTemplatesPayload, CommandsExecuteCommandPayload, CommandsSelectFilePayload, CommandsSaveTemplatePayload } from '../../types/message.types';
 import { CorrelationId } from '../../types/branded.types';
 import { CommandBuilderService } from '../command-builder.service';
 
@@ -30,11 +30,11 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         case 'commands:getTemplates':
           return await this.handleGetTemplates();
         case 'commands:executeCommand':
-          return await this.handleExecuteCommand(payload as any);
+          return await this.handleExecuteCommand(payload as CommandsExecuteCommandPayload);
         case 'commands:selectFile':
-          return await this.handleSelectFile(payload as any);
+          return await this.handleSelectFile(payload as CommandsSelectFilePayload);
         case 'commands:saveTemplate':
-          return await this.handleSaveTemplate(payload as any);
+          return await this.handleSaveTemplate(payload as CommandsSaveTemplatePayload);
         default:
           throw new Error(`Unknown command message type: ${messageType}`);
       }
@@ -90,7 +90,7 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
     }
   }
 
-  private async handleExecuteCommand(data: any): Promise<MessageResponse> {
+  private async handleExecuteCommand(data: CommandsExecuteCommandPayload): Promise<MessageResponse> {
     try {
       // Track usage for analytics
       await this.commandBuilderService.trackCommandUsage(data.templateId);
@@ -144,7 +144,7 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
     }
   }
 
-  private async handleSelectFile(data: { multiple?: boolean }): Promise<MessageResponse> {
+  private async handleSelectFile(data: CommandsSelectFilePayload): Promise<MessageResponse> {
     try {
       const options: vscode.OpenDialogOptions = {
         canSelectMany: data.multiple || false,
@@ -202,7 +202,7 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
     }
   }
 
-  private async handleSaveTemplate(data: any): Promise<MessageResponse> {
+  private async handleSaveTemplate(data: CommandsSaveTemplatePayload): Promise<MessageResponse> {
     try {
       await this.commandBuilderService.addCustomTemplate(data.template);
       const responseData = { success: true };

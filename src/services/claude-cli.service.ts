@@ -5,7 +5,7 @@ import { promisify } from 'util';
 import { Logger } from '../core/logger';
 import { ChatMessage, CommandResult, CommandTemplate } from '../types/common.types';
 import { ClaudeCliDetector, ClaudeInstallation } from './claude-cli-detector.service';
-import { SessionId, BrandedTypeValidator } from '../types/branded.types';
+import { SessionId, CorrelationId, BrandedTypeValidator } from '../types/branded.types';
 import { StrictChatMessage, MessageResponse } from '../types/message.types';
 import { 
   createClaudeMessageTransform, 
@@ -17,7 +17,8 @@ import {
 } from './streams/message-json-transform.stream';
 import { 
   CircuitBreakerService, 
-  CircuitBreakerState 
+  CircuitBreakerState,
+  CircuitBreakerStatus
 } from './resilience/circuit-breaker.service';
 import { 
   CircuitBreakerStream, 
@@ -152,7 +153,7 @@ export class ClaudeCliService implements vscode.Disposable {
     });
 
     // Override circuit breaker transform to use our stream pipeline
-    circuitBreakerStream.executeTransform = async (chunk: any, encoding: BufferEncoding): Promise<any> => {
+    circuitBreakerStream.executeTransform = async (chunk: Buffer | string | Uint8Array, encoding: BufferEncoding): Promise<Buffer | string | Uint8Array> => {
       return new Promise((resolve, reject) => {
         // Create a mini-pipeline for this chunk
         const tempMessageTransform = createClaudeMessageTransform({ 
@@ -216,13 +217,14 @@ export class ClaudeCliService implements vscode.Disposable {
         });
         
         // Push error response to output
-        const errorResponse: MessageResponse<any> = {
+        const errorResponse: MessageResponse = {
+          requestId: CorrelationId.create(),
           success: false,
           error: result.error!,
           metadata: {
             sessionId,
-            correlationId: undefined,
-            timestamp: new Date().toISOString(),
+            timestamp: Date.now(),
+            source: 'extension' as const,
             version: '1.0'
           }
         };
@@ -361,6 +363,7 @@ export class ClaudeCliService implements vscode.Disposable {
       
       // Emit circuit breaker error to output stream
       const errorResponse: MessageResponse<any> = {
+        requestId: CorrelationId.create(),
         success: false,
         error: {
           code: 'CIRCUIT_BREAKER_OPEN',
@@ -374,8 +377,8 @@ export class ClaudeCliService implements vscode.Disposable {
         },
         metadata: {
           sessionId,
-          correlationId: undefined,
-          timestamp: new Date().toISOString(),
+          timestamp: Date.now(),
+          source: 'extension' as const,
           version: '1.0'
         }
       };
@@ -397,13 +400,14 @@ export class ClaudeCliService implements vscode.Disposable {
       });
       
       // Emit recovery success to output stream
-      const recoveryResponse: MessageResponse<any> = {
+      const recoveryResponse: MessageResponse = {
+        requestId: CorrelationId.create(),
         success: true,
         error: undefined,
         metadata: {
           sessionId,
-          correlationId: undefined,
-          timestamp: new Date().toISOString(),
+          timestamp: Date.now(),
+          source: 'extension' as const,
           version: '1.0'
         }
       };
@@ -597,10 +601,10 @@ export class ClaudeCliService implements vscode.Disposable {
   getHealthStatus(): {
     activeProcesses: number;
     circuitBreakerStreams: number;
-    globalCircuitBreaker: any;
-    sessionCircuitBreakers: Record<string, any>;
+    globalCircuitBreaker: CircuitBreakerStatus | null;
+    sessionCircuitBreakers: Record<string, CircuitBreakerStatus>;
   } {
-    const sessionCircuitBreakers: Record<string, any> = {};
+    const sessionCircuitBreakers: Record<string, CircuitBreakerStatus> = {};
     
     for (const [sessionId, stream] of this.circuitBreakerStreams) {
       sessionCircuitBreakers[sessionId] = stream.getCircuitStatus();

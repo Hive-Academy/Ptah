@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
-import { StrictMessageType, MessagePayloadMap, MessageResponse } from '../../types/message.types';
+import { StrictMessageType, MessagePayloadMap, MessageResponse, StateSavePayload, StateLoadPayload, StateClearPayload } from '../../types/message.types';
 import { CorrelationId } from '../../types/branded.types';
 import { Logger } from '../../core/logger';
 
@@ -31,11 +31,11 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
     try {
       switch (messageType) {
         case 'state:save':
-          return await this.handleSaveState(payload as any);
+          return await this.handleSaveState(payload as StateSavePayload);
         case 'state:load':
-          return await this.handleLoadState(payload as any);
+          return await this.handleLoadState(payload as StateLoadPayload);
         case 'state:clear':
-          return await this.handleClearState(payload as any);
+          return await this.handleClearState(payload as StateClearPayload);
         default:
           throw new Error(`Unknown state message type: ${messageType}`);
       }
@@ -59,21 +59,14 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
     }
   }
 
-  private async handleSaveState(payload: any): Promise<MessageResponse> {
+  private async handleSaveState(payload: StateSavePayload): Promise<MessageResponse> {
     Logger.info('Saving webview state...');
     
-    // Handle case where payload might be null/undefined from VS Code setState
-    if (payload === null || payload === undefined) {
-      payload = {};
-    }
+    // Extract state from payload
+    const stateToSave = payload.state;
     
-    if (typeof payload !== 'object') {
-      Logger.warn('Invalid state payload type, converting to object:', typeof payload);
-      payload = { data: payload };
-    }
-
     // Save the state to VS Code's globalState
-    await this.context.globalState.update('ptah.webview.state', payload);
+    await this.context.globalState.update('ptah.webview.state', stateToSave);
     
     Logger.info('Webview state saved successfully');
     const responseData = { 
@@ -94,7 +87,7 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
     };
   }
 
-  private async handleLoadState(payload: any): Promise<MessageResponse> {
+  private async handleLoadState(payload: StateLoadPayload): Promise<MessageResponse> {
     Logger.info('Loading webview state...');
     
     // Load the state from VS Code's globalState
@@ -119,7 +112,7 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
     };
   }
 
-  private async handleClearState(payload: any): Promise<MessageResponse> {
+  private async handleClearState(payload: StateClearPayload): Promise<MessageResponse> {
     Logger.info('Clearing webview state...');
     
     // Clear the state from VS Code's globalState

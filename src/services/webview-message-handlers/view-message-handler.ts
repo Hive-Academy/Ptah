@@ -1,5 +1,5 @@
 import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
-import { StrictMessageType, MessagePayloadMap, MessageResponse } from '../../types/message.types';
+import { StrictMessageType, MessagePayloadMap, MessageResponse, ViewChangedPayload, ViewRouteChangedPayload, ViewGenericPayload } from '../../types/message.types';
 import { CorrelationId } from '../../types/branded.types';
 import { Logger } from '../../core/logger';
 
@@ -26,11 +26,11 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
 
       switch (messageType) {
         case 'view:changed':
-          return await this.handleViewChanged(payload as any);
+          return await this.handleViewChanged(payload as ViewChangedPayload);
         case 'view:routeChanged':
-          return await this.handleRouteChanged(payload as any);
+          return await this.handleRouteChanged(payload as ViewRouteChangedPayload);
         case 'view:generic':
-          return await this.handleGenericView(payload as any);
+          return await this.handleGenericView(payload as ViewGenericPayload);
         default:
           throw new Error(`Unknown view message type: ${messageType}`);
       }
@@ -56,19 +56,17 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
   /**
    * Handle view change events from Angular
    */
-  private async handleViewChanged(payload: any): Promise<MessageResponse> {
-    Logger.info(`View changed to: ${payload?.view || 'unknown'}`);
+  private async handleViewChanged(payload: ViewChangedPayload): Promise<MessageResponse> {
+    Logger.info(`View changed to: ${payload.view}`);
     
     // Could potentially update extension state or context here
     // For now, just log the view change
-    if (payload?.view) {
-      Logger.info(`Angular webview navigated to: ${payload.view}`);
-    }
+    Logger.info(`Angular webview navigated to: ${payload.view}`);
     
     return {
       requestId: CorrelationId.create(),
       success: true,
-      data: { view: payload?.view },
+      data: { view: payload.view },
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
@@ -80,18 +78,16 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
   /**
    * Handle route change events from Angular router
    */
-  private async handleRouteChanged(payload: any): Promise<MessageResponse> {
-    Logger.info(`Route changed to: ${payload?.route || 'unknown'}`);
+  private async handleRouteChanged(payload: ViewRouteChangedPayload): Promise<MessageResponse> {
+    Logger.info(`Route changed to: ${payload.route}`);
     
     // Track route changes for analytics or state management
-    if (payload?.route) {
-      Logger.info(`Angular router navigated to: ${payload.route}`);
-    }
+    Logger.info(`Angular router navigated to: ${payload.route}`);
     
     return {
       requestId: CorrelationId.create(),
       success: true,
-      data: { route: payload?.route },
+      data: { route: payload.route, previousRoute: payload.previousRoute },
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
@@ -103,7 +99,7 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
   /**
    * Handle generic view messages
    */
-  private async handleGenericView(payload: any): Promise<MessageResponse> {
+  private async handleGenericView(payload: ViewGenericPayload): Promise<MessageResponse> {
     Logger.info('Handling generic view message', payload);
     
     return {

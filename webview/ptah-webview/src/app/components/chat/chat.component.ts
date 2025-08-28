@@ -2,9 +2,12 @@ import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, filter } from 'rxjs';
-import { LucideAngularModule, SendIcon, PlusIcon, SettingsIcon, HistoryIcon, FileTextIcon, ZapIcon, CodeIcon, RefreshCwIcon, EditIcon, FileIcon, SearchIcon, FlaskConicalIcon, BookOpenIcon, TrendingUpIcon } from 'lucide-angular';
+import { LucideAngularModule, SendIcon, PlusIcon, SettingsIcon, HistoryIcon, FileTextIcon, ZapIcon, CodeIcon, RefreshCwIcon, EditIcon, FileIcon, SearchIcon, FlaskConicalIcon, BookOpenIcon, TrendingUpIcon, CommandIcon } from 'lucide-angular';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SimpleHeaderComponent } from '../simple-header/simple-header.component';
+import { AgentDropdownComponent, Agent } from '../../shared/components/agent-dropdown.component';
+import { CommandsBottomSheetComponent, CommandTemplate } from '../../shared/components/commands-bottom-sheet.component';
 import { EgyptianButtonComponent } from '../../shared/components/egyptian-button.component';
 import { EgyptianInputComponent } from '../../shared/components/egyptian-input.component';
 import { EgyptianThemeService } from '../../core/services/egyptian-theme.service';
@@ -38,6 +41,9 @@ interface ChatSession {
     CommonModule,
     FormsModule,
     LucideAngularModule,
+    SimpleHeaderComponent,
+    AgentDropdownComponent,
+    CommandsBottomSheetComponent,
     EgyptianButtonComponent,
     EgyptianInputComponent
   ],
@@ -65,6 +71,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   readonly FlaskConicalIcon = FlaskConicalIcon;
   readonly BookOpenIcon = BookOpenIcon;
   readonly TrendingUpIcon = TrendingUpIcon;
+  readonly CommandIcon = CommandIcon;
 
   // Signals
   currentMessage = signal('');
@@ -73,6 +80,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<ChatMessage[]>([]);
   currentSession = signal<ChatSession | null>(null);
   workspaceInfo = signal<any>(null);
+  
+  // New UI state
+  selectedAgent = signal('general');
+  selectedSecondaryAgent = signal<string | undefined>(undefined);
+  showCommandsSheet = signal(false);
+  isConnected = signal(true);
 
   // Computed
   canSendMessage = computed(() =>
@@ -316,5 +329,30 @@ export class ChatComponent implements OnInit, OnDestroy {
         messageContainer.scrollTop = messageContainer.scrollHeight;
       }
     }, 50);
+  }
+
+  // New methods for the updated UI
+  onAgentSelected(agent: Agent): void {
+    this.selectedAgent.set(agent.id);
+  }
+
+  onSecondaryAgentSelected(agent: Agent): void {
+    this.selectedSecondaryAgent.set(agent.id);
+  }
+
+  openCommandsSheet(): void {
+    this.showCommandsSheet.set(true);
+  }
+
+  closeCommandsSheet(): void {
+    this.showCommandsSheet.set(false);
+  }
+
+  onCommandSelected(command: CommandTemplate): void {
+    this.sendQuickMessage(command.prompt);
+  }
+
+  showAnalytics(): void {
+    this.vscode.postMessage('analytics:getData', {});
   }
 }

@@ -1,5 +1,5 @@
 import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
-import { StrictMessageType, MessagePayloadMap, MessageResponse, ChatSendMessagePayload, ChatMessageChunkPayload, ChatSessionCreatedPayload, StrictChatMessage } from '../../types/message.types';
+import { StrictMessageType, MessagePayloadMap, MessageResponse, MessageError, ChatSendMessagePayload, ChatMessageChunkPayload, ChatSessionCreatedPayload, StrictChatMessage } from '../../types/message.types';
 import { SessionId, MessageId, CorrelationId } from '../../types/branded.types';
 import { SessionManager } from '../session-manager';
 import { ClaudeCliService } from '../claude-cli.service';
@@ -91,9 +91,23 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
       let assistantMessageContent = '';
       let messageId: MessageId | null = null;
 
-      // Set up stream event handlers with backpressure management
+      // Set up stream event handlers with backpressure management and circuit breaker handling
       messageStream.on('data', (messageResponse: MessageResponse<StrictChatMessage>) => {
         if (!messageResponse.success) {
+          // Handle circuit breaker errors specially
+          if (messageResponse.error?.code === 'CIRCUIT_BREAKER_OPEN' || 
+              messageResponse.error?.code === 'CIRCUIT_BREAKER_BLOCKED' ||
+              messageResponse.error?.code === 'CIRCUIT_BREAKER_HALF_OPEN_LIMIT') {
+            Logger.warn('Circuit breaker blocking operation', {
+              error: messageResponse.error,
+              sessionId: currentSession?.id
+            });
+            
+            // Send circuit breaker status to UI
+            this.sendCircuitBreakerStatus(currentSession?.id as SessionId, messageResponse.error);
+            return;
+          }
+          
           Logger.error('Received error response from stream', messageResponse.error);
           return;
         }
@@ -280,6 +294,205 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         error: {
           code: 'HISTORY_LOAD_ERROR',
           message: errorMessage
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
+    }
+  }
+
+  /**
+   * Send circuit breaker status to Angular UI
+   */
+  private sendCircuitBreakerStatus(sessionId: SessionId | undefined, error: MessageError | undefined): void {
+    if (!sessionId) return;
+
+    const circuitStatus = this.claudeService.getCircuitBreakerStatus(sessionId);
+    
+    this.sendErrorResponse('chat:circuitBreakerOpen', 
+      `Circuit breaker is ${circuitStatus.state}. Service temporarily unavailable.`);
+      
+    // Send additional circuit breaker status as a separate message
+    this.postMessage({
+      type: 'chat:circuitBreakerOpen',
+      payload: {
+        circuitState: circuitStatus.state,
+        failureCount: circuitStatus.failureCount,
+        nextAttemptTime: circuitStatus.nextAttemptTime,
+        canRetry: circuitStatus.state === 'HALF_OPEN' || Date.now() >= circuitStatus.nextAttemptTime,
+        retryIn: Math.max(0, circuitStatus.nextAttemptTime - Date.now()),
+        sessionId
+      },
+      metadata: {
+        timestamp: Date.now(),
+        source: 'extension' as const,
+        sessionId,
+        version: '1.0'
+      }
+    });
+  }
+
+  /**
+   * Handle circuit breaker recovery attempt
+   */
+  async handleCircuitBreakerRecovery(sessionId: SessionId): Promise<MessageResponse> {
+    try {
+      Logger.info(`Attempting circuit breaker recovery for session: ${sessionId}`);
+      
+      const recovered = await this.claudeService.attemptCircuitBreakerRecovery(sessionId);
+      
+      if (recovered) {
+        Logger.info(`Circuit breaker recovery successful for session: ${sessionId}`);
+        
+        // Send recovery success to UI
+        this.sendSuccessResponse('chat:circuitBreakerRecovered', {
+          sessionId,
+          recovered: true,
+          timestamp: new Date().toISOString()
+        });
+        
+        return {
+          requestId: CorrelationId.create(),
+          success: true,
+          data: { recovered: true },
+          metadata: {
+            timestamp: Date.now(),
+            source: 'extension',
+            sessionId: sessionId as any,
+            version: '1.0.0'
+          }
+        };
+      } else {
+        Logger.warn(`Circuit breaker recovery failed for session: ${sessionId}`);
+        
+        const circuitStatus = this.claudeService.getCircuitBreakerStatus(sessionId);
+        
+        return {
+          requestId: CorrelationId.create(),
+          success: false,
+          error: {
+            code: 'CIRCUIT_BREAKER_RECOVERY_FAILED',
+            message: `Recovery attempt failed. Circuit breaker is in ${circuitStatus.state} state.`,
+            context: {
+              sessionId,
+              circuitState: circuitStatus.state,
+              failureCount: circuitStatus.failureCount,
+              nextAttemptTime: circuitStatus.nextAttemptTime
+            }
+          },
+          metadata: {
+            timestamp: Date.now(),
+            source: 'extension',
+            sessionId: sessionId as any,
+            version: '1.0.0'
+          }
+        };
+      }
+    } catch (error) {
+      Logger.error(`Error during circuit breaker recovery for session: ${sessionId}`, error);
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'CIRCUIT_BREAKER_RECOVERY_ERROR',
+          message: `Recovery attempt failed: ${(error as Error).message}`,
+          context: {
+            sessionId,
+            error: (error as Error).message
+          },
+          stack: (error as Error).stack
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          sessionId: sessionId as any,
+          version: '1.0.0'
+        }
+      };
+    }
+  }
+
+  /**
+   * Handle manual circuit breaker reset
+   */
+  handleCircuitBreakerReset(sessionId?: SessionId): MessageResponse {
+    try {
+      Logger.info(`Manual circuit breaker reset${sessionId ? ` for session: ${sessionId}` : ' (global)'}`);
+      
+      this.claudeService.resetCircuitBreaker(sessionId);
+      
+      // Send reset confirmation to UI
+      this.sendSuccessResponse('chat:circuitBreakerReset', {
+        sessionId,
+        reset: true,
+        timestamp: new Date().toISOString()
+      });
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: true,
+        data: { reset: true },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          sessionId: sessionId as any,
+          version: '1.0.0'
+        }
+      };
+    } catch (error) {
+      Logger.error(`Error during circuit breaker reset${sessionId ? ` for session: ${sessionId}` : ' (global)'}`, error);
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'CIRCUIT_BREAKER_RESET_ERROR',
+          message: `Reset failed: ${(error as Error).message}`,
+          context: {
+            sessionId,
+            error: (error as Error).message
+          }
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          sessionId: sessionId as any,
+          version: '1.0.0'
+        }
+      };
+    }
+  }
+
+  /**
+   * Get circuit breaker health status
+   */
+  getCircuitBreakerHealth(): MessageResponse {
+    try {
+      const healthStatus = this.claudeService.getHealthStatus();
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: true,
+        data: healthStatus,
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
+    } catch (error) {
+      Logger.error('Error getting circuit breaker health status', error);
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'CIRCUIT_BREAKER_HEALTH_ERROR',
+          message: `Health check failed: ${(error as Error).message}`
         },
         metadata: {
           timestamp: Date.now(),

@@ -15,7 +15,7 @@ export type StrictPostMessageFunction = (message: {
  * Follows Interface Segregation Principle - only contains what all handlers need
  * Now with strict typing - eliminates 'any' types
  */
-export interface IWebviewMessageHandler<T extends StrictMessageType = StrictMessageType> {
+export interface IWebviewMessageHandler<T extends keyof MessagePayloadMap = keyof MessagePayloadMap> {
   readonly messageType: string;
   canHandle(messageType: string): boolean;
   handle<K extends T>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse>;
@@ -26,7 +26,7 @@ export interface IWebviewMessageHandler<T extends StrictMessageType = StrictMess
  * Provides common functionality and enforces consistent patterns
  * Now with strict typing - eliminates all 'any' types
  */
-export abstract class BaseWebviewMessageHandler<T extends StrictMessageType = StrictMessageType> 
+export abstract class BaseWebviewMessageHandler<T extends keyof MessagePayloadMap = keyof MessagePayloadMap> 
   implements IWebviewMessageHandler<T> {
   abstract readonly messageType: string;
 

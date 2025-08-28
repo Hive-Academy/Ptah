@@ -15,6 +15,16 @@ import {
   ViewMessageHandler
 } from '../services/webview-message-handlers';
 import { Logger } from '../core/logger';
+import { WebviewMessage, isSystemMessage, isRoutableMessage } from '../types/message.types';
+
+/**
+ * Workspace information interface
+ */
+interface WorkspaceInfo {
+  name: string;
+  path: string;
+  projectType: string;
+}
 
 /**
  * Unified Angular Webview Provider - REFACTORED with SOLID principles
@@ -159,7 +169,7 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
    * Follows Single Responsibility - just coordinates, doesn't handle business logic
    * IMPROVED: Added requestInitialData handler based on research findings
    */
-  private async handleWebviewMessage(message: any): Promise<void> {
+  private async handleWebviewMessage(message: WebviewMessage): Promise<void> {
     try {
       // Handle special system messages first
       if (message.type === 'ready') {
@@ -179,8 +189,13 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
         return;
       }
 
-      // Route all other messages to appropriate handlers
-      await this.messageRouter.routeMessage(message.type, message.payload);
+      // Route routable messages to appropriate handlers
+      if (isRoutableMessage(message)) {
+        await this.messageRouter.routeMessage(message.type, message.payload);
+      } else {
+        // System message already handled above, log if unrecognized
+        Logger.warn(`Unrecognized system message type: ${message.type}`);
+      }
 
     } catch (error) {
       Logger.error('Error handling webview message:', error);
@@ -241,7 +256,7 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
   /**
    * Get workspace information
    */
-  private getWorkspaceInfo(): any {
+  private getWorkspaceInfo(): WorkspaceInfo | null {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) return null;
 

@@ -84,7 +84,7 @@ export class MessageValidatorService {
   /**
    * Validate a generic message with strict typing
    */
-  static validateMessage<T extends StrictMessageType>(
+  static validateMessage<T extends keyof MessagePayloadMap>(
     data: unknown,
     expectedType: T
   ): StrictMessage<T> {
@@ -129,7 +129,7 @@ export class MessageValidatorService {
   /**
    * Validate message payload based on type
    */
-  private static validatePayloadForType<T extends StrictMessageType>(
+  private static validatePayloadForType<T extends keyof MessagePayloadMap>(
     payload: unknown,
     messageType: T
   ): MessagePayloadMap[T] {
@@ -273,7 +273,7 @@ export class MessageValidatorService {
   /**
    * Safe validation wrapper - returns null instead of throwing
    */
-  static safeValidateMessage<T extends StrictMessageType>(
+  static safeValidateMessage<T extends keyof MessagePayloadMap>(
     data: unknown,
     expectedType: T
   ): StrictMessage<T> | null {
@@ -289,7 +289,7 @@ export class MessageValidatorService {
    * Validation wrapper for unknown message types
    */
   static validateUnknownMessage(data: unknown): {
-    type: StrictMessageType;
+    type: keyof MessagePayloadMap;
     message: StrictMessage;
   } | null {
     if (!data || typeof data !== 'object') {
@@ -304,24 +304,19 @@ export class MessageValidatorService {
     }
 
     // Check if it's a valid message type
-    const validTypes: StrictMessageType[] = [
-      'chat:sendMessage', 'chat:messageChunk', 'chat:sessionStart', 'chat:sessionEnd',
-      'chat:newSession', 'chat:switchSession', 'chat:getHistory', 'chat:messageAdded',
-      'chat:messageComplete', 'chat:sessionCreated', 'chat:sessionSwitched', 'chat:historyLoaded',
-      'context:updateFiles', 'analytics:trackEvent'
-    ];
+    const validTypes = Object.keys({} as MessagePayloadMap) as (keyof MessagePayloadMap)[];
 
-    if (!validTypes.includes(messageType as StrictMessageType)) {
+    if (!validTypes.includes(messageType as keyof MessagePayloadMap)) {
       return null;
     }
 
-    const validatedMessage = this.safeValidateMessage(data, messageType as StrictMessageType);
+    const validatedMessage = this.safeValidateMessage(data, messageType as keyof MessagePayloadMap);
     if (!validatedMessage) {
       return null;
     }
 
     return {
-      type: messageType as StrictMessageType,
+      type: messageType as keyof MessagePayloadMap,
       message: validatedMessage
     };
   }

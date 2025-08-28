@@ -6,6 +6,7 @@
 
 import { z } from 'zod';
 import { SessionId, MessageId, CorrelationId, SessionIdSchema, MessageIdSchema, CorrelationIdSchema } from './branded.types';
+import { CommandTemplate } from './command-builder.types';
 
 // Re-export for convenience
 export { CorrelationId };
@@ -26,6 +27,9 @@ export type StrictMessageType =
   | 'chat:sessionCreated'
   | 'chat:sessionSwitched'
   | 'chat:historyLoaded'
+  | 'chat:circuitBreakerOpen'
+  | 'chat:circuitBreakerRecovered'
+  | 'chat:circuitBreakerReset'
   | 'context:updateFiles'
   | 'context:getFiles'
   | 'context:includeFile'
@@ -42,6 +46,14 @@ export type StrictMessageType =
   | 'view:changed'
   | 'view:routeChanged' 
   | 'view:generic';
+
+/**
+ * System Message Types for webview lifecycle
+ */
+export type SystemMessageType = 
+  | 'ready'
+  | 'webview-ready'
+  | 'requestInitialData';
 
 /**
  * Message Payloads - Strict typing for each message type
@@ -160,7 +172,7 @@ export interface CommandsSelectFilePayload {
 }
 
 export interface CommandsSaveTemplatePayload {
-  readonly template: unknown; // Template structure
+  readonly template: CommandTemplate;
 }
 
 export interface AnalyticsGetDataPayload {
@@ -179,6 +191,21 @@ export interface StateClearPayload {
   // No payload needed for clear state request
 }
 
+export interface ChatCircuitBreakerOpenPayload {
+  readonly reason: string;
+  readonly timestamp: number;
+  readonly failureCount: number;
+}
+
+export interface ChatCircuitBreakerRecoveredPayload {
+  readonly timestamp: number;
+  readonly downDuration: number;
+}
+
+export interface ChatCircuitBreakerResetPayload {
+  readonly timestamp: number;
+}
+
 /**
  * Type mapping for message payloads - eliminates 'any' types
  */
@@ -195,6 +222,9 @@ export interface MessagePayloadMap {
   'chat:sessionCreated': ChatSessionCreatedPayload;
   'chat:sessionSwitched': ChatSessionSwitchedPayload;
   'chat:historyLoaded': ChatHistoryLoadedPayload;
+  'chat:circuitBreakerOpen': ChatCircuitBreakerOpenPayload;
+  'chat:circuitBreakerRecovered': ChatCircuitBreakerRecoveredPayload;
+  'chat:circuitBreakerReset': ChatCircuitBreakerResetPayload;
   'context:updateFiles': ContextUpdatePayload;
   'context:getFiles': ContextGetFilesPayload;
   'context:includeFile': ContextIncludeFilePayload;
@@ -216,7 +246,7 @@ export interface MessagePayloadMap {
 /**
  * Generic Message Interface with Strict Typing
  */
-export interface StrictMessage<T extends StrictMessageType = StrictMessageType> {
+export interface StrictMessage<T extends keyof MessagePayloadMap = keyof MessagePayloadMap> {
   readonly id: CorrelationId;
   readonly type: T;
   readonly payload: MessagePayloadMap[T];
@@ -236,7 +266,7 @@ export interface MessageMetadata {
 /**
  * Request-Response Message Types
  */
-export interface MessageRequest<T extends StrictMessageType = StrictMessageType> {
+export interface MessageRequest<T extends keyof MessagePayloadMap = keyof MessagePayloadMap> {
   readonly id: CorrelationId;
   readonly type: T;
   readonly payload: MessagePayloadMap[T];
@@ -414,3 +444,65 @@ export const StrictChatSessionSchema = z.object({
     total: z.number().nonnegative()
   }).strict()
 }).strict();
+
+/**
+ * System Message Payloads - For webview lifecycle messages
+ */
+export interface SystemReadyPayload {
+  // No payload needed - just lifecycle notification
+}
+
+export interface SystemWebviewReadyPayload {
+  // No payload needed - just lifecycle notification
+}
+
+export interface SystemRequestInitialDataPayload {
+  // No payload needed - just lifecycle notification
+}
+
+/**
+ * System Message Payload Map
+ */
+export interface SystemMessagePayloadMap {
+  'ready': SystemReadyPayload;
+  'webview-ready': SystemWebviewReadyPayload;
+  'requestInitialData': SystemRequestInitialDataPayload;
+}
+
+/**
+ * System Message Interface
+ */
+export interface SystemMessage<T extends keyof SystemMessagePayloadMap = keyof SystemMessagePayloadMap> {
+  readonly type: T;
+  readonly payload?: SystemMessagePayloadMap[T];
+}
+
+/**
+ * Regular routable message interface
+ */
+export interface RoutableMessage<T extends keyof MessagePayloadMap = keyof MessagePayloadMap> {
+  readonly type: T;
+  readonly payload: MessagePayloadMap[T];
+}
+
+/**
+ * Union type for all webview messages (system + routable)
+ * This eliminates the 'any' type in handleWebviewMessage
+ */
+export type WebviewMessage = 
+  | SystemMessage<keyof SystemMessagePayloadMap>
+  | RoutableMessage<keyof MessagePayloadMap>;
+
+/**
+ * Type guard to check if message is a system message
+ */
+export function isSystemMessage(message: WebviewMessage): message is SystemMessage {
+  return ['ready', 'webview-ready', 'requestInitialData'].includes(message.type);
+}
+
+/**
+ * Type guard to check if message is a routable message
+ */
+export function isRoutableMessage(message: WebviewMessage): message is RoutableMessage {
+  return !isSystemMessage(message);
+}

@@ -1,6 +1,4 @@
 import { Component, OnInit, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { NavigationComponent } from './components/navigation/navigation.component';
-import { StatusBarComponent } from './components/status-bar/status-bar.component';
 import { LoadingSpinnerComponent } from './shared';
 import { AppStateManager, ViewType } from './core/services/app-state.service';
 import { ViewManagerService } from './core/services/view-manager.service';
@@ -8,49 +6,26 @@ import { VSCodeService } from './core/services/vscode.service';
 import { WebviewNavigationService } from './core/services/webview-navigation.service';
 import { EgyptianThemeService } from './core/services/egyptian-theme.service';
 import { Subject } from 'rxjs';
-// Individual component imports for pure signal-based navigation
+// Components
 import { ChatComponent } from './components/chat/chat.component';
-import { CommandBuilderComponent } from './components/command-builder/command-builder.component';
-import { AnalyticsDashboardComponent } from './components/analytics-dashboard/analytics-dashboard.component';
-import { ContextTreeComponent } from './components/context-tree/context-tree.component';
-// REMOVED: Angular Router imports - incompatible with VS Code webviews
+import { AnalyticsComponent } from './components/analytics/analytics.component';
 
 @Component({
   selector: 'app-root',
   imports: [
-    NavigationComponent,
-    StatusBarComponent,
     LoadingSpinnerComponent,
     ChatComponent,
-    CommandBuilderComponent,
-    AnalyticsDashboardComponent,
-    ContextTreeComponent
+    AnalyticsComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './app.html',
   styles: [`
-    .app-container {
-      display: flex;
-      flex-direction: column;
+    :host {
+      display: block;
       height: 100vh;
-      min-height: 100vh;
       width: 100%;
       background-color: var(--vscode-editor-background);
       color: var(--vscode-editor-foreground);
-    }
-
-    .app-content {
-      flex: 1;
-      overflow: auto;
-      padding: 16px;
-      height: 0; /* Required for flex child proper sizing */
-    }
-
-    /* Responsive design for different webview sizes */
-    @media (max-width: 768px) {
-      .app-content {
-        padding: 8px;
-      }
     }
   `]
 })

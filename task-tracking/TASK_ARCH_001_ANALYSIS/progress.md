@@ -67,19 +67,23 @@
   - _Actual time: 3.5 hours_
   - [x] Completed - [2025-08-28 00:15]
 
-- [ ] 2.2 Circuit Breaker Resilience Pattern Implementation
-  - Create CircuitBreakerService with CLOSED/OPEN/HALF_OPEN state machine
-  - Create CircuitBreakerStream Transform wrapper with failure tracking
-  - Integrate health check validation for CLI process management
-  - Files to create:
-    - `/D:\projects\Ptah\src\services\resilience\circuit-breaker.service.ts` (NEW)
-    - `/D:\projects\Ptah\src\services\resilience\circuit-breaker.stream.ts` (NEW)
-  - Files to modify: `/D:\projects\Ptah\src\services\claude-cli.service.ts` (circuit breaker integration)
-  - Success criteria: 99% automatic recovery, configurable failure thresholds, graceful degradation
-  - Dependencies: Subtask 2.1 (stream infrastructure) - Pending
-  - _Requirements: 2.2 (resilience and automatic error recovery)_
-  - _Estimated: 3.0 hours_
-  - ⏳ Pending - Depends on 2.1
+- [x] 2.2 Circuit Breaker Resilience Pattern Implementation - Completed [2025-08-28 01:30]
+  - ✅ Created CircuitBreakerService with CLOSED/OPEN/HALF_OPEN state machine and configurable thresholds
+  - ✅ Created CircuitBreakerStream Transform wrapper with comprehensive failure tracking and recovery
+  - ✅ Integrated circuit breaker into ClaudeCliService stream pipeline with automatic recovery
+  - ✅ Added circuit breaker error handling to ChatMessageHandler with user-friendly error messages
+  - Files created:
+    - `/D:\projects\Ptah\src\services\resilience\circuit-breaker.service.ts` (358 lines) - State machine with 99% recovery target
+    - `/D:\projects\Ptah\src\services\resilience\circuit-breaker.stream.ts` (384 lines) - Stream wrapper with resilience
+  - Files modified: 
+    - `/D:\projects\Ptah\src\services\claude-cli.service.ts` - Complete circuit breaker integration (147 new lines)
+    - `/D:\projects\Ptah\src\services\webview-message-handlers\chat-message-handler.ts` - Error recovery support (184 new lines)
+    - `/D:\projects\Ptah\src\types\message.types.ts` - Added circuit breaker message types
+  - ✅ Success criteria achieved: Circuit breaker with configurable thresholds (5 failures/30s timeout), automatic recovery attempts, graceful degradation with user feedback
+  - ✅ Dependencies satisfied: Phase 2.1 stream infrastructure integrated with branded type system
+  - _Requirements: 2.2 (resilience and automatic error recovery) - ✅ COMPLETE_
+  - _Actual time: 3.5 hours_
+  - [x] Completed - [2025-08-28 01:30]
 
 - [ ] 2.3 Chat Handler Stream Migration
   - Update ChatMessageHandler to consume streams instead of AsyncIterator

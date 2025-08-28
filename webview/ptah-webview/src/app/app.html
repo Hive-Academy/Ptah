@@ -1,16 +1,9 @@
 
-<main class="app-container">
-  <!-- Clean Material Navigation -->
-  <app-navigation
-    [title]="appState.appTitle()"
-    [currentView]="appState.currentView()"
-    [disabled]="!appState.canSwitchViews()"
-    (viewChanged)="onViewChanged($event)">
-  </app-navigation>
-
+<!-- Streamlined Full-Screen App -->
+<main class="h-screen w-full overflow-hidden">
   <!-- Loading State -->
   @if (appState.isLoading() || isInitializing()) {
-    <div class="app-content flex items-center justify-center">
+    <div class="h-full flex items-center justify-center vscode-bg">
       <app-loading-spinner
         size="lg"
         [message]="appState.statusMessage()">
@@ -18,43 +11,28 @@
     </div>
   }
 
-  <!-- Clean Main Content with Material Components -->
+  <!-- Main Content - View Switching -->
   @if (isReady() && !appState.isLoading()) {
-    <div class="app-content">
-      @switch (appState.currentView()) {
-        @case ('chat') {
-          <app-chat />
-        }
-        @case ('command-builder') {
-          <app-command-builder />
-        }
-        @case ('analytics') {
-          <app-analytics-dashboard />
-        }
-        @case ('context-tree') {
-          <app-context-tree />
-        }
-        @default {
-          <app-chat />
-        }
+    @switch (appState.currentView()) {
+      @case ('chat') {
+        <app-chat class="h-full block" />
       }
-    </div>
+      @case ('analytics') {
+        <app-analytics class="h-full block" />
+      }
+      @default {
+        <app-chat class="h-full block" />
+      }
+    }
   }
 
   <!-- Error State -->
   @if (hasError()) {
-    <div class="app-content flex items-center justify-center">
-      <div class="text-center text-red-600">
-        <h3>Initialization Error</h3>
-        <p>Failed to initialize the application. Please try refreshing.</p>
+    <div class="h-full flex items-center justify-center vscode-bg">
+      <div class="text-center text-red-500">
+        <h3 class="text-lg font-semibold mb-2">Initialization Error</h3>
+        <p class="vscode-description">Failed to initialize the application. Please try refreshing.</p>
       </div>
     </div>
   }
-
-  <!-- Status Bar -->
-  <app-status-bar
-    [statusMessage]="appState.statusMessage()"
-    [isConnected]="vscodeService.isConnected()"
-    [workspaceInfo]="vscodeService.config()">
-  </app-status-bar>
 </main>

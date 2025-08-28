@@ -22,7 +22,7 @@ export interface CommandTemplate {
   ],
   template: `
     <!-- Backdrop -->
-    @if (isOpen()) {
+    @if (isOpen) {
       <div 
         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end"
         (click)="close()">
@@ -30,8 +30,8 @@ export interface CommandTemplate {
         <!-- Bottom Sheet -->
         <div 
           class="w-full max-h-[70vh] vscode-bg rounded-t-2xl border-t vscode-border shadow-2xl transform transition-transform duration-300 ease-out"
-          [class.translate-y-0]="isOpen()"
-          [class.translate-y-full]="!isOpen()"
+          [class.translate-y-0]="isOpen"
+          [class.translate-y-full]="!isOpen"
           (click)="$event.stopPropagation()">
           
           <!-- Header -->
@@ -118,7 +118,7 @@ export interface CommandTemplate {
   `
 })
 export class CommandsBottomSheetComponent {
-  @Input() isOpen = signal(false);
+  @Input() isOpen = false;
   @Output() commandSelected = new EventEmitter<CommandTemplate>();
   @Output() closed = new EventEmitter<void>();
 
@@ -180,7 +180,6 @@ export class CommandsBottomSheetComponent {
   }
 
   close(): void {
-    this.isOpen.set(false);
     this.closed.emit();
   }
 

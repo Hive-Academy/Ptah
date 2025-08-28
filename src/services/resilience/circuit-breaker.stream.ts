@@ -26,7 +26,7 @@ export interface CircuitBreakerStreamConfig extends TransformOptions {
 /**
  * Stream error context for circuit breaker
  */
-export interface StreamErrorContext {
+export interface StreamErrorContext extends Readonly<Record<string, unknown>> {
   readonly sessionId?: SessionId;
   readonly correlationId?: CorrelationId;
   readonly chunkSize?: number;
@@ -83,12 +83,12 @@ export class CircuitBreakerStream extends Transform {
   /**
    * Transform chunk through circuit breaker
    */
-  _transform(chunk: any, encoding: BufferEncoding, callback: TransformCallback): void {
+  _transform(chunk: Buffer | string | Uint8Array, encoding: BufferEncoding, callback: TransformCallback): void {
     const correlationId = this.extractCorrelationId(chunk);
     const context: StreamErrorContext = {
       sessionId: this.sessionId,
       correlationId,
-      chunkSize: chunk?.length || 0,
+      chunkSize: chunk.length || 0,
       streamPosition: this.streamPosition,
       metadata: { encoding }
     };
@@ -151,7 +151,7 @@ export class CircuitBreakerStream extends Transform {
    * Execute the actual transform operation
    * This is where the wrapped stream logic would go
    */
-  public async executeTransform(chunk: any, encoding: BufferEncoding): Promise<any> {
+  public async executeTransform(chunk: Buffer | string | Uint8Array, encoding: BufferEncoding): Promise<Buffer | string | Uint8Array> {
     // This would be overridden by subclasses or configured with actual transform logic
     // For now, we pass through the chunk as-is
     return new Promise((resolve, reject) => {
@@ -182,7 +182,7 @@ export class CircuitBreakerStream extends Transform {
     const createWrappedStream = streamFactory;
     let wrappedStream: T | null = null;
     
-    wrapper.executeTransform = async (chunk: any, encoding: BufferEncoding): Promise<any> => {
+    wrapper.executeTransform = async (chunk: Buffer | string | Uint8Array, encoding: BufferEncoding): Promise<Buffer | string | Uint8Array> => {
       return new Promise((resolve, reject) => {
         if (!wrappedStream || wrappedStream.destroyed) {
           wrappedStream = createWrappedStream();
@@ -307,17 +307,24 @@ export class CircuitBreakerStream extends Transform {
   /**
    * Extract correlation ID from chunk data if available
    */
-  private extractCorrelationId(chunk: any): CorrelationId | undefined {
+  private extractCorrelationId(chunk: Buffer | string | Uint8Array): CorrelationId | undefined {
     try {
-      if (chunk && typeof chunk === 'object') {
+      // Only try to extract from object-like chunks, not binary data
+      if (chunk && typeof chunk === 'object' && !(chunk instanceof Buffer) && !(chunk instanceof Uint8Array)) {
+        const chunkObj = chunk as Record<string, unknown>;
+        
         // Check if it's a MessageResponse with correlationId
-        if ('correlationId' in chunk) {
-          return chunk.correlationId as CorrelationId;
+        if ('correlationId' in chunkObj && chunkObj.correlationId) {
+          return chunkObj.correlationId as CorrelationId;
         }
         
         // Check if it has metadata with correlationId
-        if ('metadata' in chunk && chunk.metadata?.correlationId) {
-          return chunk.metadata.correlationId as CorrelationId;
+        if ('metadata' in chunkObj && 
+            chunkObj.metadata && 
+            typeof chunkObj.metadata === 'object' &&
+            'correlationId' in chunkObj.metadata) {
+          const metadata = chunkObj.metadata as Record<string, unknown>;
+          return metadata.correlationId as CorrelationId;
         }
       }
       
@@ -352,12 +359,13 @@ export class CircuitBreakerStream extends Transform {
     };
 
     return {
+      requestId: context.correlationId || CorrelationId.create(),
       success: false,
       error,
       metadata: {
-        correlationId: context.correlationId,
         sessionId: context.sessionId,
-        timestamp: new Date().toISOString(),
+        timestamp: Date.now(),
+        source: 'extension' as const,
         version: '1.0'
       }
     };
@@ -367,7 +375,7 @@ export class CircuitBreakerStream extends Transform {
    * Determine if we should simulate a failure for testing
    * This would be removed in production or made configurable
    */
-  private shouldSimulateFailure(chunk: any): boolean {
+  private shouldSimulateFailure(chunk: Buffer | string | Uint8Array): boolean {
     // Only simulate failures if explicitly configured for testing
     const testFailureRate = process.env.PTAH_TEST_FAILURE_RATE;
     if (testFailureRate && Math.random() < parseFloat(testFailureRate)) {
