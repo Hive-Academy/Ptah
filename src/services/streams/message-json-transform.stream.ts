@@ -1,10 +1,10 @@
 /**
  * MessageToJsonTransform - Type-Safe JSON Conversion Stream
- * 
+ *
  * Converts parsed message chunks to StrictChatMessage format with Zod validation
  * Integrates with Phase 1 branded types (MessageId, SessionId, CorrelationId)
  * Output: MessageResponse format for webview message handlers
- * 
+ *
  * Performance target: <5ms per message conversion
  * Type safety: 100% strict typing with runtime Zod validation
  */
@@ -12,17 +12,17 @@
 import { Transform, TransformCallback } from 'stream';
 import { z } from 'zod';
 import { Logger } from '../../core/logger';
-import { 
-  MessageId, 
-  SessionId, 
-  CorrelationId, 
-  BrandedTypeValidator 
+import {
+  MessageId,
+  SessionId,
+  CorrelationId,
+  BrandedTypeValidator,
 } from '../../types/branded.types';
-import { 
-  StrictChatMessage, 
-  MessageResponse, 
+import {
+  StrictChatMessage,
+  MessageResponse,
   MessageMetadata,
-  StrictChatMessageSchema 
+  StrictChatMessageSchema,
 } from '../../types/message.types';
 import { ParsedMessageChunk } from './claude-message-transform.stream';
 
@@ -40,7 +40,7 @@ export interface MessageToJsonTransformOptions {
  */
 export class MessageJsonTransformError extends Error {
   constructor(
-    message: string, 
+    message: string,
     public readonly context: {
       readonly messageId?: MessageId;
       readonly sessionId?: SessionId;
@@ -55,7 +55,7 @@ export class MessageJsonTransformError extends Error {
 
 /**
  * High-performance Transform stream for converting parsed messages to JSON
- * 
+ *
  * Features:
  * - Converts ParsedMessageChunk to StrictChatMessage format
  * - Integrates branded types (SessionId, MessageId) from Phase 1
@@ -66,7 +66,7 @@ export class MessageJsonTransformError extends Error {
 export class MessageToJsonTransformStream extends Transform {
   private readonly correlationId: CorrelationId;
   private readonly validateOutput: boolean;
-  
+
   // Performance monitoring
   private transformCount = 0;
   private totalProcessingTime = 0;
@@ -76,12 +76,12 @@ export class MessageToJsonTransformStream extends Transform {
       objectMode: true,
       highWaterMark: options.highWaterMark || 16,
       readableObjectMode: true,
-      writableObjectMode: true
+      writableObjectMode: true,
     });
 
     this.correlationId = options.correlationId || CorrelationId.create();
     this.validateOutput = options.validateOutput !== false; // Default true
-    
+
     Logger.info(`Initialized MessageToJsonTransformStream with correlation: ${this.correlationId}`);
   }
 
@@ -89,22 +89,26 @@ export class MessageToJsonTransformStream extends Transform {
    * Transform implementation - converts ParsedMessageChunk to MessageResponse
    * Target: <5ms processing time per message
    */
-  _transform(chunk: ParsedMessageChunk, encoding: BufferEncoding, callback: TransformCallback): void {
+  _transform(
+    chunk: ParsedMessageChunk,
+    encoding: BufferEncoding,
+    callback: TransformCallback
+  ): void {
     const startTime = Date.now();
-    
+
     try {
       // Validate input chunk
       if (!this.isValidParsedChunk(chunk)) {
         throw new MessageJsonTransformError('Invalid parsed message chunk', {
           messageId: (chunk as any).messageId,
           sessionId: (chunk as any).sessionId,
-          correlationId: this.correlationId
+          correlationId: this.correlationId,
         });
       }
 
       // Convert to StrictChatMessage
       const chatMessage = this.convertToStrictChatMessage(chunk);
-      
+
       // Apply Zod validation if enabled
       if (this.validateOutput) {
         this.validateStrictChatMessage(chatMessage);
@@ -117,7 +121,7 @@ export class MessageToJsonTransformStream extends Transform {
       const processingTime = Date.now() - startTime;
       this.transformCount++;
       this.totalProcessingTime += processingTime;
-      
+
       if (processingTime > 5) {
         Logger.warn(`JSON transform exceeded 5ms target: ${processingTime}ms`);
       }
@@ -127,14 +131,13 @@ export class MessageToJsonTransformStream extends Transform {
       // Push MessageResponse to output
       this.push(messageResponse);
       callback();
-
     } catch (error) {
       Logger.error('Error transforming message to JSON', error);
 
       // Create error response
       const errorResponse = this.createErrorResponse(chunk, error);
       this.push(errorResponse);
-      
+
       callback(); // Continue processing despite error
     }
   }
@@ -177,7 +180,7 @@ export class MessageToJsonTransformStream extends Transform {
           content: chunk.content,
           timestamp: chunk.timestamp,
           // Note: files array would be added from original user message context
-          files: []
+          files: [],
         };
 
       case 'assistant':
@@ -188,7 +191,7 @@ export class MessageToJsonTransformStream extends Transform {
           content: chunk.content,
           timestamp: chunk.timestamp,
           streaming: !chunk.isComplete,
-          isComplete: chunk.isComplete
+          isComplete: chunk.isComplete,
         };
 
       case 'partial':
@@ -200,7 +203,7 @@ export class MessageToJsonTransformStream extends Transform {
           content: chunk.content,
           timestamp: chunk.timestamp,
           streaming: true,
-          isComplete: false
+          isComplete: false,
         };
 
       default:
@@ -208,7 +211,7 @@ export class MessageToJsonTransformStream extends Transform {
         throw new MessageJsonTransformError(`Unknown message type: ${(chunk as any).type}`, {
           messageId,
           sessionId,
-          correlationId: this.correlationId
+          correlationId: this.correlationId,
         });
     }
   }
@@ -218,13 +221,13 @@ export class MessageToJsonTransformStream extends Transform {
    */
   private validateStrictChatMessage(message: StrictChatMessage): void {
     const result = StrictChatMessageSchema.safeParse(message);
-    
+
     if (!result.success) {
       throw new MessageJsonTransformError('StrictChatMessage validation failed', {
         messageId: message.id,
         sessionId: message.sessionId,
         correlationId: this.correlationId,
-        originalError: result.error
+        originalError: result.error,
       });
     }
   }
@@ -233,41 +236,38 @@ export class MessageToJsonTransformStream extends Transform {
    * Create successful MessageResponse wrapper
    */
   private createMessageResponse(
-    chatMessage: StrictChatMessage, 
+    chatMessage: StrictChatMessage,
     originalChunk: ParsedMessageChunk
   ): MessageResponse<StrictChatMessage> {
     const metadata: MessageMetadata = {
       timestamp: Date.now(),
       source: 'extension',
       sessionId: chatMessage.sessionId,
-      version: '1.0.0'
+      version: '1.0.0',
     };
 
     return {
       requestId: this.correlationId,
       success: true,
       data: chatMessage,
-      metadata
+      metadata,
     };
   }
 
   /**
    * Create error MessageResponse
    */
-  private createErrorResponse(
-    chunk: ParsedMessageChunk, 
-    error: unknown
-  ): MessageResponse<never> {
+  private createErrorResponse(chunk: ParsedMessageChunk, error: unknown): MessageResponse<never> {
     const metadata: MessageMetadata = {
       timestamp: Date.now(),
       source: 'extension',
       sessionId: chunk.sessionId,
-      version: '1.0.0'
+      version: '1.0.0',
     };
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const errorStack = error instanceof Error ? error.stack : undefined;
-    
+
     return {
       requestId: this.correlationId,
       success: false,
@@ -278,11 +278,11 @@ export class MessageToJsonTransformStream extends Transform {
           messageId: chunk.messageId,
           sessionId: chunk.sessionId,
           messageType: chunk.type,
-          contentLength: chunk.content.length
+          contentLength: chunk.content.length,
         },
-        stack: errorStack
+        stack: errorStack,
       },
-      metadata
+      metadata,
     };
   }
 
@@ -297,11 +297,10 @@ export class MessageToJsonTransformStream extends Transform {
   } {
     return {
       transformCount: this.transformCount,
-      averageProcessingTime: this.transformCount > 0 
-        ? this.totalProcessingTime / this.transformCount 
-        : 0,
+      averageProcessingTime:
+        this.transformCount > 0 ? this.totalProcessingTime / this.transformCount : 0,
       totalProcessingTime: this.totalProcessingTime,
-      correlationId: this.correlationId
+      correlationId: this.correlationId,
     };
   }
 }
@@ -318,11 +317,13 @@ export function createMessageToJsonTransform(
 /**
  * Zod schema for ParsedMessageChunk validation
  */
-export const ParsedMessageChunkSchema = z.object({
-  type: z.enum(['user', 'assistant', 'partial']),
-  content: z.string(),
-  isComplete: z.boolean(),
-  messageId: z.string().uuid(),
-  sessionId: z.string().uuid(),
-  timestamp: z.number().positive()
-}).strict();
+export const ParsedMessageChunkSchema = z
+  .object({
+    type: z.enum(['user', 'assistant', 'partial']),
+    content: z.string(),
+    isComplete: z.boolean(),
+    messageId: z.string().uuid(),
+    sessionId: z.string().uuid(),
+    timestamp: z.number().positive(),
+  })
+  .strict();

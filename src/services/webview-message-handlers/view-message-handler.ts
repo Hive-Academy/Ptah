@@ -1,5 +1,16 @@
-import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
-import { StrictMessageType, MessagePayloadMap, MessageResponse, ViewChangedPayload, ViewRouteChangedPayload, ViewGenericPayload } from '../../types/message.types';
+import {
+  BaseWebviewMessageHandler,
+  StrictPostMessageFunction,
+  IWebviewMessageHandler,
+} from './base-message-handler';
+import {
+  StrictMessageType,
+  MessagePayloadMap,
+  MessageResponse,
+  ViewChangedPayload,
+  ViewRouteChangedPayload,
+  ViewGenericPayload,
+} from '../../types/message.types';
 import { CorrelationId } from '../../types/branded.types';
 import { Logger } from '../../core/logger';
 
@@ -12,15 +23,20 @@ type ViewMessageTypes = 'view:changed' | 'view:routeChanged' | 'view:generic';
  * ViewMessageHandler - Handles view-related messages from Angular webview
  * Single Responsibility: Manage view state changes and navigation events
  */
-export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTypes> 
-  implements IWebviewMessageHandler<ViewMessageTypes> {
+export class ViewMessageHandler
+  extends BaseWebviewMessageHandler<ViewMessageTypes>
+  implements IWebviewMessageHandler<ViewMessageTypes>
+{
   readonly messageType = 'view:';
 
   constructor(postMessage: StrictPostMessageFunction) {
     super(postMessage);
   }
 
-  async handle<K extends ViewMessageTypes>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse> {
+  async handle<K extends ViewMessageTypes>(
+    messageType: K,
+    payload: MessagePayloadMap[K]
+  ): Promise<MessageResponse> {
     try {
       Logger.info(`Handling view message: ${messageType}`, payload);
 
@@ -42,13 +58,13 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
         success: false,
         error: {
           code: 'VIEW_HANDLER_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -58,11 +74,11 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
    */
   private async handleViewChanged(payload: ViewChangedPayload): Promise<MessageResponse> {
     Logger.info(`View changed to: ${payload.view}`);
-    
+
     // Could potentially update extension state or context here
     // For now, just log the view change
     Logger.info(`Angular webview navigated to: ${payload.view}`);
-    
+
     return {
       requestId: CorrelationId.create(),
       success: true,
@@ -70,8 +86,8 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
   }
 
@@ -80,10 +96,10 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
    */
   private async handleRouteChanged(payload: ViewRouteChangedPayload): Promise<MessageResponse> {
     Logger.info(`Route changed to: ${payload.route}`);
-    
+
     // Track route changes for analytics or state management
     Logger.info(`Angular router navigated to: ${payload.route}`);
-    
+
     return {
       requestId: CorrelationId.create(),
       success: true,
@@ -91,8 +107,8 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
   }
 
@@ -101,7 +117,7 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
    */
   private async handleGenericView(payload: ViewGenericPayload): Promise<MessageResponse> {
     Logger.info('Handling generic view message', payload);
-    
+
     return {
       requestId: CorrelationId.create(),
       success: true,
@@ -109,8 +125,8 @@ export class ViewMessageHandler extends BaseWebviewMessageHandler<ViewMessageTyp
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
   }
 }

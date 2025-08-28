@@ -1,7 +1,17 @@
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, CommandIcon, XIcon, TerminalIcon, FileTextIcon, SearchIcon, FlaskConicalIcon, BookOpenIcon, TrendingUpIcon } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  CommandIcon,
+  XIcon,
+  TerminalIcon,
+  FileTextIcon,
+  SearchIcon,
+  FlaskConicalIcon,
+  BookOpenIcon,
+  TrendingUpIcon,
+} from 'lucide-angular';
 
 export interface CommandTemplate {
   id: string;
@@ -15,25 +25,18 @@ export interface CommandTemplate {
 @Component({
   selector: 'app-commands-bottom-sheet',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    LucideAngularModule
-  ],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   template: `
     <!-- Backdrop -->
     @if (isOpen) {
-      <div 
-        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end"
-        (click)="close()">
-        
+      <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end" (click)="close()">
         <!-- Bottom Sheet -->
-        <div 
+        <div
           class="w-full max-h-[70vh] vscode-bg rounded-t-2xl border-t vscode-border shadow-2xl transform transition-transform duration-300 ease-out"
           [class.translate-y-0]="isOpen"
           [class.translate-y-full]="!isOpen"
-          (click)="$event.stopPropagation()">
-          
+          (click)="$event.stopPropagation()"
+        >
           <!-- Header -->
           <div class="flex items-center justify-between p-4 border-b vscode-border">
             <div class="flex items-center gap-3">
@@ -45,11 +48,12 @@ export interface CommandTemplate {
                 <p class="text-sm vscode-description">Choose a command template</p>
               </div>
             </div>
-            
-            <button 
+
+            <button
               class="w-8 h-8 rounded-full hover:vscode-hover-bg flex items-center justify-center transition-colors duration-200"
               (click)="close()"
-              type="button">
+              type="button"
+            >
               <lucide-angular [img]="XIcon" class="w-4 h-4 vscode-description"></lucide-angular>
             </button>
           </div>
@@ -58,16 +62,18 @@ export interface CommandTemplate {
           <div class="p-4 overflow-y-auto max-h-[calc(70vh-120px)]">
             <!-- Search -->
             <div class="relative mb-4">
-              <input 
+              <input
                 type="text"
                 placeholder="Search commands..."
                 class="w-full px-4 py-3 pl-10 rounded-lg vscode-input-bg vscode-input-border border vscode-input-fg placeholder-gray-500 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
                 [(ngModel)]="searchQuery"
-                (input)="filterCommands()">
-              
-              <lucide-angular 
-                [img]="SearchIcon" 
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 vscode-description">
+                (input)="filterCommands()"
+              />
+
+              <lucide-angular
+                [img]="SearchIcon"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 vscode-description"
+              >
               </lucide-angular>
             </div>
 
@@ -78,21 +84,28 @@ export interface CommandTemplate {
                   <h4 class="text-sm font-medium vscode-fg mb-3 uppercase tracking-wide opacity-70">
                     {{ category.name }}
                   </h4>
-                  
+
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     @for (command of category.commands; track command.id) {
                       <button
                         class="flex items-start gap-3 p-3 rounded-lg vscode-border border hover:vscode-hover-bg transition-all duration-200 text-left group"
                         (click)="selectCommand(command)"
-                        type="button">
-                        
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/30 transition-colors duration-200">
-                          <lucide-angular [img]="command.icon" class="w-4 h-4 text-blue-400"></lucide-angular>
+                        type="button"
+                      >
+                        <div
+                          class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-500/30 transition-colors duration-200"
+                        >
+                          <lucide-angular
+                            [img]="command.icon"
+                            class="w-4 h-4 text-blue-400"
+                          ></lucide-angular>
                         </div>
-                        
+
                         <div class="flex-1 min-w-0">
                           <div class="font-medium vscode-fg mb-1">{{ command.name }}</div>
-                          <div class="text-sm vscode-description line-clamp-2">{{ command.description }}</div>
+                          <div class="text-sm vscode-description line-clamp-2">
+                            {{ command.description }}
+                          </div>
                         </div>
                       </button>
                     }
@@ -104,8 +117,13 @@ export interface CommandTemplate {
             <!-- No Results -->
             @if (getFilteredCategories().length === 0) {
               <div class="text-center py-8">
-                <div class="w-16 h-16 rounded-full bg-gray-500/20 flex items-center justify-center mx-auto mb-4">
-                  <lucide-angular [img]="SearchIcon" class="w-8 h-8 vscode-description"></lucide-angular>
+                <div
+                  class="w-16 h-16 rounded-full bg-gray-500/20 flex items-center justify-center mx-auto mb-4"
+                >
+                  <lucide-angular
+                    [img]="SearchIcon"
+                    class="w-8 h-8 vscode-description"
+                  ></lucide-angular>
                 </div>
                 <p class="vscode-fg font-medium mb-1">No commands found</p>
                 <p class="text-sm vscode-description">Try adjusting your search terms</p>
@@ -115,7 +133,7 @@ export interface CommandTemplate {
         </div>
       </div>
     }
-  `
+  `,
 })
 export class CommandsBottomSheetComponent {
   @Input() isOpen = false;
@@ -139,7 +157,7 @@ export class CommandsBottomSheetComponent {
       description: 'Analyze current file for potential improvements and best practices',
       icon: FileTextIcon,
       prompt: 'Please review the current file for potential improvements.',
-      category: 'review'
+      category: 'review',
     },
     {
       id: 'generate-tests',
@@ -147,7 +165,7 @@ export class CommandsBottomSheetComponent {
       description: 'Create comprehensive unit tests for the current file',
       icon: FlaskConicalIcon,
       prompt: 'Generate comprehensive unit tests for the current file.',
-      category: 'generate'
+      category: 'generate',
     },
     {
       id: 'find-bugs',
@@ -155,7 +173,7 @@ export class CommandsBottomSheetComponent {
       description: 'Analyze code for potential bugs and issues',
       icon: SearchIcon,
       prompt: 'Analyze the current code for potential bugs and issues.',
-      category: 'debug'
+      category: 'debug',
     },
     {
       id: 'add-docs',
@@ -163,7 +181,7 @@ export class CommandsBottomSheetComponent {
       description: 'Add comprehensive documentation to the current code',
       icon: BookOpenIcon,
       prompt: 'Add comprehensive documentation to the current code.',
-      category: 'document'
+      category: 'document',
     },
     {
       id: 'optimize-performance',
@@ -171,8 +189,8 @@ export class CommandsBottomSheetComponent {
       description: 'Suggest performance optimizations for the current code',
       icon: TrendingUpIcon,
       prompt: 'Suggest performance optimizations for the current code.',
-      category: 'optimize'
-    }
+      category: 'optimize',
+    },
   ];
 
   ngOnInit() {
@@ -195,9 +213,10 @@ export class CommandsBottomSheetComponent {
     }
 
     const query = this.searchQuery.toLowerCase();
-    this.filteredCommands = this.commands.filter(command =>
-      command.name.toLowerCase().includes(query) ||
-      command.description.toLowerCase().includes(query)
+    this.filteredCommands = this.commands.filter(
+      (command) =>
+        command.name.toLowerCase().includes(query) ||
+        command.description.toLowerCase().includes(query),
     );
   }
 
@@ -207,14 +226,14 @@ export class CommandsBottomSheetComponent {
       { name: 'Generate', key: 'generate' as const },
       { name: 'Debug', key: 'debug' as const },
       { name: 'Optimize', key: 'optimize' as const },
-      { name: 'Document', key: 'document' as const }
+      { name: 'Document', key: 'document' as const },
     ];
 
     return categories
-      .map(category => ({
+      .map((category) => ({
         name: category.name,
-        commands: this.filteredCommands.filter(cmd => cmd.category === category.key)
+        commands: this.filteredCommands.filter((cmd) => cmd.category === category.key),
       }))
-      .filter(category => category.commands.length > 0);
+      .filter((category) => category.commands.length > 0);
   }
 }

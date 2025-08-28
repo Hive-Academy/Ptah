@@ -15,7 +15,7 @@ export class CommandHandlers {
   async quickChat(): Promise<void> {
     Logger.info('Executing quick chat command');
     await vscode.commands.executeCommand('ptah.chatSidebar.focus');
-    
+
     // Switch the Angular webview to chat mode
     this.services.angularWebviewProvider.switchView('chat');
   }
@@ -36,14 +36,14 @@ export class CommandHandlers {
       // Add current file to context
       const filePath = editor.document.uri.fsPath;
       await this.services.contextManager.includeFile(vscode.Uri.file(filePath));
-      
+
       // Send review message to chat
       const reviewMessage = `Please review this code for bugs, security issues, and improvements:\n\n${editor.document.getText()}`;
       await this.services.sessionManager.sendMessage(reviewMessage, [filePath]);
-      
+
       // Open chat to show the review
       await this.quickChat();
-      
+
       vscode.window.showInformationMessage('Code review request sent to Claude');
     } catch (error) {
       Logger.error('Failed to review current file', error);
@@ -67,14 +67,14 @@ export class CommandHandlers {
       // Add current file to context
       const filePath = editor.document.uri.fsPath;
       await this.services.contextManager.includeFile(vscode.Uri.file(filePath));
-      
+
       // Send test generation message
       const testMessage = `Generate comprehensive unit tests for this code:\n\n${editor.document.getText()}`;
       await this.services.sessionManager.sendMessage(testMessage, [filePath]);
-      
+
       // Open chat to show the generated tests
       await this.quickChat();
-      
+
       vscode.window.showInformationMessage('Test generation request sent to Claude');
     } catch (error) {
       Logger.error('Failed to generate tests', error);
@@ -88,7 +88,7 @@ export class CommandHandlers {
   async buildCommand(): Promise<void> {
     Logger.info('Opening command builder');
     await vscode.commands.executeCommand('ptah.commandBuilder.focus');
-    
+
     // Switch the Angular webview to command builder mode
     this.services.angularWebviewProvider.switchView('command-builder');
   }
@@ -98,11 +98,11 @@ export class CommandHandlers {
    */
   async newSession(): Promise<void> {
     Logger.info('Creating new session');
-    
+
     try {
       const session = await this.services.sessionManager.createSession();
       vscode.window.showInformationMessage(`New session created: ${session.name}`);
-      
+
       // Open chat sidebar to show the new session
       await this.quickChat();
     } catch (error) {
@@ -127,10 +127,10 @@ export class CommandHandlers {
       }
 
       await this.services.contextManager.includeFile(uri);
-      
+
       const fileName = uri.fsPath.split(/[\\/]/).pop();
       vscode.window.showInformationMessage(`Added ${fileName} to context`);
-      
+
       Logger.info(`File included in context: ${uri.fsPath}`);
     } catch (error) {
       Logger.error('Failed to include file', error);
@@ -154,10 +154,10 @@ export class CommandHandlers {
       }
 
       await this.services.contextManager.excludeFile(uri);
-      
+
       const fileName = uri.fsPath.split(/[\\/]/).pop();
       vscode.window.showInformationMessage(`Removed ${fileName} from context`);
-      
+
       Logger.info(`File excluded from context: ${uri.fsPath}`);
     } catch (error) {
       Logger.error('Failed to exclude file', error);
@@ -171,7 +171,7 @@ export class CommandHandlers {
   async showAnalytics(): Promise<void> {
     Logger.info('Opening analytics dashboard');
     await vscode.commands.executeCommand('ptah.chatSidebar.focus');
-    
+
     // Switch the Angular webview to analytics mode
     this.services.angularWebviewProvider.switchView('analytics');
   }
@@ -181,7 +181,7 @@ export class CommandHandlers {
    */
   async switchSession(): Promise<void> {
     Logger.info('Opening session picker');
-    
+
     try {
       await this.services.sessionManager.showSessionPicker();
     } catch (error) {
@@ -195,24 +195,24 @@ export class CommandHandlers {
    */
   async optimizeContext(): Promise<void> {
     Logger.info('Showing context optimization suggestions');
-    
+
     try {
       const suggestions = await this.services.contextManager.getOptimizationSuggestions();
-      
+
       if (suggestions.length === 0) {
         vscode.window.showInformationMessage('Context is already optimized!');
         return;
       }
 
-      const items = suggestions.map(suggestion => ({
+      const items = suggestions.map((suggestion) => ({
         label: suggestion.type.replace(/_/g, ' ').toUpperCase(),
         description: suggestion.description,
-        detail: `Potential savings: ${suggestion.estimatedSavings} tokens`
+        detail: `Potential savings: ${suggestion.estimatedSavings} tokens`,
       }));
 
       const selected = await vscode.window.showQuickPick(items, {
         title: 'Context Optimization Suggestions',
-        placeHolder: 'Select an optimization to apply'
+        placeHolder: 'Select an optimization to apply',
       });
 
       if (selected) {
@@ -230,7 +230,7 @@ export class CommandHandlers {
    */
   async runDiagnostic(): Promise<void> {
     Logger.info('Creating diagnostic webview...');
-    
+
     try {
       WebviewDiagnostic.createDiagnosticWebview(this.services.context);
       vscode.window.showInformationMessage('Diagnostic webview created. Check the new panel.');

@@ -3,17 +3,20 @@
 ## 📊 Research Evidence Integration & Context
 
 **Phase 1 Success Foundation**: ✅ Type safety transformation complete with zero TypeScript compilation errors
-- All message handlers use strict typing with MessageResponse returns  
+
+- All message handlers use strict typing with MessageResponse returns
 - Branded types (SessionId, MessageId, CorrelationId) fully integrated across codebase
 - 100% elimination of 'any' types in message handling layer
 
 **Performance Bottleneck Analysis**: Current AsyncIterator pattern in `claude-cli.service.ts` lines 73-112
+
 - **Current Latency**: 165-755ms per message cycle (measured performance impact)
 - **Root Cause**: Synchronous readline processing with blocking for-await loops
 - **Memory Issues**: String concatenation in loops causing GC pressure and potential memory leaks
 - **UI Impact**: No backpressure handling leads to UI freezes during large Claude responses
 
 **Evidence-Based Performance Target**: <100ms p95 latency (5-7x improvement)
+
 - **Research Basis**: Architectural analysis lines 847-848 demonstrate achievable targets
 - **Stream Benefits**: Transform streams eliminate blocking operations and provide automatic backpressure
 - **Production Impact**: Matches industry-leading VS Code extension response characteristics
@@ -68,9 +71,9 @@ class ClaudeMessageTransformStream extends Transform {
   private currentMessage: Partial<StrictChatMessage> | null = null;
 
   constructor(private readonly sessionId: SessionId) {
-    super({ 
+    super({
       objectMode: true,
-      highWaterMark: 100 // Backpressure control
+      highWaterMark: 100, // Backpressure control
     });
   }
 
@@ -83,6 +86,7 @@ class ClaudeMessageTransformStream extends Transform {
 ```
 
 **Quality Attributes**:
+
 - **Performance**: <10ms chunk processing with zero memory leaks
 - **Reliability**: Handle partial messages and CLI output format changes
 - **Scalability**: Backpressure handling prevents UI freezes during high-volume streaming
@@ -111,6 +115,7 @@ class MessageToJsonTransform extends Transform {
 ```
 
 **Type Safety Features**:
+
 - **Branded Types**: All IDs use SessionId/MessageId from Phase 1
 - **Runtime Validation**: Integration with Zod schemas from message-validator.service.ts
 - **Error Handling**: Structured errors with CorrelationId tracking
@@ -123,10 +128,10 @@ class MessageToJsonTransform extends Transform {
 
 ```typescript
 interface CircuitBreakerConfig {
-  readonly failureThreshold: number;      // Default: 5 failures
-  readonly recoveryTimeout: number;       // Default: 30000ms
-  readonly halfOpenMaxCalls: number;      // Default: 3 test calls
-  readonly timeWindow: number;            // Default: 60000ms
+  readonly failureThreshold: number; // Default: 5 failures
+  readonly recoveryTimeout: number; // Default: 30000ms
+  readonly halfOpenMaxCalls: number; // Default: 3 test calls
+  readonly timeWindow: number; // Default: 60000ms
 }
 
 class CircuitBreakerStream extends Transform {
@@ -144,6 +149,7 @@ class CircuitBreakerStream extends Transform {
 ```
 
 **Resilience Features**:
+
 - **99% Recovery Rate**: Automatic recovery from CLI process failures
 - **Graceful Degradation**: Cached responses during outages
 - **Health Monitoring**: CLI process validation with timeout handling
@@ -160,7 +166,7 @@ class CircuitBreakerStream extends Transform {
 
 **Implementation Steps**:
 
-1. **Create ClaudeMessageTransformStream** 
+1. **Create ClaudeMessageTransformStream**
    - **File**: `D:\projects\Ptah\src\services\streams\claude-message-transform.stream.ts` (NEW)
    - **Interface**: Extend Node.js Transform stream with objectMode
    - **Logic**: Parse CLI output with message boundary detection
@@ -179,6 +185,7 @@ class CircuitBreakerStream extends Transform {
    - **Compatibility**: Add adapter for existing AsyncIterator consumers
 
 **Acceptance Criteria**:
+
 - [ ] ClaudeMessageTransformStream processes chunks in <10ms
 - [ ] MessageToJsonTransform generates proper StrictChatMessage objects
 - [ ] Stream pipeline handles backpressure without UI freezes
@@ -187,6 +194,7 @@ class CircuitBreakerStream extends Transform {
 - [ ] Memory usage remains stable during high-volume streaming
 
 **Progress Updates**:
+
 - Update progress.md when starting implementation
 - Checkpoint commit every 30 minutes with working code
 - Update progress.md with performance metrics upon completion
@@ -220,6 +228,7 @@ class CircuitBreakerStream extends Transform {
    - **Monitoring**: Health check integration for CLI process management
 
 **Acceptance Criteria**:
+
 - [ ] Circuit breaker transitions between states correctly
 - [ ] Failure threshold triggers OPEN state within configured time window
 - [ ] Recovery timeout allows HALF_OPEN testing after configured delay
@@ -228,6 +237,7 @@ class CircuitBreakerStream extends Transform {
 - [ ] 99% automatic recovery rate achieved in integration tests
 
 **Progress Updates**:
+
 - Update progress.md when starting resilience implementation
 - Document state transition testing in progress notes
 - Update progress.md with recovery metrics upon completion
@@ -259,6 +269,7 @@ class CircuitBreakerStream extends Transform {
    - **Memory Profiling**: Ensure no memory leaks during extended usage
 
 **Acceptance Criteria**:
+
 - [ ] Chat handler processes stream events without breaking existing functionality
 - [ ] Message chunking to Angular webview maintains same format and timing
 - [ ] Error handling maintains MessageResponse structure with CorrelationId
@@ -271,11 +282,13 @@ class CircuitBreakerStream extends Transform {
 ### Performance Validation (Evidence-Based)
 
 **Latency Requirements**:
+
 - **Target**: <100ms p95 latency (5-7x improvement from current 165-755ms)
 - **Measurement**: Benchmark stream processing vs AsyncIterator baseline
 - **Validation**: Performance tests with realistic Claude response sizes
 
 **Memory Efficiency**:
+
 - **Target**: Stable memory usage <50MB during streaming
 - **Prevention**: Zero memory leaks during long-running sessions
 - **Monitoring**: Stream lifecycle management with proper cleanup
@@ -283,11 +296,13 @@ class CircuitBreakerStream extends Transform {
 ### Integration Quality Standards
 
 **Type Safety Compliance**:
+
 - All stream data uses StrictChatMessage and branded types from Phase 1
 - Runtime validation through existing Zod schemas
 - Error handling maintains MessageResponse patterns with structured context
 
 **Resilience Validation**:
+
 - Circuit breaker state transitions tested under failure scenarios
 - 99% automatic recovery rate achieved in load testing
 - Graceful degradation provides meaningful user feedback
@@ -303,6 +318,7 @@ class CircuitBreakerStream extends Transform {
 ### Quality Assurance Requirements
 
 **Pre-Handoff Checklist**:
+
 - [ ] TypeScript compilation: Zero errors with strict mode
 - [ ] Performance benchmarks: Document latency improvements with measurements
 - [ ] Memory profiling: Validate stable memory usage patterns
@@ -312,6 +328,7 @@ class CircuitBreakerStream extends Transform {
 ### Next Phase Readiness
 
 **Prerequisites for Phase 3** (Angular Integration):
+
 - Stream-based CLI communication operational with <100ms latency
 - Circuit breaker resilience patterns functional
 - All integration points documented with performance metrics
@@ -320,12 +337,14 @@ class CircuitBreakerStream extends Transform {
 ### Success Metrics Validation
 
 **Quantified Improvements**:
+
 - **Message Latency**: 5-7x improvement measured (target: <100ms p95)
-- **Error Recovery**: 99% automatic recovery rate in failure testing  
+- **Error Recovery**: 99% automatic recovery rate in failure testing
 - **Memory Efficiency**: Zero memory leaks in extended usage scenarios
 - **Type Safety**: 100% strict typing maintained with branded type integration
 
 **Developer Experience Enhancements**:
+
 - **Debug Clarity**: Structured error context with correlation tracking
 - **Performance Visibility**: Stream metrics and circuit breaker state monitoring
 - **Reliability**: Predictable error handling with graceful degradation patterns
@@ -341,11 +360,13 @@ class CircuitBreakerStream extends Transform {
 ### Risk Mitigation Strategies
 
 **Technical Risks**:
+
 - **Stream Complexity**: Start with simple Transform streams, add features incrementally
 - **Performance Regression**: Comprehensive benchmarking before and after migration
 - **Memory Leaks**: Implement proper stream lifecycle management with cleanup testing
 
 **Integration Risks**:
+
 - **CLI Process Management**: Circuit breaker provides failure isolation and recovery
 - **Type Safety Regression**: Validate all stream data against existing Zod schemas
 - **Angular Communication**: Maintain exact message format compatibility
@@ -353,11 +374,13 @@ class CircuitBreakerStream extends Transform {
 ### Deployment Strategy
 
 **Gradual Rollout**:
+
 1. **Development Environment**: Stream implementation with comprehensive testing
 2. **Internal Validation**: Performance and reliability testing with real Claude CLI
 3. **Production Deployment**: Feature flag controlled rollout with monitoring
 
 **Rollback Procedures**:
+
 - Maintain AsyncIterator code path during initial deployment
 - Performance monitoring with automatic fallback triggers
 - Clear rollback criteria based on latency and error rate thresholds

@@ -44,9 +44,7 @@
       "Bash(npm install:*)",
       "Bash(rg:*)"
     ],
-    "additionalDirectories": [
-      "d:\\projects\\Ptah"
-    ]
+    "additionalDirectories": ["d:\\projects\\Ptah"]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [

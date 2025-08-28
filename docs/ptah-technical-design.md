@@ -99,7 +99,7 @@ import { Logger } from './core/logger';
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   try {
     Logger.info('Activating Ptah extension...');
-    
+
     // Initialize main extension controller
     const ptahExtension = new PtahExtension(context);
     await ptahExtension.initialize();
@@ -135,14 +135,14 @@ export function deactivate(): void {
 export class PtahExtension implements vscode.Disposable {
   private static _instance: PtahExtension;
   private disposables: vscode.Disposable[] = [];
-  
+
   // Core services
   private claudeCliService: ClaudeCliService;
   private sessionManager: SessionManager;
   private contextManager: ContextManager;
   private workspaceManager: WorkspaceManager;
   private analyticsService: AnalyticsService;
-  
+
   // UI providers
   private chatSidebarProvider: ChatSidebarProvider;
   private commandBuilderProvider: CommandBuilderProvider;
@@ -179,16 +179,16 @@ export class PtahExtension implements vscode.Disposable {
   async registerAll(): Promise<void> {
     // Register webview providers
     this.registerWebviewProviders();
-    
-    // Register tree data providers  
+
+    // Register tree data providers
     this.registerTreeProviders();
-    
+
     // Register commands
     this.registerCommands();
-    
+
     // Register event handlers
     this.registerEventHandlers();
-    
+
     // Register status bar items
     this.registerStatusBar();
   }
@@ -196,17 +196,15 @@ export class PtahExtension implements vscode.Disposable {
   private registerWebviewProviders(): void {
     // Chat sidebar
     this.chatSidebarProvider = new ChatSidebarProvider(
-      this.context, 
-      this.sessionManager, 
+      this.context,
+      this.sessionManager,
       this.claudeCliService
     );
-    
+
     this.context.subscriptions.push(
-      vscode.window.registerWebviewViewProvider(
-        'ptah.chatSidebar',
-        this.chatSidebarProvider,
-        { webviewOptions: { retainContextWhenHidden: true } }
-      )
+      vscode.window.registerWebviewViewProvider('ptah.chatSidebar', this.chatSidebarProvider, {
+        webviewOptions: { retainContextWhenHidden: true },
+      })
     );
 
     // Command builder panel
@@ -229,23 +227,39 @@ export class PtahExtension implements vscode.Disposable {
       vscode.commands.registerCommand('ptah.quickChat', () => this.quickChat()),
       vscode.commands.registerCommand('ptah.reviewCurrentFile', () => this.reviewCurrentFile()),
       vscode.commands.registerCommand('ptah.generateTests', () => this.generateTests()),
-      
+
       // Session management
       vscode.commands.registerCommand('ptah.newSession', () => this.sessionManager.createSession()),
-      vscode.commands.registerCommand('ptah.switchSession', () => this.sessionManager.showSessionPicker()),
-      
+      vscode.commands.registerCommand('ptah.switchSession', () =>
+        this.sessionManager.showSessionPicker()
+      ),
+
       // Command building
-      vscode.commands.registerCommand('ptah.buildCommand', () => this.commandBuilderProvider.show()),
-      vscode.commands.registerCommand('ptah.showTemplates', () => this.commandBuilderProvider.showTemplates()),
-      
+      vscode.commands.registerCommand('ptah.buildCommand', () =>
+        this.commandBuilderProvider.show()
+      ),
+      vscode.commands.registerCommand('ptah.showTemplates', () =>
+        this.commandBuilderProvider.showTemplates()
+      ),
+
       // Context management
-      vscode.commands.registerCommand('ptah.includeFile', (uri) => this.contextManager.includeFile(uri)),
-      vscode.commands.registerCommand('ptah.excludeFile', (uri) => this.contextManager.excludeFile(uri)),
-      vscode.commands.registerCommand('ptah.optimizeContext', () => this.contextManager.showOptimizations()),
-      
+      vscode.commands.registerCommand('ptah.includeFile', (uri) =>
+        this.contextManager.includeFile(uri)
+      ),
+      vscode.commands.registerCommand('ptah.excludeFile', (uri) =>
+        this.contextManager.excludeFile(uri)
+      ),
+      vscode.commands.registerCommand('ptah.optimizeContext', () =>
+        this.contextManager.showOptimizations()
+      ),
+
       // Analytics
-      vscode.commands.registerCommand('ptah.showAnalytics', () => this.analyticsDashboardProvider.show()),
-      vscode.commands.registerCommand('ptah.exportUsageData', () => this.analyticsService.exportData()),
+      vscode.commands.registerCommand('ptah.showAnalytics', () =>
+        this.analyticsDashboardProvider.show()
+      ),
+      vscode.commands.registerCommand('ptah.exportUsageData', () =>
+        this.analyticsService.exportData()
+      ),
     ];
 
     this.context.subscriptions.push(...commands);
@@ -293,9 +307,12 @@ export class ClaudeCliService implements vscode.Disposable {
     }
   }
 
-  async startChatSession(sessionId: string, projectPath?: string): Promise<AsyncIterator<ChatMessage>> {
+  async startChatSession(
+    sessionId: string,
+    projectPath?: string
+  ): Promise<AsyncIterator<ChatMessage>> {
     const args = ['chat'];
-    
+
     if (projectPath) {
       args.push('--project', projectPath);
     }
@@ -309,7 +326,7 @@ export class ClaudeCliService implements vscode.Disposable {
     const process = spawn(this.installationPath!, args, {
       cwd: projectPath || workspaceRoot,
       stdio: 'pipe',
-      env: { ...process.env }
+      env: { ...process.env },
     });
 
     this.activeProcesses.set(sessionId, process);
@@ -326,7 +343,9 @@ export class ClaudeCliService implements vscode.Disposable {
     // Format message with file attachments
     let fullMessage = message;
     if (files && files.length > 0) {
-      const fileAttachments = files.map(file => `\nFile: ${file}\n\`\`\`\n${fs.readFileSync(file, 'utf8')}\n\`\`\``).join('\n');
+      const fileAttachments = files
+        .map((file) => `\nFile: ${file}\n\`\`\`\n${fs.readFileSync(file, 'utf8')}\n\`\`\``)
+        .join('\n');
       fullMessage += fileAttachments;
     }
 
@@ -345,9 +364,9 @@ export class ClaudeCliService implements vscode.Disposable {
 
     // Add file context if specified
     if (parameters.files && Array.isArray(parameters.files)) {
-      const fileContext = parameters.files.map(file => 
-        `\nFile: ${file}\n\`\`\`\n${fs.readFileSync(file, 'utf8')}\n\`\`\``
-      ).join('\n');
+      const fileContext = parameters.files
+        .map((file) => `\nFile: ${file}\n\`\`\`\n${fs.readFileSync(file, 'utf8')}\n\`\`\``)
+        .join('\n');
       command += fileContext;
     }
 
@@ -355,12 +374,12 @@ export class ClaudeCliService implements vscode.Disposable {
   }
 
   private async *createMessageStream(
-    process: ChildProcess, 
+    process: ChildProcess,
     sessionId: string
   ): AsyncIterator<ChatMessage> {
     const readline = createInterface({
       input: process.stdout!,
-      crlfDelay: Infinity
+      crlfDelay: Infinity,
     });
 
     let currentMessage: Partial<ChatMessage> = {
@@ -368,7 +387,7 @@ export class ClaudeCliService implements vscode.Disposable {
       type: 'assistant',
       content: '',
       timestamp: new Date(),
-      sessionId
+      sessionId,
     };
 
     for await (const line of readline) {
@@ -384,7 +403,7 @@ export class ClaudeCliService implements vscode.Disposable {
             type: 'assistant',
             content: line.substring(7),
             timestamp: new Date(),
-            sessionId
+            sessionId,
           };
         } else if (line.startsWith('TOKEN_COUNT:')) {
           // Token usage information
@@ -409,7 +428,7 @@ export class ClaudeCliService implements vscode.Disposable {
           content: `Error: ${error.message}`,
           timestamp: new Date(),
           sessionId,
-          isError: true
+          isError: true,
         };
       }
     }
@@ -421,35 +440,37 @@ export class ClaudeCliService implements vscode.Disposable {
   }
 
   async executeCommand(
-    command: string, 
-    args: string[], 
+    command: string,
+    args: string[],
     options: { timeout?: number } = {}
   ): Promise<CommandResult> {
     return new Promise((resolve, reject) => {
       const process = spawn(command, args, { stdio: 'pipe' });
-      
+
       let stdout = '';
       let stderr = '';
-      
-      process.stdout?.on('data', (data) => stdout += data);
-      process.stderr?.on('data', (data) => stderr += data);
-      
-      const timeoutId = options.timeout ? setTimeout(() => {
-        process.kill();
-        reject(new Error(`Command timeout after ${options.timeout}ms`));
-      }, options.timeout) : null;
-      
+
+      process.stdout?.on('data', (data) => (stdout += data));
+      process.stderr?.on('data', (data) => (stderr += data));
+
+      const timeoutId = options.timeout
+        ? setTimeout(() => {
+            process.kill();
+            reject(new Error(`Command timeout after ${options.timeout}ms`));
+          }, options.timeout)
+        : null;
+
       process.on('close', (code) => {
         if (timeoutId) clearTimeout(timeoutId);
-        
+
         resolve({
           success: code === 0,
           code,
           stdout: stdout.trim(),
-          stderr: stderr.trim()
+          stderr: stderr.trim(),
         });
       });
-      
+
       process.on('error', (error) => {
         if (timeoutId) clearTimeout(timeoutId);
         reject(error);
@@ -495,8 +516,8 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
       enableScripts: true,
       localResourceRoots: [
         vscode.Uri.joinPath(this.context.extensionUri, 'media'),
-        vscode.Uri.joinPath(this.context.extensionUri, 'out')
-      ]
+        vscode.Uri.joinPath(this.context.extensionUri, 'out'),
+      ],
     };
 
     // Set HTML content
@@ -586,23 +607,23 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
       case 'sendMessage':
         await this.handleSendMessage(message.data);
         break;
-        
+
       case 'attachFiles':
         await this.handleAttachFiles(message.data);
         break;
-        
+
       case 'newSession':
         await this.handleNewSession();
         break;
-        
+
       case 'switchSession':
         await this.handleSwitchSession(message.data.sessionId);
         break;
-        
+
       case 'exportSession':
         await this.handleExportSession(message.data.sessionId);
         break;
-        
+
       case 'clearSession':
         await this.handleClearSession(message.data.sessionId);
         break;
@@ -628,15 +649,15 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
           id: generateId(),
           content: data.content,
           timestamp: new Date().toISOString(),
-          files: data.files
-        }
+          files: data.files,
+        },
       });
 
       // Start streaming response from Claude
       const sessionId = this.sessionManager.getCurrentSession()!.id;
       const messageStream = await this.claudeService.sendMessage(
-        sessionId, 
-        data.content, 
+        sessionId,
+        data.content,
         data.files
       );
 
@@ -644,22 +665,21 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
       for await (const message of messageStream) {
         this._view?.webview.postMessage({
           type: 'assistantMessage',
-          data: message
+          data: message,
         });
       }
-
     } catch (error) {
       Logger.error('Failed to send message', error);
       this._view?.webview.postMessage({
         type: 'error',
-        data: { message: error.message }
+        data: { message: error.message },
       });
     }
   }
 
   private async handleAttachFiles(data: { uris?: string[] }): Promise<void> {
     const files = data.uris || [];
-    
+
     if (files.length === 0) {
       // Show file picker
       const selected = await vscode.window.showOpenDialog({
@@ -668,22 +688,22 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
         canSelectFolders: false,
         filters: {
           'Code Files': ['ts', 'js', 'tsx', 'jsx', 'py', 'java', 'cpp', 'h'],
-          'All Files': ['*']
-        }
+          'All Files': ['*'],
+        },
       });
 
       if (selected) {
-        const filePaths = selected.map(uri => uri.fsPath);
+        const filePaths = selected.map((uri) => uri.fsPath);
         this._view?.webview.postMessage({
           type: 'filesAttached',
-          data: { files: filePaths }
+          data: { files: filePaths },
         });
       }
     } else {
       // Files already provided (e.g., from drag-and-drop)
       this._view?.webview.postMessage({
         type: 'filesAttached',
-        data: { files }
+        data: { files },
       });
     }
   }
@@ -691,14 +711,14 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
   private async sendInitialData(): Promise<void> {
     const currentSession = this.sessionManager.getCurrentSession();
     const workspaceInfo = this.getWorkspaceInfo();
-    
+
     this._view?.webview.postMessage({
       type: 'initialized',
       data: {
         session: currentSession,
         workspace: workspaceInfo,
-        theme: this.getCurrentTheme()
-      }
+        theme: this.getCurrentTheme(),
+      },
     });
   }
 
@@ -714,28 +734,32 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
     return {
       name: workspaceFolder.name,
       path: workspaceFolder.uri.fsPath,
-      type: this.detectProjectType(workspaceFolder.uri.fsPath)
+      type: this.detectProjectType(workspaceFolder.uri.fsPath),
     };
   }
 
   private detectProjectType(path: string): string {
     // Simple project type detection
     if (fs.existsSync(vscode.Uri.joinPath(vscode.Uri.file(path), 'package.json').fsPath)) {
-      const packageJson = JSON.parse(fs.readFileSync(vscode.Uri.joinPath(vscode.Uri.file(path), 'package.json').fsPath, 'utf8'));
+      const packageJson = JSON.parse(
+        fs.readFileSync(vscode.Uri.joinPath(vscode.Uri.file(path), 'package.json').fsPath, 'utf8')
+      );
       if (packageJson.dependencies?.react) return 'react';
       if (packageJson.dependencies?.vue) return 'vue';
       if (packageJson.dependencies?.angular) return 'angular';
       return 'node';
     }
-    if (fs.existsSync(vscode.Uri.joinPath(vscode.Uri.file(path), 'requirements.txt').fsPath)) return 'python';
+    if (fs.existsSync(vscode.Uri.joinPath(vscode.Uri.file(path), 'requirements.txt').fsPath))
+      return 'python';
     if (fs.existsSync(vscode.Uri.joinPath(vscode.Uri.file(path), 'pom.xml').fsPath)) return 'java';
-    if (fs.existsSync(vscode.Uri.joinPath(vscode.Uri.file(path), 'Cargo.toml').fsPath)) return 'rust';
-    
+    if (fs.existsSync(vscode.Uri.joinPath(vscode.Uri.file(path), 'Cargo.toml').fsPath))
+      return 'rust';
+
     return 'general';
   }
 
   dispose(): void {
-    this._disposables.forEach(d => d.dispose());
+    this._disposables.forEach((d) => d.dispose());
   }
 }
 ```
@@ -745,8 +769,10 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
 ```typescript
 // src/providers/context-tree.provider.ts
 export class ContextTreeProvider implements vscode.TreeDataProvider<ContextItem> {
-  private _onDidChangeTreeData: vscode.EventEmitter<ContextItem | undefined | null | void> = new vscode.EventEmitter<ContextItem | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<ContextItem | undefined | null | void> = this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<ContextItem | undefined | null | void> =
+    new vscode.EventEmitter<ContextItem | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<ContextItem | undefined | null | void> =
+    this._onDidChangeTreeData.event;
 
   private contextItems: Map<string, ContextItem> = new Map();
   private includedFiles: Set<string> = new Set();
@@ -824,11 +850,7 @@ export class ContextTreeProvider implements vscode.TreeDataProvider<ContextItem>
     const items: ContextItem[] = [];
 
     // Token usage
-    const tokenUsage = new ContextItem(
-      'Token Usage',
-      vscode.TreeItemCollapsibleState.None,
-      'info'
-    );
+    const tokenUsage = new ContextItem('Token Usage', vscode.TreeItemCollapsibleState.None, 'info');
     tokenUsage.description = `${this.getTokenEstimate()} / 200,000`;
     tokenUsage.iconPath = new vscode.ThemeIcon('pulse');
     items.push(tokenUsage);
@@ -867,18 +889,18 @@ export class ContextTreeProvider implements vscode.TreeDataProvider<ContextItem>
       for (const [name, type] of children) {
         const childUri = vscode.Uri.joinPath(folderUri, name);
         const isIncluded = this.includedFiles.has(childUri.fsPath);
-        
+
         const item = new ContextItem(
           name,
-          type === vscode.FileType.Directory 
-            ? vscode.TreeItemCollapsibleState.Collapsed 
+          type === vscode.FileType.Directory
+            ? vscode.TreeItemCollapsibleState.Collapsed
             : vscode.TreeItemCollapsibleState.None,
           type === vscode.FileType.Directory ? 'folder' : 'file'
         );
-        
+
         item.resourceUri = childUri;
         item.contextValue = type === vscode.FileType.Directory ? 'folder' : 'file';
-        
+
         // Set inclusion status
         if (isIncluded) {
           item.iconPath = new vscode.ThemeIcon('check', new vscode.ThemeColor('charts.green'));
@@ -918,7 +940,7 @@ export class ContextTreeProvider implements vscode.TreeDataProvider<ContextItem>
   private loadContextItems(): void {
     const currentContext = this.contextManager.getCurrentContext();
     this.includedFiles.clear();
-    
+
     if (currentContext.includedFiles) {
       for (const file of currentContext.includedFiles) {
         this.includedFiles.add(file);
@@ -972,23 +994,9 @@ class ContextItem extends vscode.TreeItem {
   "engines": {
     "vscode": "^1.74.0"
   },
-  "categories": [
-    "AI",
-    "Machine Learning", 
-    "Productivity",
-    "Other"
-  ],
-  "keywords": [
-    "claude",
-    "ai",
-    "chat",
-    "code-review", 
-    "assistant",
-    "anthropic"
-  ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
+  "categories": ["AI", "Machine Learning", "Productivity", "Other"],
+  "keywords": ["claude", "ai", "chat", "code-review", "assistant", "anthropic"],
+  "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -1034,7 +1042,7 @@ class ContextItem extends vscode.TreeItem {
         "icon": "$(comment)"
       },
       {
-        "command": "ptah.reviewCurrentFile", 
+        "command": "ptah.reviewCurrentFile",
         "title": "Review Current File",
         "category": "Ptah",
         "icon": "$(search-review)"
@@ -1042,7 +1050,7 @@ class ContextItem extends vscode.TreeItem {
       {
         "command": "ptah.generateTests",
         "title": "Generate Tests",
-        "category": "Ptah", 
+        "category": "Ptah",
         "icon": "$(beaker)"
       },
       {
@@ -1064,7 +1072,7 @@ class ContextItem extends vscode.TreeItem {
         "icon": "$(add)"
       },
       {
-        "command": "ptah.excludeFile", 
+        "command": "ptah.excludeFile",
         "title": "Exclude from Context",
         "category": "Ptah",
         "icon": "$(remove)"
@@ -1087,7 +1095,7 @@ class ContextItem extends vscode.TreeItem {
           "when": "editorIsOpen && ptah.enabled"
         },
         {
-          "command": "ptah.generateTests", 
+          "command": "ptah.generateTests",
           "when": "editorIsOpen && ptah.enabled"
         }
       ],
@@ -1099,7 +1107,7 @@ class ContextItem extends vscode.TreeItem {
         },
         {
           "command": "ptah.generateTests",
-          "when": "ptah.enabled", 
+          "when": "ptah.enabled",
           "group": "ptah@2"
         }
       ],
@@ -1112,7 +1120,7 @@ class ContextItem extends vscode.TreeItem {
         {
           "command": "ptah.excludeFile",
           "when": "ptah.enabled && ptah.fileIncluded",
-          "group": "ptah@1" 
+          "group": "ptah@1"
         }
       ],
       "view/title": [
@@ -1136,7 +1144,7 @@ class ContextItem extends vscode.TreeItem {
       },
       {
         "command": "ptah.reviewCurrentFile",
-        "key": "ctrl+shift+p ctrl+shift+r", 
+        "key": "ctrl+shift+p ctrl+shift+r",
         "mac": "cmd+shift+p cmd+shift+r",
         "when": "editorIsOpen"
       },
@@ -1155,7 +1163,7 @@ class ContextItem extends vscode.TreeItem {
           "description": "Path to Claude Code CLI executable"
         },
         "ptah.defaultProvider": {
-          "type": "string", 
+          "type": "string",
           "enum": ["anthropic", "bedrock", "vertex"],
           "default": "anthropic",
           "description": "Default Claude provider"
@@ -1167,7 +1175,7 @@ class ContextItem extends vscode.TreeItem {
         },
         "ptah.autoIncludeOpenFiles": {
           "type": "boolean",
-          "default": true, 
+          "default": true,
           "description": "Automatically include open files in context"
         },
         "ptah.contextOptimization": {
@@ -1196,7 +1204,7 @@ class ContextItem extends vscode.TreeItem {
   "devDependencies": {
     "@types/vscode": "^1.74.0",
     "@types/node": "16.x",
-    "@typescript-eslint/eslint-plugin": "^5.45.0", 
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
     "eslint": "^8.28.0",
     "typescript": "^4.9.4"
@@ -1239,11 +1247,12 @@ class ContextItem extends vscode.TreeItem {
 
       <!-- Token Usage Bar -->
       <div class="token-usage-bar" *ngIf="tokenUsage">
-        <div class="usage-fill" 
-             [style.width.%]="(tokenUsage.used / tokenUsage.max) * 100"
-             [class.warning]="tokenUsage.used / tokenUsage.max > 0.8"
-             [class.danger]="tokenUsage.used / tokenUsage.max > 0.9">
-        </div>
+        <div
+          class="usage-fill"
+          [style.width.%]="(tokenUsage.used / tokenUsage.max) * 100"
+          [class.warning]="tokenUsage.used / tokenUsage.max > 0.8"
+          [class.danger]="tokenUsage.used / tokenUsage.max > 0.9"
+        ></div>
         <span class="usage-text">
           {{ tokenUsage.used | number }} / {{ tokenUsage.max | number }} tokens
         </span>
@@ -1251,9 +1260,10 @@ class ContextItem extends vscode.TreeItem {
 
       <!-- Message List -->
       <div class="message-list" #messageList>
-        <div *ngFor="let message of messages; trackBy: trackByMessage" 
-             [ngClass]="getMessageClasses(message)">
-          
+        <div
+          *ngFor="let message of messages; trackBy: trackByMessage"
+          [ngClass]="getMessageClasses(message)"
+        >
           <!-- User Message -->
           <div *ngIf="message.type === 'user'" class="user-message">
             <div class="message-content">
@@ -1266,16 +1276,17 @@ class ContextItem extends vscode.TreeItem {
               </div>
             </div>
             <div class="message-timestamp">
-              {{ message.timestamp | date:'short' }}
+              {{ message.timestamp | date: 'short' }}
             </div>
           </div>
 
           <!-- Assistant Message -->
           <div *ngIf="message.type === 'assistant'" class="assistant-message">
             <div class="message-content">
-              <ptah-message-renderer 
+              <ptah-message-renderer
                 [content]="message.content"
-                [streaming]="message.id === streamingMessageId">
+                [streaming]="message.id === streamingMessageId"
+              >
               </ptah-message-renderer>
             </div>
             <div class="message-actions">
@@ -1290,7 +1301,6 @@ class ContextItem extends vscode.TreeItem {
               </span>
             </div>
           </div>
-
         </div>
 
         <!-- Streaming Indicator -->
@@ -1327,34 +1337,41 @@ class ContextItem extends vscode.TreeItem {
 
         <!-- Message Input -->
         <div class="message-input-container">
-          <textarea 
+          <textarea
             [(ngModel)]="messageInput"
             (keydown)="handleKeyDown($event)"
             placeholder="Ask Claude about your code..."
             class="message-input"
             #messageTextarea
-            [disabled]="isStreaming">
+            [disabled]="isStreaming"
+          >
           </textarea>
-          
+
           <div class="input-actions">
-            <button (click)="attachFiles()" 
-                    class="attach-button"
-                    title="Attach Files"
-                    [disabled]="isStreaming">
+            <button
+              (click)="attachFiles()"
+              class="attach-button"
+              title="Attach Files"
+              [disabled]="isStreaming"
+            >
               <svg><!-- Paperclip icon --></svg>
             </button>
-            
-            <button (click)="openCommandBuilder()"
-                    class="command-button" 
-                    title="Command Builder"
-                    [disabled]="isStreaming">
+
+            <button
+              (click)="openCommandBuilder()"
+              class="command-button"
+              title="Command Builder"
+              [disabled]="isStreaming"
+            >
               <svg><!-- Tools icon --></svg>
             </button>
-            
-            <button (click)="sendMessage()"
-                    class="send-button"
-                    [disabled]="!canSendMessage()"
-                    title="Send Message">
+
+            <button
+              (click)="sendMessage()"
+              class="send-button"
+              [disabled]="!canSendMessage()"
+              title="Send Message"
+            >
               <svg><!-- Send icon --></svg>
             </button>
           </div>
@@ -1362,16 +1379,18 @@ class ContextItem extends vscode.TreeItem {
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-          <button *ngFor="let action of quickActions" 
-                  (click)="executeQuickAction(action)"
-                  class="quick-action-button">
+          <button
+            *ngFor="let action of quickActions"
+            (click)="executeQuickAction(action)"
+            class="quick-action-button"
+          >
             {{ action.label }}
           </button>
         </div>
       </div>
     </div>
   `,
-  styleUrls: ['./chat.component.scss']
+  styleUrls: ['./chat.component.scss'],
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private vscode = acquireVsCodeApi();
@@ -1392,7 +1411,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     { label: 'Generate Tests', command: 'generate-tests' },
     { label: 'Find Bugs', command: 'find-bugs' },
     { label: 'Add Docs', command: 'add-documentation' },
-    { label: 'Optimize', command: 'optimize-code' }
+    { label: 'Optimize', command: 'optimize-code' },
   ];
 
   ngOnInit(): void {
@@ -1406,30 +1425,30 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   private setupVSCodeCommunication(): void {
-    window.addEventListener('message', event => {
+    window.addEventListener('message', (event) => {
       const message = event.data;
-      
+
       switch (message.type) {
         case 'initialized':
           this.handleInitialized(message.data);
           break;
-          
+
         case 'userMessage':
           this.addMessage(message.data);
           break;
-          
+
         case 'assistantMessage':
           this.handleAssistantMessage(message.data);
           break;
-          
+
         case 'filesAttached':
           this.contextFiles = message.data.files;
           break;
-          
+
         case 'error':
           this.handleError(message.data);
           break;
-          
+
         case 'theme-change':
           this.theme = message.data.theme;
           break;
@@ -1441,7 +1460,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.currentSession = data.session;
     this.workspaceInfo = data.workspace;
     this.theme = data.theme;
-    
+
     if (this.currentSession?.messages) {
       this.messages = this.currentSession.messages;
     }
@@ -1450,7 +1469,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private handleAssistantMessage(message: ChatMessage): void {
     if (message.streaming) {
       // Update existing streaming message
-      const existingIndex = this.messages.findIndex(m => m.id === message.id);
+      const existingIndex = this.messages.findIndex((m) => m.id === message.id);
       if (existingIndex >= 0) {
         this.messages[existingIndex] = message;
       } else {
@@ -1476,15 +1495,15 @@ export class ChatComponent implements OnInit, OnDestroy {
       type: 'sendMessage',
       data: {
         content,
-        files: this.contextFiles.length > 0 ? this.contextFiles : undefined
-      }
+        files: this.contextFiles.length > 0 ? this.contextFiles : undefined,
+      },
     });
   }
 
   attachFiles(): void {
     this.vscode.postMessage({
       type: 'attachFiles',
-      data: {}
+      data: {},
     });
   }
 
@@ -1492,7 +1511,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Send command to VS Code for execution
     this.vscode.postMessage({
       type: 'executeCommand',
-      data: { command: action.command }
+      data: { command: action.command },
     });
   }
 
@@ -1547,17 +1566,17 @@ export class ChatComponent implements OnInit, OnDestroy {
 // Lazy loading for webview content
 class WebviewContentManager {
   private contentCache = new Map<string, string>();
-  
+
   async getContent(viewType: string): Promise<string> {
     if (this.contentCache.has(viewType)) {
       return this.contentCache.get(viewType)!;
     }
-    
+
     const content = await this.loadContent(viewType);
     this.contentCache.set(viewType, content);
     return content;
   }
-  
+
   private async loadContent(viewType: string): Promise<string> {
     // Load and compile Angular content on demand
     const bundlePath = path.join(__dirname, 'webview', `${viewType}.js`);
@@ -1568,27 +1587,27 @@ class WebviewContentManager {
 // Memory management for large sessions
 class SessionMemoryManager {
   private readonly MAX_MESSAGES = 1000;
-  
+
   optimizeSession(session: ChatSession): ChatSession {
     if (session.messages.length > this.MAX_MESSAGES) {
       // Keep recent messages and summarize older ones
       const recentMessages = session.messages.slice(-500);
       const oldMessages = session.messages.slice(0, -500);
-      
+
       const summary: ChatMessage = {
         id: 'summary',
         type: 'system',
         content: `[Earlier conversation with ${oldMessages.length} messages summarized]`,
         timestamp: new Date(),
-        sessionId: session.id
+        sessionId: session.id,
       };
-      
+
       return {
         ...session,
-        messages: [summary, ...recentMessages]
+        messages: [summary, ...recentMessages],
       };
     }
-    
+
     return session;
   }
 }
@@ -1600,10 +1619,10 @@ class SessionMemoryManager {
 // Secure webview content
 private getSecureWebviewContent(webview: vscode.Webview): string {
   const nonce = getNonce();
-  
+
   return `
-    <meta http-equiv="Content-Security-Policy" 
-          content="default-src 'none'; 
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none';
                    script-src 'nonce-${nonce}' ${webview.cspSource};
                    style-src 'nonce-${nonce}' ${webview.cspSource} 'unsafe-inline';
                    font-src ${webview.cspSource};
@@ -1621,12 +1640,12 @@ class MessageSanitizer {
       .replace(/javascript:/gi, '')
       .replace(/on\w+\s*=/gi, '');
   }
-  
+
   static validateFilePath(path: string): boolean {
     // Ensure file paths are within workspace
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     if (!workspaceRoot) return false;
-    
+
     const resolvedPath = pathModule.resolve(path);
     return resolvedPath.startsWith(workspaceRoot);
   }
@@ -1700,40 +1719,40 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build Angular webviews
-      run: |
-        cd webview
-        npm ci
-        npm run build:prod
-        
-    - name: Build extension
-      run: npm run compile
-      
-    - name: Run tests
-      run: npm test
-      
-    - name: Package extension
-      run: |
-        npm install -g vsce
-        vsce package
-        
-    - name: Upload VSIX
-      uses: actions/upload-artifact@v3
-      with:
-        name: ptah-extension
-        path: "*.vsix"
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular webviews
+        run: |
+          cd webview
+          npm ci
+          npm run build:prod
+
+      - name: Build extension
+        run: npm run compile
+
+      - name: Run tests
+        run: npm test
+
+      - name: Package extension
+        run: |
+          npm install -g vsce
+          vsce package
+
+      - name: Upload VSIX
+        uses: actions/upload-artifact@v3
+        with:
+          name: ptah-extension
+          path: '*.vsix'
 ```
 
 This technical architecture provides a comprehensive foundation for Ptah, transforming Claude Code's CLI capabilities into an intuitive VS Code extension with professional-grade visual interfaces. The modular design supports all planned features while maintaining excellent performance and security standards.

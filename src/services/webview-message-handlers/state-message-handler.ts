@@ -1,6 +1,17 @@
 import * as vscode from 'vscode';
-import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
-import { StrictMessageType, MessagePayloadMap, MessageResponse, StateSavePayload, StateLoadPayload, StateClearPayload } from '../../types/message.types';
+import {
+  BaseWebviewMessageHandler,
+  StrictPostMessageFunction,
+  IWebviewMessageHandler,
+} from './base-message-handler';
+import {
+  StrictMessageType,
+  MessagePayloadMap,
+  MessageResponse,
+  StateSavePayload,
+  StateLoadPayload,
+  StateClearPayload,
+} from '../../types/message.types';
 import { CorrelationId } from '../../types/branded.types';
 import { Logger } from '../../core/logger';
 
@@ -13,8 +24,10 @@ type StateMessageTypes = 'state:save' | 'state:load' | 'state:clear';
  * StateMessageHandler - Single Responsibility: Handle state management messages
  * Handles saveState, loadState, and state management operations
  */
-export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageTypes> 
-  implements IWebviewMessageHandler<StateMessageTypes> {
+export class StateMessageHandler
+  extends BaseWebviewMessageHandler<StateMessageTypes>
+  implements IWebviewMessageHandler<StateMessageTypes>
+{
   readonly messageType = 'state:';
 
   constructor(
@@ -24,8 +37,10 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
     super(postMessage);
   }
 
-
-  async handle<K extends StateMessageTypes>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse> {
+  async handle<K extends StateMessageTypes>(
+    messageType: K,
+    payload: MessagePayloadMap[K]
+  ): Promise<MessageResponse> {
     Logger.info(`Handling state message: ${messageType}`);
 
     try {
@@ -48,33 +63,33 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
         success: false,
         error: {
           code: 'STATE_HANDLER_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
 
   private async handleSaveState(payload: StateSavePayload): Promise<MessageResponse> {
     Logger.info('Saving webview state...');
-    
+
     // Extract state from payload
     const stateToSave = payload.state;
-    
+
     // Save the state to VS Code's globalState
     await this.context.globalState.update('ptah.webview.state', stateToSave);
-    
+
     Logger.info('Webview state saved successfully');
-    const responseData = { 
+    const responseData = {
       message: 'State saved successfully',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     this.sendSuccessResponse('state:saved', responseData);
-    
+
     return {
       requestId: CorrelationId.create(),
       success: true,
@@ -82,24 +97,24 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
   }
 
   private async handleLoadState(payload: StateLoadPayload): Promise<MessageResponse> {
     Logger.info('Loading webview state...');
-    
+
     // Load the state from VS Code's globalState
     const savedState = this.context.globalState.get('ptah.webview.state', {});
-    
+
     Logger.info('Webview state loaded successfully');
     const responseData = {
       state: savedState,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     this.sendSuccessResponse('state:loaded', responseData);
-    
+
     return {
       requestId: CorrelationId.create(),
       success: true,
@@ -107,24 +122,24 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
   }
 
   private async handleClearState(payload: StateClearPayload): Promise<MessageResponse> {
     Logger.info('Clearing webview state...');
-    
+
     // Clear the state from VS Code's globalState
     await this.context.globalState.update('ptah.webview.state', undefined);
-    
+
     Logger.info('Webview state cleared successfully');
     const responseData = {
       message: 'State cleared successfully',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     this.sendSuccessResponse('state:cleared', responseData);
-    
+
     return {
       requestId: CorrelationId.create(),
       success: true,
@@ -132,8 +147,8 @@ export class StateMessageHandler extends BaseWebviewMessageHandler<StateMessageT
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
   }
 }

@@ -35,7 +35,7 @@ export class Logger {
     Logger.initialize();
     const logMessage = `[ERROR] ${new Date().toISOString()} - ${message}`;
     Logger.outputChannel.appendLine(logMessage);
-    
+
     if (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       const stackTrace = error instanceof Error ? error.stack : '';

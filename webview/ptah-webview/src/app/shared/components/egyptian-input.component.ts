@@ -38,7 +38,8 @@ import { LucideAngularModule, LucideIconData, X } from 'lucide-angular';
             (focus)="onFocus()"
             (keydown)="onKeyDown($event)"
             [attr.aria-describedby]="errorId"
-            [attr.aria-invalid]="hasError">
+            [attr.aria-invalid]="hasError"
+          >
           </textarea>
         } @else {
           <input
@@ -63,8 +64,12 @@ import { LucideAngularModule, LucideIconData, X } from 'lucide-angular';
             type="button"
             class="absolute inset-y-0 right-0 pr-3 flex items-center"
             (click)="clear()"
-            aria-label="Clear input">
-            <lucide-angular [img]="X" class="w-4 h-4 text-hieroglyph-400 hover:text-hieroglyph-600"></lucide-angular>
+            aria-label="Clear input"
+          >
+            <lucide-angular
+              [img]="X"
+              class="w-4 h-4 text-hieroglyph-400 hover:text-hieroglyph-600"
+            ></lucide-angular>
           </button>
         }
       </div>
@@ -78,45 +83,47 @@ import { LucideAngularModule, LucideIconData, X } from 'lucide-angular';
       }
     </div>
   `,
-  styles: [`
-    .hieroglyph-input {
-      @apply bg-papyrus-50 border border-papyrus-300
+  styles: [
+    `
+      .hieroglyph-input {
+        @apply bg-papyrus-50 border border-papyrus-300
              rounded-egyptian px-4 py-2
              focus:ring-2 focus:ring-lapis-400 focus:border-lapis-500
              transition-all duration-200
              placeholder-hieroglyph-400;
-    }
+      }
 
-    .hieroglyph-input:disabled {
-      @apply bg-hieroglyph-100 cursor-not-allowed opacity-60;
-    }
+      .hieroglyph-input:disabled {
+        @apply bg-hieroglyph-100 cursor-not-allowed opacity-60;
+      }
 
-    .hieroglyph-input.error {
-      @apply border-red-500 focus:ring-red-400 focus:border-red-500;
-    }
+      .hieroglyph-input.error {
+        @apply border-red-500 focus:ring-red-400 focus:border-red-500;
+      }
 
-    /* VS Code theme adaptations */
-    :host-context(.vscode-dark) .hieroglyph-input {
-      @apply bg-hieroglyph-800 border-hieroglyph-600
+      /* VS Code theme adaptations */
+      :host-context(.vscode-dark) .hieroglyph-input {
+        @apply bg-hieroglyph-800 border-hieroglyph-600
              text-papyrus-100 placeholder-hieroglyph-400;
-    }
+      }
 
-    :host-context(.vscode-light) .hieroglyph-input {
-      @apply bg-white border-papyrus-200
+      :host-context(.vscode-light) .hieroglyph-input {
+        @apply bg-white border-papyrus-200
              text-hieroglyph-800 placeholder-hieroglyph-500;
-    }
+      }
 
-    :host-context(.vscode-high-contrast) .hieroglyph-input {
-      @apply bg-black border-white text-white;
-    }
-  `],
+      :host-context(.vscode-high-contrast) .hieroglyph-input {
+        @apply bg-black border-white text-white;
+      }
+    `,
+  ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => EgyptianInputComponent),
-      multi: true
-    }
-  ]
+      multi: true,
+    },
+  ],
 })
 export class EgyptianInputComponent implements ControlValueAccessor {
   @Input() label?: string;
@@ -129,13 +136,13 @@ export class EgyptianInputComponent implements ControlValueAccessor {
   @Input() errorMessage?: string;
   @Input() helpText?: string;
   @Input() inputId: string = 'input-' + Math.random().toString(36).substring(2);
-  @Input() multiline: boolean = false;  // Support textarea mode
-  @Input() rows: number = 1;  // Support custom rows
+  @Input() multiline: boolean = false; // Support textarea mode
+  @Input() rows: number = 1; // Support custom rows
 
   @Output() inputChange = new EventEmitter<string>();
   @Output() focused = new EventEmitter<void>();
   @Output() blurred = new EventEmitter<void>();
-  @Output() keyDown = new EventEmitter<KeyboardEvent>();  // Add keydown event
+  @Output() keyDown = new EventEmitter<KeyboardEvent>(); // Add keydown event
 
   value: string = '';
   private onChange = (value: string) => {};

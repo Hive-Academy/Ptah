@@ -9,13 +9,13 @@ import { EgyptianInputComponent } from './components/egyptian-input.component';
 import { LoadingSpinnerComponent } from './components/loading-spinner.component';
 
 // New Egyptian Accent Directives (Material-based)
-export { 
+export {
   EgyptianButtonDirective,
   EgyptianInputDirective,
   EgyptianCardDirective,
   EgyptianIconDirective,
   EgyptianSpinnerDirective,
-  EGYPTIAN_DIRECTIVES
+  EGYPTIAN_DIRECTIVES,
 } from './directives/egyptian-accents.directive';
 
 // Material Module
@@ -32,14 +32,11 @@ export const SHARED_COMPONENTS = [
   EgyptianButtonComponent,
   EgyptianCardComponent,
   EgyptianInputComponent,
-  LoadingSpinnerComponent
+  LoadingSpinnerComponent,
 ] as const;
 
 // New Material-based component imports (preferred)
-export const MATERIAL_EGYPTIAN_IMPORTS = [
-  ...MATERIAL_IMPORTS,
-  ...EGYPTIAN_DIRECTIVES
-] as const;
+export const MATERIAL_EGYPTIAN_IMPORTS = [...MATERIAL_IMPORTS, ...EGYPTIAN_DIRECTIVES] as const;
 
 // Export shared types
 export interface EgyptianTheme {

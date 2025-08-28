@@ -7,7 +7,7 @@ let ptahExtension: PtahExtension | undefined;
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   try {
     Logger.info('Activating Ptah extension...');
-    
+
     // Initialize main extension controller
     ptahExtension = new PtahExtension(context);
     await ptahExtension.initialize();
@@ -16,7 +16,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await ptahExtension.registerAll();
 
     Logger.info('Ptah extension activated successfully');
-    
+
     // Show welcome message for first-time users
     const isFirstTime = context.globalState.get('ptah.firstActivation', true);
     if (isFirstTime) {
@@ -25,7 +25,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   } catch (error) {
     Logger.error('Failed to activate Ptah extension', error);
-    vscode.window.showErrorMessage(`Ptah activation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    vscode.window.showErrorMessage(
+      `Ptah activation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 

@@ -1,20 +1,38 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
-import { StrictMessageType, MessagePayloadMap, MessageResponse, CommandsGetTemplatesPayload, CommandsExecuteCommandPayload, CommandsSelectFilePayload, CommandsSaveTemplatePayload } from '../../types/message.types';
+import {
+  BaseWebviewMessageHandler,
+  StrictPostMessageFunction,
+  IWebviewMessageHandler,
+} from './base-message-handler';
+import {
+  StrictMessageType,
+  MessagePayloadMap,
+  MessageResponse,
+  CommandsGetTemplatesPayload,
+  CommandsExecuteCommandPayload,
+  CommandsSelectFilePayload,
+  CommandsSaveTemplatePayload,
+} from '../../types/message.types';
 import { CorrelationId } from '../../types/branded.types';
 import { CommandBuilderService } from '../command-builder.service';
 
 /**
  * Command Message Types - Strict type definition
  */
-type CommandMessageTypes = 'commands:getTemplates' | 'commands:executeCommand' | 'commands:selectFile' | 'commands:saveTemplate';
+type CommandMessageTypes =
+  | 'commands:getTemplates'
+  | 'commands:executeCommand'
+  | 'commands:selectFile'
+  | 'commands:saveTemplate';
 
 /**
  * CommandMessageHandler - Single Responsibility: Handle command builder related messages
  */
-export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMessageTypes> 
-  implements IWebviewMessageHandler<CommandMessageTypes> {
+export class CommandMessageHandler
+  extends BaseWebviewMessageHandler<CommandMessageTypes>
+  implements IWebviewMessageHandler<CommandMessageTypes>
+{
   readonly messageType = 'commands:';
 
   constructor(
@@ -24,7 +42,10 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
     super(postMessage);
   }
 
-  async handle<K extends CommandMessageTypes>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse> {
+  async handle<K extends CommandMessageTypes>(
+    messageType: K,
+    payload: MessagePayloadMap[K]
+  ): Promise<MessageResponse> {
     try {
       switch (messageType) {
         case 'commands:getTemplates':
@@ -45,13 +66,13 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         success: false,
         error: {
           code: 'COMMAND_HANDLER_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -68,8 +89,8 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to get templates';
@@ -79,22 +100,24 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         success: false,
         error: {
           code: 'GET_TEMPLATES_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
 
-  private async handleExecuteCommand(data: CommandsExecuteCommandPayload): Promise<MessageResponse> {
+  private async handleExecuteCommand(
+    data: CommandsExecuteCommandPayload
+  ): Promise<MessageResponse> {
     try {
       // Track usage for analytics
       await this.commandBuilderService.trackCommandUsage(data.templateId);
-      
+
       const template = await this.commandBuilderService.getTemplate(data.templateId);
       if (!template) {
         throw new Error(`Template ${data.templateId} not found`);
@@ -105,15 +128,15 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
       for (const [key, value] of Object.entries(data.parameters)) {
         command = command.replace(`{{${key}}}`, String(value));
       }
-      
+
       const result = {
         success: true,
         command,
         template,
         parameters: data.parameters,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-      
+
       this.sendSuccessResponse('commands:executeResult', { result });
       return {
         requestId: CorrelationId.create(),
@@ -122,8 +145,8 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Execution failed';
@@ -133,13 +156,13 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         success: false,
         error: {
           code: 'COMMAND_EXECUTION_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -150,16 +173,16 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         canSelectMany: data.multiple || false,
         canSelectFiles: true,
         canSelectFolders: false,
-        openLabel: 'Select File(s)'
+        openLabel: 'Select File(s)',
       };
 
       const result = await vscode.window.showOpenDialog(options);
       if (result) {
-        const files = result.map(uri => ({
+        const files = result.map((uri) => ({
           path: uri.fsPath,
-          name: path.basename(uri.fsPath)
+          name: path.basename(uri.fsPath),
         }));
-        
+
         this.sendSuccessResponse('commands:fileSelected', { files });
         return {
           requestId: CorrelationId.create(),
@@ -168,8 +191,8 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
           metadata: {
             timestamp: Date.now(),
             source: 'extension',
-            version: '1.0.0'
-          }
+            version: '1.0.0',
+          },
         };
       } else {
         return {
@@ -179,8 +202,8 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
           metadata: {
             timestamp: Date.now(),
             source: 'extension',
-            version: '1.0.0'
-          }
+            version: '1.0.0',
+          },
         };
       }
     } catch (error) {
@@ -191,13 +214,13 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         success: false,
         error: {
           code: 'FILE_SELECT_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -214,8 +237,8 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save template';
@@ -225,13 +248,13 @@ export class CommandMessageHandler extends BaseWebviewMessageHandler<CommandMess
         success: false,
         error: {
           code: 'TEMPLATE_SAVE_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }

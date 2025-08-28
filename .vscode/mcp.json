@@ -1,6 +1,5 @@
 {
   "servers": {
-
     "angular-cli": {
       "command": "cmd.exe",
       "args": ["/c", "npx", "-y", "@angular/cli", "mcp"]
@@ -21,7 +20,6 @@
       ]
     },
 
-    
     "filesystem": {
       "command": "cmd.exe",
       "args": [
@@ -32,7 +30,6 @@
         "D:\\projects"
       ]
     },
-
 
     "anubis": {
       "command": "npx",

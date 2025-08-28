@@ -5,14 +5,14 @@ import { ClaudeCliService } from '../services/claude-cli.service';
 import { ContextManager } from '../services/context-manager';
 import { CommandBuilderService } from '../services/command-builder.service';
 import { WebviewHtmlGenerator } from '../services/webview-html-generator';
-import { 
+import {
   WebviewMessageRouter,
   ChatMessageHandler,
   CommandMessageHandler,
   ContextMessageHandler,
   AnalyticsMessageHandler,
   StateMessageHandler,
-  ViewMessageHandler
+  ViewMessageHandler,
 } from '../services/webview-message-handlers';
 import { Logger } from '../core/logger';
 import { WebviewMessage, isSystemMessage, isRoutableMessage } from '../types/message.types';
@@ -59,10 +59,22 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
     const postMessageFn = this.postMessage.bind(this);
 
     // Register all message handlers with explicit type casting for compatibility
-    this.messageRouter.registerHandler(new ChatMessageHandler(postMessageFn, this.sessionManager, this.claudeService) as any);
-    this.messageRouter.registerHandler(new CommandMessageHandler(postMessageFn, this.commandBuilderService) as any);
-    this.messageRouter.registerHandler(new ContextMessageHandler(postMessageFn, this.contextManager) as any);
-    this.messageRouter.registerHandler(new AnalyticsMessageHandler(postMessageFn, this.sessionManager, this.commandBuilderService) as any);
+    this.messageRouter.registerHandler(
+      new ChatMessageHandler(postMessageFn, this.sessionManager, this.claudeService) as any
+    );
+    this.messageRouter.registerHandler(
+      new CommandMessageHandler(postMessageFn, this.commandBuilderService) as any
+    );
+    this.messageRouter.registerHandler(
+      new ContextMessageHandler(postMessageFn, this.contextManager) as any
+    );
+    this.messageRouter.registerHandler(
+      new AnalyticsMessageHandler(
+        postMessageFn,
+        this.sessionManager,
+        this.commandBuilderService
+      ) as any
+    );
     this.messageRouter.registerHandler(new StateMessageHandler(postMessageFn, this.context) as any);
     this.messageRouter.registerHandler(new ViewMessageHandler(postMessageFn) as any);
 
@@ -82,13 +94,16 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [
         vscode.Uri.joinPath(this.context.extensionUri, 'out', 'webview', 'browser'),
         vscode.Uri.joinPath(this.context.extensionUri, 'media'),
-        vscode.Uri.joinPath(this.context.extensionUri, 'out')
-      ]
+        vscode.Uri.joinPath(this.context.extensionUri, 'out'),
+      ],
     };
 
     // Set Angular HTML content using dedicated generator
     const workspaceInfo = this.getWorkspaceInfo();
-    webviewView.webview.html = this.htmlGenerator.generateAngularWebviewContent(webviewView.webview, workspaceInfo);
+    webviewView.webview.html = this.htmlGenerator.generateAngularWebviewContent(
+      webviewView.webview,
+      workspaceInfo
+    );
 
     // Handle messages using the router
     webviewView.webview.onDidReceiveMessage(
@@ -130,14 +145,17 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
         localResourceRoots: [
           vscode.Uri.joinPath(this.context.extensionUri, 'out', 'webview'),
           vscode.Uri.joinPath(this.context.extensionUri, 'media'),
-          vscode.Uri.joinPath(this.context.extensionUri, 'out')
-        ]
+          vscode.Uri.joinPath(this.context.extensionUri, 'out'),
+        ],
       }
     );
 
     const workspaceInfo = this.getWorkspaceInfo();
-    this._panel.webview.html = this.htmlGenerator.generateAngularWebviewContent(this._panel.webview, workspaceInfo);
-    
+    this._panel.webview.html = this.htmlGenerator.generateAngularWebviewContent(
+      this._panel.webview,
+      workspaceInfo
+    );
+
     // Handle messages from Angular app
     this._panel.webview.onDidReceiveMessage(
       this.handleWebviewMessage.bind(this),
@@ -146,9 +164,13 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
     );
 
     // Handle panel disposal
-    this._panel.onDidDispose(() => {
-      this._panel = undefined;
-    }, undefined, this._disposables);
+    this._panel.onDidDispose(
+      () => {
+        this._panel = undefined;
+      },
+      undefined,
+      this._disposables
+    );
 
     // Send initial data
     this.sendInitialData(this._panel.webview);
@@ -160,7 +182,7 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
   public switchView(viewType: 'chat' | 'command-builder' | 'analytics'): void {
     this.postMessage({
       type: 'navigate',
-      payload: { route: `/${viewType}` }
+      payload: { route: `/${viewType}` },
     });
   }
 
@@ -196,15 +218,14 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
         // System message already handled above, log if unrecognized
         Logger.warn(`Unrecognized system message type: ${message.type}`);
       }
-
     } catch (error) {
       Logger.error('Error handling webview message:', error);
       this.postMessage({
         type: 'error',
-        payload: { 
+        payload: {
           message: error instanceof Error ? error.message : 'Unknown error',
-          source: message.type 
-        }
+          source: message.type,
+        },
       });
     }
   }
@@ -230,8 +251,8 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
           workspaceInfo,
           theme: vscode.window.activeColorTheme.kind,
           isVSCode: true,
-          extensionVersion: this.context.extension.packageJSON.version
-        }
+          extensionVersion: this.context.extension.packageJSON.version,
+        },
       };
 
       target.postMessage(initialData);
@@ -263,7 +284,7 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
     return {
       name: workspaceFolders[0].name,
       path: workspaceFolders[0].uri.fsPath,
-      projectType: this.detectProjectType(workspaceFolders[0].uri.fsPath)
+      projectType: this.detectProjectType(workspaceFolders[0].uri.fsPath),
     };
   }
 
@@ -289,7 +310,7 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
    */
   dispose(): void {
     Logger.info('Disposing Angular Webview Provider...');
-    this._disposables.forEach(d => d.dispose());
+    this._disposables.forEach((d) => d.dispose());
     this._disposables = [];
   }
 }

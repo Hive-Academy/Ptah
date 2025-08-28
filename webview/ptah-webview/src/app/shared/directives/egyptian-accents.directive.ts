@@ -7,7 +7,7 @@ import {
   inject,
   computed,
   effect,
-  Renderer2
+  Renderer2,
 } from '@angular/core';
 import { EgyptianThemeService } from '../../core/services/egyptian-theme.service';
 
@@ -17,7 +17,7 @@ import { EgyptianThemeService } from '../../core/services/egyptian-theme.service
  */
 @Directive({
   selector: '[egyptianButton]',
-  standalone: true
+  standalone: true,
 })
 export class EgyptianButtonDirective implements OnInit, OnDestroy {
   @Input() egyptianButton = 'default';
@@ -34,7 +34,7 @@ export class EgyptianButtonDirective implements OnInit, OnDestroy {
       'egyptian-btn',
       `egyptian-btn-${this.egyptianButton}`,
       `egyptian-btn-${this.egyptianSize}`,
-      `egyptian-btn-theme-${theme}`
+      `egyptian-btn-theme-${theme}`,
     ];
 
     // Add glow effect for accent and sacred variants
@@ -58,18 +58,14 @@ export class EgyptianButtonDirective implements OnInit, OnDestroy {
     });
 
     // Add new classes
-    classes.forEach(cls => {
+    classes.forEach((cls) => {
       this.renderer.addClass(this.el.nativeElement, cls);
     });
 
     // Apply theme-specific custom properties
     const colors = this.themeService.themeColors();
     if (this.egyptianButton === 'accent' || this.egyptianButton === 'sacred') {
-      this.renderer.setStyle(
-        this.el.nativeElement,
-        '--egyptian-glow-color',
-        colors.egyptianGlow
-      );
+      this.renderer.setStyle(this.el.nativeElement, '--egyptian-glow-color', colors.egyptianGlow);
     }
   });
 
@@ -95,7 +91,7 @@ export class EgyptianButtonDirective implements OnInit, OnDestroy {
  */
 @Directive({
   selector: '[egyptianInput]',
-  standalone: true
+  standalone: true,
 })
 export class EgyptianInputDirective implements OnInit, OnDestroy {
   @Input() egyptianInput = 'default';
@@ -111,7 +107,7 @@ export class EgyptianInputDirective implements OnInit, OnDestroy {
     const baseClasses = [
       'egyptian-input',
       `egyptian-input-${this.egyptianInput}`,
-      `egyptian-input-theme-${theme}`
+      `egyptian-input-theme-${theme}`,
     ];
 
     // Add glow effect when enabled or for certain variants
@@ -135,22 +131,14 @@ export class EgyptianInputDirective implements OnInit, OnDestroy {
     });
 
     // Add new classes
-    classes.forEach(cls => {
+    classes.forEach((cls) => {
       this.renderer.addClass(this.el.nativeElement, cls);
     });
 
     // Apply theme-specific glow color
     const colors = this.themeService.themeColors();
-    this.renderer.setStyle(
-      this.el.nativeElement,
-      '--egyptian-glow-color',
-      colors.egyptianGlow
-    );
-    this.renderer.setStyle(
-      this.el.nativeElement,
-      '--egyptian-accent-color',
-      colors.egyptianAccent
-    );
+    this.renderer.setStyle(this.el.nativeElement, '--egyptian-glow-color', colors.egyptianGlow);
+    this.renderer.setStyle(this.el.nativeElement, '--egyptian-accent-color', colors.egyptianAccent);
   });
 
   ngOnInit(): void {
@@ -164,8 +152,9 @@ export class EgyptianInputDirective implements OnInit, OnDestroy {
   }
 
   private setupFocusGlow(): void {
-    const inputElement = this.el.nativeElement.querySelector('input') ||
-                        this.el.nativeElement.querySelector('textarea');
+    const inputElement =
+      this.el.nativeElement.querySelector('input') ||
+      this.el.nativeElement.querySelector('textarea');
 
     if (inputElement) {
       this.renderer.listen(inputElement, 'focus', () => {
@@ -185,7 +174,7 @@ export class EgyptianInputDirective implements OnInit, OnDestroy {
  */
 @Directive({
   selector: '[egyptianCard]',
-  standalone: true
+  standalone: true,
 })
 export class EgyptianCardDirective implements OnInit, OnDestroy {
   @Input() egyptianCard = 'default';
@@ -201,7 +190,7 @@ export class EgyptianCardDirective implements OnInit, OnDestroy {
     const baseClasses = [
       'egyptian-card',
       `egyptian-card-${this.egyptianCard}`,
-      `egyptian-card-theme-${theme}`
+      `egyptian-card-theme-${theme}`,
     ];
 
     // Add elevation classes
@@ -234,17 +223,13 @@ export class EgyptianCardDirective implements OnInit, OnDestroy {
     });
 
     // Add new classes
-    classes.forEach(cls => {
+    classes.forEach((cls) => {
       this.renderer.addClass(this.el.nativeElement, cls);
     });
 
     // Apply theme colors
     const colors = this.themeService.themeColors();
-    this.renderer.setStyle(
-      this.el.nativeElement,
-      '--egyptian-accent-color',
-      colors.egyptianAccent
-    );
+    this.renderer.setStyle(this.el.nativeElement, '--egyptian-accent-color', colors.egyptianAccent);
   });
 
   ngOnInit(): void {
@@ -268,7 +253,7 @@ export class EgyptianCardDirective implements OnInit, OnDestroy {
  */
 @Directive({
   selector: '[egyptianIcon]',
-  standalone: true
+  standalone: true,
 })
 export class EgyptianIconDirective implements OnInit, OnDestroy {
   @Input() egyptianIcon = 'default';
@@ -284,7 +269,7 @@ export class EgyptianIconDirective implements OnInit, OnDestroy {
     const baseClasses = [
       'egyptian-icon',
       `egyptian-icon-${this.egyptianIcon}`,
-      `egyptian-icon-theme-${theme}`
+      `egyptian-icon-theme-${theme}`,
     ];
 
     // Add glow for accent icons
@@ -308,17 +293,13 @@ export class EgyptianIconDirective implements OnInit, OnDestroy {
     });
 
     // Add new classes
-    classes.forEach(cls => {
+    classes.forEach((cls) => {
       this.renderer.addClass(this.el.nativeElement, cls);
     });
 
     // Apply theme colors
     const colors = this.themeService.themeColors();
-    this.renderer.setStyle(
-      this.el.nativeElement,
-      '--egyptian-icon-color',
-      colors.egyptianAccent
-    );
+    this.renderer.setStyle(this.el.nativeElement, '--egyptian-icon-color', colors.egyptianAccent);
   });
 
   ngOnInit(): void {
@@ -336,7 +317,7 @@ export class EgyptianIconDirective implements OnInit, OnDestroy {
  */
 @Directive({
   selector: '[egyptianSpinner]',
-  standalone: true
+  standalone: true,
 })
 export class EgyptianSpinnerDirective implements OnInit, OnDestroy {
   @Input() egyptianSpinner = 'default';
@@ -351,7 +332,7 @@ export class EgyptianSpinnerDirective implements OnInit, OnDestroy {
     const baseClasses = [
       'egyptian-spinner',
       `egyptian-spinner-${this.egyptianSpinner}`,
-      `egyptian-spinner-theme-${theme}`
+      `egyptian-spinner-theme-${theme}`,
     ];
 
     // Add golden glow for accent spinners
@@ -375,7 +356,7 @@ export class EgyptianSpinnerDirective implements OnInit, OnDestroy {
     });
 
     // Add new classes
-    classes.forEach(cls => {
+    classes.forEach((cls) => {
       this.renderer.addClass(this.el.nativeElement, cls);
     });
 
@@ -384,12 +365,16 @@ export class EgyptianSpinnerDirective implements OnInit, OnDestroy {
     this.renderer.setStyle(
       this.el.nativeElement,
       '--egyptian-spinner-color',
-      colors.egyptianAccent
+      colors.egyptianAccent,
     );
   });
 
   ngOnInit(): void {
-    this.renderer.setAttribute(this.el.nativeElement, 'data-egyptian-spinner', this.egyptianSpinner);
+    this.renderer.setAttribute(
+      this.el.nativeElement,
+      'data-egyptian-spinner',
+      this.egyptianSpinner,
+    );
 
     // Ensure accessibility for screen readers
     const existingAriaLabel = this.el.nativeElement.getAttribute('aria-label');
@@ -412,5 +397,5 @@ export const EGYPTIAN_DIRECTIVES = [
   EgyptianInputDirective,
   EgyptianCardDirective,
   EgyptianIconDirective,
-  EgyptianSpinnerDirective
+  EgyptianSpinnerDirective,
 ] as const;

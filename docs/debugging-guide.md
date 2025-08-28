@@ -43,21 +43,17 @@ Our `.vscode/launch.json` is already configured:
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Run Extension",
-            "type": "extensionHost",
-            "request": "launch",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/out/**/*.js"
-            ],
-            "preLaunchTask": "${workspaceFolder}/npm: compile"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "preLaunchTask": "${workspaceFolder}/npm: compile"
+    }
+  ]
 }
 ```
 
@@ -128,14 +124,12 @@ Logger.error('Debug: Error occurred', error);
 ```json
 // In launch.json, add version property
 {
-    "name": "Run Extension (Insiders)",
-    "type": "extensionHost",
-    "request": "launch",
-    "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}"
-    ],
-    "outFiles": ["${workspaceFolder}/out/**/*.js"],
-    "version": "insiders"  // or "stable"
+  "name": "Run Extension (Insiders)",
+  "type": "extensionHost",
+  "request": "launch",
+  "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+  "outFiles": ["${workspaceFolder}/out/**/*.js"],
+  "version": "insiders" // or "stable"
 }
 ```
 
@@ -173,8 +167,8 @@ module.exports = defineConfig({
   workspaceFolder: './test-workspace',
   mocha: {
     ui: 'tdd',
-    timeout: 20000
-  }
+    timeout: 20000,
+  },
 });
 ```
 

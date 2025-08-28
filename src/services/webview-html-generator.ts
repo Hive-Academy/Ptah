@@ -40,7 +40,7 @@ export class WebviewHtmlGenerator {
 
     // Read the actual Angular-generated index.html
     const indexPath = path.join(appDistPath, 'index.html');
-    
+
     if (!fs.existsSync(indexPath)) {
       throw new Error(`Angular index.html not found at ${indexPath}`);
     }
@@ -48,15 +48,12 @@ export class WebviewHtmlGenerator {
     let indexHtml = fs.readFileSync(indexPath, { encoding: 'utf8' });
 
     // RESEARCH FINDING: Update base URI - this is the key fix for asset loading
-    indexHtml = indexHtml.replace(
-      '<base href="/">',
-      `<base href="${String(baseUri)}/">`
-    );
+    indexHtml = indexHtml.replace('<base href="/">', `<base href="${String(baseUri)}/">`);
 
     // IMPROVED CSP: Fix Google Fonts and add proper nonce support
     const nonce = this.generateNonce();
     const cspContent = this.getImprovedCSP(webview, nonce);
-    
+
     // Add CSP meta tag after charset
     indexHtml = indexHtml.replace(
       '<meta charset="utf-8">',
@@ -177,11 +174,16 @@ export class WebviewHtmlGenerator {
   }
 
   private getAssetUris(webview: vscode.Webview) {
-    const angularDistPath = vscode.Uri.joinPath(this.context.extensionUri, 'out', 'webview', 'browser');
-    
+    const angularDistPath = vscode.Uri.joinPath(
+      this.context.extensionUri,
+      'out',
+      'webview',
+      'browser'
+    );
+
     return {
       scriptUri: webview.asWebviewUri(vscode.Uri.joinPath(angularDistPath, 'main.js')),
-      stylesUri: webview.asWebviewUri(vscode.Uri.joinPath(angularDistPath, 'styles.css'))
+      stylesUri: webview.asWebviewUri(vscode.Uri.joinPath(angularDistPath, 'styles.css')),
     };
   }
 

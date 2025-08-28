@@ -1,13 +1,9 @@
-
 <!-- Streamlined Full-Screen App -->
 <main class="h-screen w-full overflow-hidden">
   <!-- Loading State -->
   @if (appState.isLoading() || isInitializing()) {
     <div class="h-full flex items-center justify-center vscode-bg">
-      <app-loading-spinner
-        size="lg"
-        [message]="appState.statusMessage()">
-      </app-loading-spinner>
+      <app-loading-spinner size="lg" [message]="appState.statusMessage()"> </app-loading-spinner>
     </div>
   }
 
@@ -31,7 +27,9 @@
     <div class="h-full flex items-center justify-center vscode-bg">
       <div class="text-center text-red-500">
         <h3 class="text-lg font-semibold mb-2">Initialization Error</h3>
-        <p class="vscode-description">Failed to initialize the application. Please try refreshing.</p>
+        <p class="vscode-description">
+          Failed to initialize the application. Please try refreshing.
+        </p>
       </div>
     </div>
   }

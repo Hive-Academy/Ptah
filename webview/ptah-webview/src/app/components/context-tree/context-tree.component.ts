@@ -5,13 +5,17 @@ import {
   signal,
   computed,
   inject,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
 import { VSCodeService } from '../../core/services/vscode.service';
 import { AppStateManager } from '../../core/services/app-state.service';
-import { EgyptianCardComponent, EgyptianButtonComponent, LoadingSpinnerComponent } from '../../shared';
+import {
+  EgyptianCardComponent,
+  EgyptianButtonComponent,
+  LoadingSpinnerComponent,
+} from '../../shared';
 
 // Context Tree specific types
 export interface FileTreeNode {
@@ -47,92 +51,89 @@ export interface TokenWarning {
 @Component({
   selector: 'app-context-tree',
   standalone: true,
-  imports: [
-    CommonModule,
-    EgyptianCardComponent,
-    EgyptianButtonComponent,
-    LoadingSpinnerComponent
-  ],
+  imports: [CommonModule, EgyptianCardComponent, EgyptianButtonComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './context-tree.component.html',
-  styles: [`
-    .context-tree-container {
-      @apply min-h-full;
-    }
-
-    .token-usage-bar .bg-green-500 {
-      background-color: #10b981;
-    }
-
-    .token-usage-bar .bg-yellow-500 {
-      background-color: #f59e0b;
-    }
-
-    .token-usage-bar .bg-red-500 {
-      background-color: #ef4444;
-    }
-
-    .file-node:hover .context-menu-trigger {
-      @apply opacity-100;
-    }
-
-    .file-node.selected {
-      @apply bg-papyrus-200;
-    }
-
-    .inclusion-toggle.included {
-      @apply border-ankh-500 bg-ankh-500 text-white;
-    }
-
-    .inclusion-toggle.excluded {
-      @apply border-red-500 bg-red-50 text-red-500;
-    }
-
-    .inclusion-toggle.default {
-      @apply border-papyrus-300 bg-white text-hieroglyph-400 hover:border-papyrus-400;
-    }
-
-    .context-menu {
-      @apply transition-all duration-200;
-      animation: fadeInZoom 0.2s ease-out;
-    }
-
-    @keyframes fadeInZoom {
-      from {
-        opacity: 0;
-        transform: scale(0.95);
+  styles: [
+    `
+      .context-tree-container {
+        @apply min-h-full;
       }
-      to {
-        opacity: 1;
-        transform: scale(1);
+
+      .token-usage-bar .bg-green-500 {
+        background-color: #10b981;
       }
-    }
 
-    /* VS Code theme adaptations */
-    :host-context(.vscode-dark) .context-menu {
-      @apply bg-hieroglyph-800 border-hieroglyph-600 text-papyrus-100;
-    }
+      .token-usage-bar .bg-yellow-500 {
+        background-color: #f59e0b;
+      }
 
-    :host-context(.vscode-dark) .file-node.selected {
-      @apply bg-hieroglyph-700;
-    }
+      .token-usage-bar .bg-red-500 {
+        background-color: #ef4444;
+      }
 
-    :host-context(.vscode-dark) .node-content:hover {
-      @apply bg-hieroglyph-700;
-    }
+      .file-node:hover .context-menu-trigger {
+        @apply opacity-100;
+      }
 
-    :host-context(.vscode-dark) .menu-item:hover {
-      @apply bg-hieroglyph-700;
-    }
+      .file-node.selected {
+        @apply bg-papyrus-200;
+      }
 
-    :host-context(.vscode-high-contrast) .context-menu {
-      @apply bg-black border-white text-white;
-    }
+      .inclusion-toggle.included {
+        @apply border-ankh-500 bg-ankh-500 text-white;
+      }
 
-    :host-context(.vscode-high-contrast) .inclusion-toggle {
-      @apply border-white;
-    }
-  `]
+      .inclusion-toggle.excluded {
+        @apply border-red-500 bg-red-50 text-red-500;
+      }
+
+      .inclusion-toggle.default {
+        @apply border-papyrus-300 bg-white text-hieroglyph-400 hover:border-papyrus-400;
+      }
+
+      .context-menu {
+        @apply transition-all duration-200;
+        animation: fadeInZoom 0.2s ease-out;
+      }
+
+      @keyframes fadeInZoom {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* VS Code theme adaptations */
+      :host-context(.vscode-dark) .context-menu {
+        @apply bg-hieroglyph-800 border-hieroglyph-600 text-papyrus-100;
+      }
+
+      :host-context(.vscode-dark) .file-node.selected {
+        @apply bg-hieroglyph-700;
+      }
+
+      :host-context(.vscode-dark) .node-content:hover {
+        @apply bg-hieroglyph-700;
+      }
+
+      :host-context(.vscode-dark) .menu-item:hover {
+        @apply bg-hieroglyph-700;
+      }
+
+      :host-context(.vscode-high-contrast) .context-menu {
+        @apply bg-black border-white text-white;
+      }
+
+      :host-context(.vscode-high-contrast) .inclusion-toggle {
+        @apply border-white;
+      }
+    `,
+  ],
 })
 export class ContextTreeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -148,7 +149,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     maxTokens: 200000,
     isLoading: false,
     selectedFiles: new Set(),
-    expandedFolders: new Set()
+    expandedFolders: new Set(),
   });
 
   private _contextMenuFile = signal<FileTreeNode | null>(null);
@@ -168,12 +169,12 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
   readonly contextMenuPosition = computed(() => this._contextMenuPosition());
 
   // Computed values for UI
-  readonly includedFilesCount = computed(() =>
-    this.files().filter(f => f.type === 'file' && f.isIncluded).length
+  readonly includedFilesCount = computed(
+    () => this.files().filter((f) => f.type === 'file' && f.isIncluded).length,
   );
 
   readonly tokenUsagePercentage = computed(() =>
-    Math.min(100, (this.currentTokens() / this.maxTokens()) * 100)
+    Math.min(100, (this.currentTokens() / this.maxTokens()) * 100),
   );
 
   readonly tokenUsageBarClass = computed(() => {
@@ -192,7 +193,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
       return {
         level: 'error',
         message: `Critical: ${current} tokens (${percentage.toFixed(1)}% of limit)`,
-        suggestion: 'Exclude some files to avoid hitting the token limit'
+        suggestion: 'Exclude some files to avoid hitting the token limit',
       };
     }
 
@@ -200,7 +201,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
       return {
         level: 'warning',
         message: `High usage: ${current} tokens (${percentage.toFixed(1)}% of limit)`,
-        suggestion: 'Consider excluding test files or build artifacts'
+        suggestion: 'Consider excluding test files or build artifacts',
       };
     }
 
@@ -208,7 +209,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
       return {
         level: 'info',
         message: `Moderate usage: ${current} tokens (${percentage.toFixed(1)}% of limit)`,
-        suggestion: 'Token usage is within normal range'
+        suggestion: 'Token usage is within normal range',
       };
     }
 
@@ -220,10 +221,14 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     if (!warning) return '';
 
     switch (warning.level) {
-      case 'error': return 'bg-red-100 text-red-800 border border-red-300';
-      case 'warning': return 'bg-yellow-100 text-yellow-800 border border-yellow-300';
-      case 'info': return 'bg-blue-100 text-blue-800 border border-blue-300';
-      default: return '';
+      case 'error':
+        return 'bg-red-100 text-red-800 border border-red-300';
+      case 'warning':
+        return 'bg-yellow-100 text-yellow-800 border border-yellow-300';
+      case 'info':
+        return 'bg-blue-100 text-blue-800 border border-blue-300';
+      default:
+        return '';
     }
   });
 
@@ -254,28 +259,32 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
 
   private setupMessageListeners(): void {
     // Listen for context updates from extension
-    this.vscodeService.onMessageType('context:filesLoaded')
+    this.vscodeService
+      .onMessageType('context:filesLoaded')
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         console.log('Context files loaded:', data);
         this.handleContextFilesLoaded(data);
       });
 
-    this.vscodeService.onMessageType('context:fileIncluded')
+    this.vscodeService
+      .onMessageType('context:fileIncluded')
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         console.log('File included:', data);
         this.handleFileIncluded(data.filePath);
       });
 
-    this.vscodeService.onMessageType('context:fileExcluded')
+    this.vscodeService
+      .onMessageType('context:fileExcluded')
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         console.log('File excluded:', data);
         this.handleFileExcluded(data.filePath);
       });
 
-    this.vscodeService.onMessageType('context:error')
+    this.vscodeService
+      .onMessageType('context:error')
       .pipe(takeUntil(this.destroy$))
       .subscribe((data) => {
         console.error('Context error:', data);
@@ -297,7 +306,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
 
   clearAll(): void {
     console.log('ContextTreeComponent: Clearing all included files...');
-    const includedFiles = this.files().filter(f => f.type === 'file' && f.isIncluded);
+    const includedFiles = this.files().filter((f) => f.type === 'file' && f.isIncluded);
 
     for (const file of includedFiles) {
       this.vscodeService.excludeFile(file.path);
@@ -363,8 +372,8 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     if (file && file.type === 'directory') {
       // Find all files in this directory and include them
       const allFiles = this.flattenTree(this.files());
-      const directoryFiles = allFiles.filter(f =>
-        f.type === 'file' && f.path.startsWith(file.path + '/')
+      const directoryFiles = allFiles.filter(
+        (f) => f.type === 'file' && f.path.startsWith(file.path + '/'),
       );
 
       for (const dirFile of directoryFiles) {
@@ -381,8 +390,8 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     if (file && file.type === 'directory') {
       // Find all files in this directory and exclude them
       const allFiles = this.flattenTree(this.files());
-      const directoryFiles = allFiles.filter(f =>
-        f.type === 'file' && f.path.startsWith(file.path + '/')
+      const directoryFiles = allFiles.filter(
+        (f) => f.type === 'file' && f.path.startsWith(file.path + '/'),
       );
 
       for (const dirFile of directoryFiles) {
@@ -426,7 +435,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
         files: treeFiles,
         totalTokens: data.context?.tokenEstimate || 0,
         isLoading: false,
-        error: undefined
+        error: undefined,
       });
     } else {
       this.handleContextError('Invalid file data received from extension');
@@ -444,7 +453,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
   private handleContextError(message: string): void {
     this.updateContextState({
       isLoading: false,
-      error: message
+      error: message,
     });
   }
 
@@ -453,7 +462,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
   }
 
   private updateContextState(updates: Partial<ContextTreeState>): void {
-    this._contextState.update(state => ({ ...state, ...updates }));
+    this._contextState.update((state) => ({ ...state, ...updates }));
   }
 
   private updateExpandedFolders(expanded: Set<string>): void {
@@ -461,8 +470,8 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
   }
 
   private updateFileInclusion(filePath: string, isIncluded: boolean, isExcluded: boolean): void {
-    const files = this.files().map(file =>
-      this.updateFileInclusionRecursive(file, filePath, isIncluded, isExcluded)
+    const files = this.files().map((file) =>
+      this.updateFileInclusionRecursive(file, filePath, isIncluded, isExcluded),
     );
 
     // Recalculate total tokens
@@ -475,7 +484,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     file: FileTreeNode,
     targetPath: string,
     isIncluded: boolean,
-    isExcluded: boolean
+    isExcluded: boolean,
   ): FileTreeNode {
     if (file.path === targetPath) {
       return { ...file, isIncluded, isExcluded };
@@ -484,9 +493,9 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     if (file.children) {
       return {
         ...file,
-        children: file.children.map(child =>
-          this.updateFileInclusionRecursive(child, targetPath, isIncluded, isExcluded)
-        )
+        children: file.children.map((child) =>
+          this.updateFileInclusionRecursive(child, targetPath, isIncluded, isExcluded),
+        ),
       };
     }
 
@@ -541,7 +550,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
             isExcluded: isFile ? (context.excludedFiles || []).includes(currentPath) : false,
             children: isFile ? undefined : [],
             isExpanded: false,
-            depth: i
+            depth: i,
           };
 
           fileMap.set(currentPath, node);
@@ -566,10 +575,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     const addToResult = (file: FileTreeNode) => {
       result.push(file);
 
-      if (file.type === 'directory' &&
-          file.children &&
-          this.expandedFolders().has(file.path)) {
-
+      if (file.type === 'directory' && file.children && this.expandedFolders().has(file.path)) {
         for (const child of file.children) {
           addToResult(child);
         }

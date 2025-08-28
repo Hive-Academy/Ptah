@@ -25,19 +25,16 @@ This guide outlines the modern Angular patterns and ESLint configurations for An
 ```html
 <!-- New built-in control flow -->
 @if (condition) {
-  <div>Content</div>
-}
-
-@for (item of items; track item.id) {
-  <li>{{item.name}}</li>
+<div>Content</div>
+} @for (item of items; track item.id) {
+<li>{{item.name}}</li>
 } @empty {
-  <p>No items found</p>
-}
-
-@switch (status) {
-  @case ('loading') { <p>Loading...</p> }
-  @default { <p>Ready</p> }
-}
+<p>No items found</p>
+} @switch (status) { @case ('loading') {
+<p>Loading...</p>
+} @default {
+<p>Ready</p>
+} }
 ```
 
 ### 🔥 **Signals & Modern Component Architecture**
@@ -47,15 +44,15 @@ This guide outlines the modern Angular patterns and ESLint configurations for An
 ```typescript
 @Component({
   selector: 'app-legacy',
-  template: `<div>{{count}}</div>`,
+  template: `<div>{{ count }}</div>`,
   // Missing: standalone, changeDetection
 })
 export class LegacyComponent {
-  @Input() initialValue!: number;  // ❌ Decorator-based
+  @Input() initialValue!: number; // ❌ Decorator-based
   @Output() valueChange = new EventEmitter<number>(); // ❌ Decorator-based
-  
+
   count = 0; // ❌ Not reactive
-  
+
   constructor(private service: MyService) {} // ❌ Constructor injection
 }
 ```
@@ -65,7 +62,7 @@ export class LegacyComponent {
 ```typescript
 @Component({
   selector: 'app-modern',
-  template: `<div>{{count()}}</div>`,
+  template: `<div>{{ count() }}</div>`,
   changeDetection: ChangeDetectionStrategy.OnPush, // ✅ Performance
   // ✅ standalone: true is default in Angular 20+
 })
@@ -73,16 +70,16 @@ export class ModernComponent {
   // ✅ Signal-based inputs/outputs
   readonly initialValue = input.required<number>();
   readonly valueChange = output<number>();
-  
+
   // ✅ Signal state
   readonly count = signal(0);
   readonly doubleCount = computed(() => this.count() * 2);
-  
+
   // ✅ inject() function
   private readonly service = inject(MyService);
-  
+
   increment(): void {
-    this.count.update(val => val + 1);
+    this.count.update((val) => val + 1);
     this.valueChange.emit(this.count());
   }
 }
@@ -144,7 +141,7 @@ Our ESLint setup now enforces these modern patterns:
 
 ```typescript
 // Current issues found:
-- ❌ Uses @Input/@Output decorators  
+- ❌ Uses @Input/@Output decorators
 - ❌ Missing OnPush change detection
 - ❌ Constructor injection pattern
 - ❌ Non-signal reactive state
@@ -152,7 +149,7 @@ Our ESLint setup now enforces these modern patterns:
 // Recommended updates:
 - ✅ Convert to input()/output() functions
 - ✅ Add ChangeDetectionStrategy.OnPush
-- ✅ Use inject() for dependencies  
+- ✅ Use inject() for dependencies
 - ✅ Convert state to signals
 ```
 
@@ -164,7 +161,7 @@ ng generate @angular/core:control-flow
 
 # This will automatically convert:
 *ngIf → @if
-*ngFor → @for  
+*ngFor → @for
 *ngSwitch → @switch
 ```
 
@@ -175,7 +172,7 @@ ng generate @angular/core:control-flow
 // ❌ Remove Angular Material icons
 import { MatIconModule } from '@angular/material/icon';
 
-// ✅ Keep only Lucide Angular  
+// ✅ Keep only Lucide Angular
 import { LucideAngularModule, SendIcon } from 'lucide-angular';
 ```
 
@@ -236,7 +233,7 @@ npm run format
 ## 📖 **Additional Resources**
 
 - [Angular Control Flow Guide](https://angular.dev/guide/templates/control-flow)
-- [Angular Signals Overview](https://angular.dev/guide/signals)  
+- [Angular Signals Overview](https://angular.dev/guide/signals)
 - [Angular Style Guide](https://angular.dev/style-guide)
 - [Modern Angular Setup 2025](https://dev.to/this-is-angular/my-favorite-angular-setup-in-2025-3mbo)
 

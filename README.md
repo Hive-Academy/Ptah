@@ -7,6 +7,7 @@ Transform your Claude Code experience with Ptah, the first and only VS Code exte
 ## 🚀 Features
 
 ### ⭐ Core Features
+
 - **Integrated Chat Sidebar** - Native VS Code chat interface with Claude Code
 - **Visual Command Builder** - Build Claude commands through intuitive UI forms
 - **Smart Context Management** - Visual file inclusion/exclusion with optimization suggestions
@@ -14,6 +15,7 @@ Transform your Claude Code experience with Ptah, the first and only VS Code exte
 - **Real-time Analytics** - Token usage, cost tracking, and productivity insights
 
 ### 🎯 Quick Actions
+
 - **Instant Code Review** - Right-click any file for immediate Claude analysis
 - **Test Generation** - Generate comprehensive tests for your code
 - **Bug Detection** - AI-powered bug finding and security analysis
@@ -23,16 +25,19 @@ Transform your Claude Code experience with Ptah, the first and only VS Code exte
 ## 📦 Installation
 
 ### Prerequisites
+
 1. **VS Code** 1.74.0 or higher
 2. **Claude Code CLI** - [Installation Guide](https://github.com/anthropics/claude-code#installation)
 
 ### Install Extension
+
 1. Open VS Code
 2. Go to Extensions (Ctrl+Shift+X)
 3. Search for "Ptah - Claude Code GUI"
 4. Click Install
 
 ### First Run
+
 1. Open any workspace in VS Code
 2. Click the Ptah icon (📜) in the Activity Bar
 3. Follow the welcome guide to configure your Claude CLI path
@@ -109,21 +114,25 @@ Project-specific context rules and session preferences are automatically saved t
 ## 📚 Usage Guide
 
 ### Basic Chat
+
 1. Click Ptah icon in Activity Bar
 2. Type your question in the chat input
 3. Press Enter or click Send
 
 ### Code Review
+
 1. Right-click any file in Explorer
 2. Select "Ptah: Review Current File"
 3. View analysis in chat sidebar
 
 ### Context Management
+
 1. Open Context Files tree view
 2. Click checkmarks to include/exclude files
 3. View token usage and optimization suggestions
 
 ### Command Builder
+
 1. Press `Ctrl+Shift+P` > "Ptah: Build Command"
 2. Select template from gallery
 3. Fill in parameters through visual form

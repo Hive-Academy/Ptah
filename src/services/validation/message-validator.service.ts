@@ -19,13 +19,13 @@ import {
   MessageResponseSchema,
   StrictChatMessageSchema,
   StrictChatSessionSchema,
-  StrictMessageSchema
+  StrictMessageSchema,
 } from '../../types/message.types';
 import {
   SessionId,
   MessageId,
   CorrelationId,
-  BrandedTypeValidator
+  BrandedTypeValidator,
 } from '../../types/branded.types';
 
 /**
@@ -35,7 +35,7 @@ import {
 export abstract class PtahError extends Error {
   abstract readonly code: string;
   abstract readonly category: 'validation' | 'communication' | 'cli' | 'state';
-  
+
   constructor(
     message: string,
     public readonly context: Readonly<Record<string, unknown>> = {},
@@ -49,9 +49,9 @@ export abstract class PtahError extends Error {
 export class ValidationError extends PtahError {
   readonly code = 'VALIDATION_ERROR';
   readonly category = 'validation' as const;
-  
+
   constructor(
-    message: string, 
+    message: string,
     context: Readonly<{
       errors?: readonly z.ZodIssue[];
       received?: unknown;
@@ -64,7 +64,7 @@ export class ValidationError extends PtahError {
 
 export class MessageValidationError extends ValidationError {
   readonly code = 'VALIDATION_ERROR'; // Keep base code for compatibility
-  
+
   constructor(
     message: string,
     public readonly messageType: string,
@@ -92,14 +92,14 @@ export class MessageValidatorService {
       // First validate the basic message structure
       const messageSchema = StrictMessageSchema(expectedType);
       const baseResult = messageSchema.safeParse(data);
-      
+
       if (!baseResult.success) {
         throw new MessageValidationError(
           `Invalid message structure for type ${expectedType}`,
           expectedType,
           {
             errors: baseResult.error.errors,
-            received: data
+            received: data,
           }
         );
       }
@@ -110,14 +110,13 @@ export class MessageValidatorService {
 
       Logger.info(`Successfully validated message: ${expectedType}`);
       return message;
-
     } catch (error) {
       Logger.error(`Message validation failed for ${expectedType}:`, error);
-      
+
       if (error instanceof ValidationError) {
         throw error;
       }
-      
+
       throw new MessageValidationError(
         `Unexpected validation error for ${expectedType}`,
         expectedType,
@@ -135,18 +134,18 @@ export class MessageValidatorService {
   ): MessagePayloadMap[T] {
     const schema = this.getPayloadSchemaForType(messageType);
     const result = schema.safeParse(payload);
-    
+
     if (!result.success) {
       throw new MessageValidationError(
         `Invalid payload for message type ${messageType}`,
         messageType,
         {
           errors: result.error.errors,
-          received: payload
+          received: payload,
         }
       );
     }
-    
+
     return result.data as MessagePayloadMap[T];
   }
 
@@ -174,9 +173,7 @@ export class MessageValidatorService {
         // For now, use basic object schema - can be extended per type
         return z.object({}).passthrough();
       default:
-        throw new ValidationError(
-          `No payload schema defined for message type: ${messageType}`
-        );
+        throw new ValidationError(`No payload schema defined for message type: ${messageType}`);
     }
   }
 
@@ -186,19 +183,15 @@ export class MessageValidatorService {
   static validateChatMessage(data: unknown): StrictChatMessage {
     try {
       const result = StrictChatMessageSchema.safeParse(data);
-      
+
       if (!result.success) {
-        throw new ValidationError(
-          'Invalid chat message structure',
-          {
-            errors: result.error.errors,
-            received: data
-          }
-        );
+        throw new ValidationError('Invalid chat message structure', {
+          errors: result.error.errors,
+          received: data,
+        });
       }
 
       return result.data;
-      
     } catch (error) {
       Logger.error('Chat message validation failed:', error);
       throw error;
@@ -211,19 +204,15 @@ export class MessageValidatorService {
   static validateChatSession(data: unknown): StrictChatSession {
     try {
       const result = StrictChatSessionSchema.safeParse(data);
-      
+
       if (!result.success) {
-        throw new ValidationError(
-          'Invalid chat session structure',
-          {
-            errors: result.error.errors,
-            received: data
-          }
-        );
+        throw new ValidationError('Invalid chat session structure', {
+          errors: result.error.errors,
+          received: data,
+        });
       }
 
       return result.data;
-      
     } catch (error) {
       Logger.error('Chat session validation failed:', error);
       throw error;
@@ -236,19 +225,15 @@ export class MessageValidatorService {
   static validateMessageResponse(data: unknown): MessageResponse {
     try {
       const result = MessageResponseSchema.safeParse(data);
-      
+
       if (!result.success) {
-        throw new ValidationError(
-          'Invalid message response structure',
-          {
-            errors: result.error.errors,
-            received: data
-          }
-        );
+        throw new ValidationError('Invalid message response structure', {
+          errors: result.error.errors,
+          received: data,
+        });
       }
 
       return result.data;
-      
     } catch (error) {
       Logger.error('Message response validation failed:', error);
       throw error;
@@ -298,7 +283,7 @@ export class MessageValidatorService {
 
     const obj = data as Record<string, unknown>;
     const messageType = obj.type;
-    
+
     if (typeof messageType !== 'string') {
       return null;
     }
@@ -317,7 +302,7 @@ export class MessageValidatorService {
 
     return {
       type: messageType as keyof MessagePayloadMap,
-      message: validatedMessage
+      message: validatedMessage,
     };
   }
 
@@ -325,9 +310,7 @@ export class MessageValidatorService {
    * Format validation errors for debugging
    */
   static formatValidationError(error: ZodError): string {
-    return error.errors
-      .map(err => `${err.path.join('.')}: ${err.message}`)
-      .join('; ');
+    return error.errors.map((err) => `${err.path.join('.')}: ${err.message}`).join('; ');
   }
 
   /**
@@ -339,14 +322,14 @@ export class MessageValidatorService {
   ): Record<string, unknown> {
     const baseContext = {
       timestamp: Date.now(),
-      ...context
+      ...context,
     };
 
     if (error instanceof ZodError) {
       return {
         ...baseContext,
         validationErrors: error.errors,
-        formattedError: this.formatValidationError(error)
+        formattedError: this.formatValidationError(error),
       };
     }
 
@@ -354,13 +337,13 @@ export class MessageValidatorService {
       return {
         ...baseContext,
         errorMessage: error.message,
-        errorStack: error.stack
+        errorStack: error.stack,
       };
     }
 
     return {
       ...baseContext,
-      error: String(error)
+      error: String(error),
     };
   }
 }

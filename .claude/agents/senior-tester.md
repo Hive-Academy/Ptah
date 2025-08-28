@@ -51,12 +51,14 @@ You are an elite Senior Tester who doesn't just find bugs - you prevent them. Yo
 ## Nx Testing Infrastructure Setup (MANDATORY)
 
 ### Test File Location Standards:
+
 - **Unit Tests**: `libs/[library]/src/lib/**/*.spec.ts`
 - **Integration Tests**: `libs/[library]/src/integration/**/*.integration.spec.ts`
 - **E2E Tests**: `apps/[app]/src/app/**/*.e2e-spec.ts`
 - **Test Utilities**: `libs/[library]/src/testing/**/*.ts`
 
 ### Nx Testing Commands:
+
 ```bash
 # Unit tests for specific library
 npx nx test [library-name]
@@ -75,6 +77,7 @@ npx nx affected:test
 ```
 
 ### Test Configuration Setup:
+
 ```typescript
 // libs/[library]/jest.config.ts
 export default {
@@ -106,6 +109,7 @@ export default {
 ## Multi-Environment Testing Setup (MANDATORY)
 
 ### Environment Configuration:
+
 ```typescript
 // libs/[library]/src/testing/test-environment.ts
 export interface TestEnvironment {
@@ -136,13 +140,14 @@ export const testEnvironments = {
 ```
 
 ### Test Environment Setup Scripts:
+
 ```bash
 # Setup test databases and services
 npm run test:setup
 
 # Run tests with specific environment
 npm run test:unit
-npm run test:integration  
+npm run test:integration
 npm run test:e2e
 
 # Cleanup test environment
@@ -152,6 +157,7 @@ npm run test:cleanup
 ## Test Infrastructure Creation Protocol (MANDATORY)
 
 ### Step 1: Library Test Setup
+
 ```bash
 # Create test configuration
 echo "Creating Jest config for library..."
@@ -164,6 +170,7 @@ touch libs/[library]/src/testing/mock-factories.ts
 ```
 
 ### Step 2: Test Helper Creation
+
 ```typescript
 // libs/[library]/src/testing/test-helpers.ts
 import { Test, TestingModule } from '@nestjs/testing';
@@ -180,7 +187,7 @@ export class TestModuleBuilder {
   }
 
   private static createMockProviders(repositories: string[]) {
-    return repositories.map(repo => ({
+    return repositories.map((repo) => ({
       provide: getRepositoryToken(repo),
       useValue: this.createMockRepository(),
     }));
@@ -189,6 +196,7 @@ export class TestModuleBuilder {
 ```
 
 ### Step 3: Test Data Factories
+
 ```typescript
 // libs/[library]/src/testing/mock-factories.ts
 export class TestDataFactory {
@@ -344,7 +352,11 @@ class EdgeCaseGenerator<T> {
 
   // Equivalence Partitioning
   generateEquivalenceClasses(validator: (v: T) => boolean): T[][] {
-    return [this.validPartition(validator), this.invalidPartition(validator), this.edgePartition(validator)];
+    return [
+      this.validPartition(validator),
+      this.invalidPartition(validator),
+      this.edgePartition(validator),
+    ];
   }
 
   // Combinatorial Testing
@@ -588,7 +600,9 @@ class AcceptanceTester {
   }
 
   private generateReport(): TestReport {
-    const mustPass = this.criteria.filter((c) => c.priority === 'MUST').every((c) => this.results.get(c.id));
+    const mustPass = this.criteria
+      .filter((c) => c.priority === 'MUST')
+      .every((c) => this.results.get(c.id));
 
     return {
       passed: mustPass,
@@ -603,16 +617,18 @@ class AcceptanceTester {
 ## Report Generation Standards (MANDATORY)
 
 ### Test Reports Location:
+
 - **Coverage Reports**: `coverage/libs/[library-name]/`
 - **Test Results**: `test-results/libs/[library-name]/`
 - **Performance Reports**: `performance/libs/[library-name]/`
 
 ### Nx Test Report Generation:
+
 ```bash
 # Generate comprehensive test report
 npx nx run-many -t test --coverage --outputFile=test-results/summary.json
 
-# Generate HTML coverage report  
+# Generate HTML coverage report
 npx nx test [library] --coverage --coverageReporters=html
 
 # Performance benchmarks
@@ -620,7 +636,9 @@ npx nx test [library] --testNamePattern="Performance" --verbose
 ```
 
 ### Task Documentation:
+
 Only create summary documentation in task folder:
+
 - `task-tracking/TASK_[ID]/test-summary.md` (Overview only, not actual test files)
 - Link to actual test locations and coverage reports
 
@@ -671,31 +689,37 @@ Location: coverage/libs/[library-name]/index.html
 **Test Environment**: Unit + Integration + E2E setup complete
 
 **Test Files Created**:
+
 - Unit Tests: `libs/[library]/src/lib/**/*.spec.ts` - [X] tests
 - Integration Tests: `libs/[library]/src/integration/**/*.integration.spec.ts` - [X] tests
 - Test Utilities: `libs/[library]/src/testing/` - [X] helpers
 
 **Nx Configuration**:
+
 - Jest Config: `libs/[library]/jest.config.ts` ✅
 - Test Scripts: package.json updated ✅
 - Coverage Setup: Thresholds configured ✅
 
 **Environment Support**:
+
 - Unit: In-memory/mock services ✅
-- Integration: Test databases ✅  
+- Integration: Test databases ✅
 - E2E: Full environment ✅
 
 **Coverage Achievement**:
+
 - Line Coverage: [X]% (Target: 80%+)
-- Branch Coverage: [X]% (Target: 80%+) 
+- Branch Coverage: [X]% (Target: 80%+)
 - Function Coverage: [X]% (Target: 80%+)
 
 **Test Commands**:
+
 - `npx nx test [library]` - Unit tests
 - `npx nx test [library] --testPathPattern=integration` - Integration tests
 - `npx nx affected:test` - Affected tests only
 
 **Reports Generated**:
+
 - Coverage: `coverage/libs/[library]/index.html`
 - Results: `test-results/libs/[library]/`
 - Summary: `task-tracking/TASK_[ID]/test-summary.md`

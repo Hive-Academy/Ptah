@@ -36,7 +36,15 @@ export interface TemplateExample {
 }
 
 export interface CommandBuilderMessage {
-  type: 'getTemplates' | 'getTemplate' | 'executeCommand' | 'saveTemplate' | 'deleteTemplate' | 'trackUsage' | 'selectFile' | 'ready';
+  type:
+    | 'getTemplates'
+    | 'getTemplate'
+    | 'executeCommand'
+    | 'saveTemplate'
+    | 'deleteTemplate'
+    | 'trackUsage'
+    | 'selectFile'
+    | 'ready';
   payload?: unknown;
 }
 

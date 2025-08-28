@@ -23,7 +23,7 @@
 
 **User Story:** As a VS Code user with specific theme preferences, I want Ptah's UI to automatically adapt to my active VS Code theme (light/dark/high-contrast), so that the extension feels native to my development environment.
 
-#### Acceptance Criteria  
+#### Acceptance Criteria
 
 1. WHEN VS Code switches themes THEN Ptah SHALL automatically detect and adapt within 200ms using CSS custom properties
 2. WHEN dark theme is active THEN all Material components SHALL use dark color palette with proper contrast ratios (WCAG 2.1 AA compliance)
@@ -94,46 +94,46 @@
 
 ### Primary Stakeholders
 
-| Stakeholder | Impact Level | Success Criteria | Involvement |
-|-------------|--------------|------------------|-------------|
-| **End Users (Developers)** | Critical | User satisfaction > 4.5/5, reduced learning curve | User testing, feedback sessions |
-| **VS Code Extension Ecosystem** | High | Compliance with VS Code UX guidelines, no conflicts with other extensions | Technical review, compatibility testing |
-| **Development Team** | High | Reduced maintenance overhead, faster feature development | Implementation, code reviews |
+| Stakeholder                     | Impact Level | Success Criteria                                                          | Involvement                             |
+| ------------------------------- | ------------ | ------------------------------------------------------------------------- | --------------------------------------- |
+| **End Users (Developers)**      | Critical     | User satisfaction > 4.5/5, reduced learning curve                         | User testing, feedback sessions         |
+| **VS Code Extension Ecosystem** | High         | Compliance with VS Code UX guidelines, no conflicts with other extensions | Technical review, compatibility testing |
+| **Development Team**            | High         | Reduced maintenance overhead, faster feature development                  | Implementation, code reviews            |
 
-### Secondary Stakeholders  
+### Secondary Stakeholders
 
-| Stakeholder | Impact Level | Success Criteria | Involvement |
-|-------------|--------------|------------------|-------------|
-| **Open Source Community** | Medium | Code quality score > 9/10, clear documentation | Code reviews, contributions |
-| **Accessibility Users** | Medium | WCAG 2.1 AA compliance, screen reader compatibility | Accessibility auditing |
-| **Performance Monitoring** | Low | Bundle size within limits, no performance regressions | Automated monitoring |
+| Stakeholder                | Impact Level | Success Criteria                                      | Involvement                 |
+| -------------------------- | ------------ | ----------------------------------------------------- | --------------------------- |
+| **Open Source Community**  | Medium       | Code quality score > 9/10, clear documentation        | Code reviews, contributions |
+| **Accessibility Users**    | Medium       | WCAG 2.1 AA compliance, screen reader compatibility   | Accessibility auditing      |
+| **Performance Monitoring** | Low          | Bundle size within limits, no performance regressions | Automated monitoring        |
 
 ## Risk Analysis Framework
 
 ### Technical Risks
 
-| Risk | Probability | Impact | Score | Mitigation Strategy |
-|------|-------------|--------|-------|-------------------|
-| **Material 18 Breaking Changes** | Medium | High | 6 | Thorough testing environment, gradual migration approach |
-| **VS Code Theme API Changes** | Low | High | 3 | Use documented APIs only, fallback theme system |
-| **Bundle Size Explosion** | High | Medium | 6 | Tree shaking configuration, selective Material imports |
-| **CSP Policy Violations** | Medium | Critical | 9 | Strict adherence to external CSS only, comprehensive testing |
+| Risk                             | Probability | Impact   | Score | Mitigation Strategy                                          |
+| -------------------------------- | ----------- | -------- | ----- | ------------------------------------------------------------ |
+| **Material 18 Breaking Changes** | Medium      | High     | 6     | Thorough testing environment, gradual migration approach     |
+| **VS Code Theme API Changes**    | Low         | High     | 3     | Use documented APIs only, fallback theme system              |
+| **Bundle Size Explosion**        | High        | Medium   | 6     | Tree shaking configuration, selective Material imports       |
+| **CSP Policy Violations**        | Medium      | Critical | 9     | Strict adherence to external CSS only, comprehensive testing |
 
 ### Business Risks
 
-| Risk | Probability | Impact | Score | Mitigation Strategy |
-|------|-------------|--------|-------|-------------------|
-| **User Adoption Resistance** | Low | Medium | 3 | Gradual rollout, maintain familiar workflows |
-| **Development Timeline Overrun** | Medium | Medium | 4 | Phased implementation, minimum viable product approach |
-| **Competitor Feature Gap** | Low | Low | 1 | Focus on unique Egyptian identity differentiator |
+| Risk                             | Probability | Impact | Score | Mitigation Strategy                                    |
+| -------------------------------- | ----------- | ------ | ----- | ------------------------------------------------------ |
+| **User Adoption Resistance**     | Low         | Medium | 3     | Gradual rollout, maintain familiar workflows           |
+| **Development Timeline Overrun** | Medium      | Medium | 4     | Phased implementation, minimum viable product approach |
+| **Competitor Feature Gap**       | Low         | Low    | 1     | Focus on unique Egyptian identity differentiator       |
 
 ### Integration Risks
 
-| Risk | Probability | Impact | Score | Mitigation Strategy |
-|------|-------------|--------|-------|-------------------|
-| **Angular 20+ Compatibility** | Low | High | 3 | Use Material 18 LTS features only |
-| **Tailwind CSS Conflicts** | Medium | Medium | 4 | CSS isolation, proper cascade order |
-| **Webview Limitations** | High | Medium | 6 | Early prototype testing, fallback strategies |
+| Risk                          | Probability | Impact | Score | Mitigation Strategy                          |
+| ----------------------------- | ----------- | ------ | ----- | -------------------------------------------- |
+| **Angular 20+ Compatibility** | Low         | High   | 3     | Use Material 18 LTS features only            |
+| **Tailwind CSS Conflicts**    | Medium      | Medium | 4     | CSS isolation, proper cascade order          |
+| **Webview Limitations**       | High        | Medium | 6     | Early prototype testing, fallback strategies |
 
 ## Success Metrics
 
@@ -144,7 +144,7 @@
 - **Maintainability**: 50% reduction in CSS-related issues, 30% faster feature development
 - **User Experience**: Task completion 25% faster, 40% reduction in UI-related support requests
 
-### Qualitative Metrics  
+### Qualitative Metrics
 
 - **Professional Appearance**: Achieves visual parity with RooCode, Trae, GitHub Copilot interfaces
 - **Brand Identity**: Maintains distinctive Egyptian visual language while achieving professional polish
@@ -199,7 +199,7 @@
 ### Architecture Readiness Checklist
 
 - [ ] Material 18 component architecture designed
-- [ ] VS Code theme integration strategy defined  
+- [ ] VS Code theme integration strategy defined
 - [ ] Egyptian accent integration approach documented
 - [ ] CSS elimination and Tailwind migration plan created
 - [ ] Bundle size optimization strategy established

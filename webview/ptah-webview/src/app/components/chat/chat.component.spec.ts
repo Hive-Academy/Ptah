@@ -18,7 +18,7 @@ import {
   EgyptianAccentTester,
   VSCodeThemeTester,
   ResponsiveTester,
-  PerformanceTester
+  PerformanceTester,
 } from '../../testing/test-helpers';
 
 describe('ChatComponent - UI/UX Revamp Integration', () => {
@@ -30,12 +30,9 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
   let responsiveTester: ResponsiveTester;
 
   beforeEach(async () => {
-    const testModule = await MaterialTestModuleBuilder.createTestingModule(
-      ChatComponent,
-      {
-        mockServices: ['VSCodeService', 'AppStateService', 'MessageHandlerService']
-      }
-    );
+    const testModule = await MaterialTestModuleBuilder.createTestingModule(ChatComponent, {
+      mockServices: ['VSCodeService', 'AppStateService', 'MessageHandlerService'],
+    });
 
     component = testModule.component;
     fixture = testModule.fixture;
@@ -49,7 +46,6 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
   });
 
   describe('Material Component Integration', () => {
-    
     it('should render Mat-Toolbar with Egyptian Card accent', async () => {
       const toolbar = await loader.getHarness(MatToolbarHarness);
       expect(toolbar).toBeTruthy();
@@ -71,12 +67,14 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
     });
 
     it('should render Material form field with Egyptian input styling', async () => {
-      const input = await loader.getHarness(MatInputHarness.with({ 
-        placeholder: /send a message/i 
-      }));
-      
+      const input = await loader.getHarness(
+        MatInputHarness.with({
+          placeholder: /send a message/i,
+        }),
+      );
+
       expect(input).toBeTruthy();
-      
+
       const result = await egyptianTester.testEgyptianInput('mat-input');
       expect(result.hasGoldenGlow).toBe(true);
       expect(result.borderColor).toContain('rgb(16, 52, 166)'); // Egyptian blue
@@ -86,20 +84,20 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
     it('should display message cards with Material Card component', async () => {
       // Simulate adding messages using signals
       component.messages.set([
-        { 
-          id: '1', 
-          content: 'Test message', 
-          type: 'user', 
-          timestamp: new Date().toISOString()
+        {
+          id: '1',
+          content: 'Test message',
+          type: 'user',
+          timestamp: new Date().toISOString(),
         },
-        { 
-          id: '2', 
-          content: 'Response message', 
-          type: 'assistant', 
-          timestamp: new Date().toISOString()
-        }
+        {
+          id: '2',
+          content: 'Response message',
+          type: 'assistant',
+          timestamp: new Date().toISOString(),
+        },
       ]);
-      
+
       fixture.detectChanges();
 
       const cards = await loader.getAllHarnesses(MatCardHarness);
@@ -127,24 +125,25 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
   });
 
   describe('Egyptian Identity Preservation', () => {
-    
     it('should maintain Egyptian color palette', async () => {
       const elements = fixture.nativeElement.querySelectorAll('[class*="egyptian-"]');
       expect(elements.length).toBeGreaterThan(0);
 
       for (const element of elements) {
         const styles = getComputedStyle(element);
-        const hasEgyptianColors = 
+        const hasEgyptianColors =
           styles.backgroundColor.includes('16, 52, 166') || // Egyptian blue
           styles.color.includes('255, 215, 0') || // Egyptian gold
           styles.borderColor.includes('16, 52, 166');
-        
+
         expect(hasEgyptianColors).toBe(true);
       }
     });
 
     it('should display hieroglyph icons in navigation elements', () => {
-      const iconElements = fixture.nativeElement.querySelectorAll('mat-icon[class*="egyptian-hieroglyph"]');
+      const iconElements = fixture.nativeElement.querySelectorAll(
+        'mat-icon[class*="egyptian-hieroglyph"]',
+      );
       expect(iconElements.length).toBeGreaterThan(0);
 
       iconElements.forEach((icon: Element) => {
@@ -155,11 +154,11 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should apply golden hover effects to interactive elements', async () => {
       const interactiveElements = await loader.getAllHarnesses(MatButtonHarness);
-      
+
       for (const element of interactiveElements) {
         const host = await element.host();
         await host.hover();
-        
+
         const hasGoldenHover = await host.hasClass('egyptian-hover-glow');
         expect(hasGoldenHover).toBe(true);
       }
@@ -185,10 +184,9 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
   });
 
   describe('VS Code Theme Integration', () => {
-    
     it('should adapt to VS Code light theme within 200ms', async () => {
       const result = await themeTester.testThemeSwitch('light');
-      
+
       expect(result.meetsPerformanceTarget).toBe(true);
       expect(result.switchTime).toBeLessThan(200);
       expect(result.adaptationComplete).toBe(true);
@@ -196,7 +194,7 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should adapt to VS Code dark theme within 200ms', async () => {
       const result = await themeTester.testThemeSwitch('dark');
-      
+
       expect(result.meetsPerformanceTarget).toBe(true);
       expect(result.switchTime).toBeLessThan(200);
       expect(result.adaptationComplete).toBe(true);
@@ -204,11 +202,13 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should support high contrast mode', async () => {
       const result = await themeTester.testThemeSwitch('high-contrast');
-      
+
       expect(result.adaptationComplete).toBe(true);
-      
+
       // Verify high contrast elements
-      const elements = fixture.nativeElement.querySelectorAll('mat-button, mat-card, mat-form-field');
+      const elements = fixture.nativeElement.querySelectorAll(
+        'mat-button, mat-card, mat-form-field',
+      );
       for (const element of elements) {
         const styles = getComputedStyle(element);
         const borderWidth = parseFloat(styles.borderWidth);
@@ -218,11 +218,10 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
   });
 
   describe('Responsive Design Validation', () => {
-    
     it('should work at 300px minimum VS Code sidebar width', async () => {
       const results = await responsiveTester.testResponsiveBreakpoints();
-      const minimumResult = results.find(r => r.width === 300);
-      
+      const minimumResult = results.find((r) => r.width === 300);
+
       expect(minimumResult).toBeTruthy();
       expect(minimumResult!.hasOverflow).toBe(false);
       expect(minimumResult!.touchTargetsValid).toBe(true);
@@ -232,8 +231,8 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should scale appropriately at wider sidebar widths', async () => {
       const results = await responsiveTester.testResponsiveBreakpoints();
-      const largeResult = results.find(r => r.width === 800);
-      
+      const largeResult = results.find((r) => r.width === 800);
+
       expect(largeResult).toBeTruthy();
       expect(largeResult!.elementsVisible).toBe(true);
       expect(largeResult!.textReadable).toBe(true);
@@ -241,49 +240,51 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should maintain 44px minimum touch targets across breakpoints', async () => {
       const results = await responsiveTester.testResponsiveBreakpoints();
-      
-      results.forEach(result => {
+
+      results.forEach((result) => {
         expect(result.touchTargetsValid).toBe(true);
       });
     });
 
     it('should handle content overflow properly', async () => {
       // Simulate long message content
-      component.messages.set(Array.from({ length: 50 }, (_, i) => ({
-        id: `${i}`,
-        content: 'Very long message content that should test overflow behavior and scrolling capabilities',
-        type: i % 2 === 0 ? 'user' : 'assistant',
-        timestamp: new Date().toISOString()
-      })));
+      component.messages.set(
+        Array.from({ length: 50 }, (_, i) => ({
+          id: `${i}`,
+          content:
+            'Very long message content that should test overflow behavior and scrolling capabilities',
+          type: i % 2 === 0 ? 'user' : 'assistant',
+          timestamp: new Date().toISOString(),
+        })),
+      );
 
       fixture.detectChanges();
 
       const results = await responsiveTester.testResponsiveBreakpoints();
-      
+
       // Should use proper scrolling, not horizontal overflow
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.hasOverflow).toBe(false);
       });
     });
   });
 
   describe('Accessibility Compliance', () => {
-    
     it('should provide ARIA labels for all interactive elements', async () => {
       const buttons = await loader.getAllHarnesses(MatButtonHarness);
-      
+
       for (const button of buttons) {
         const host = await button.host();
         const ariaLabel = await host.getAttribute('aria-label');
         const text = await button.getText();
-        
+
         expect(ariaLabel || text).toBeTruthy();
       }
     });
 
     it('should support keyboard navigation', async () => {
       const input = await loader.getHarness(MatInputHarness);
-      
+
       await input.focus();
       const isFocused = await input.isFocused();
       expect(isFocused).toBe(true);
@@ -299,12 +300,12 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should maintain proper color contrast ratios', () => {
       const textElements = fixture.nativeElement.querySelectorAll('p, span, div[class*="text-"]');
-      
+
       textElements.forEach((element: Element) => {
         const styles = getComputedStyle(element as HTMLElement);
         const color = styles.color;
         const backgroundColor = styles.backgroundColor;
-        
+
         // Mock contrast ratio check - in real test would use actual calculation
         expect(color).toBeTruthy();
         expect(backgroundColor).toBeTruthy();
@@ -327,10 +328,9 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
   });
 
   describe('Performance Validation', () => {
-    
     it('should render within performance targets', waitForAsync(async () => {
       const performanceResult = await PerformanceTester.measureRenderTime(ChatComponent, 10);
-      
+
       expect(performanceResult.p95).toBeLessThan(200); // 95% under 200ms
       expect(performanceResult.p99).toBeLessThan(500); // 99% under 500ms
       expect(performanceResult.average).toBeLessThan(100); // Average under 100ms
@@ -338,41 +338,42 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should handle rapid theme switching without performance degradation', async () => {
       const switchTimes: number[] = [];
-      
+
       // Test rapid theme switching
       for (let i = 0; i < 10; i++) {
         const theme = i % 2 === 0 ? 'light' : 'dark';
         const result = await themeTester.testThemeSwitch(theme);
         switchTimes.push(result.switchTime);
       }
-      
+
       const averageSwitchTime = switchTimes.reduce((a, b) => a + b) / switchTimes.length;
       expect(averageSwitchTime).toBeLessThan(200);
     });
 
     it('should maintain performance with large message lists', async () => {
       const startTime = performance.now();
-      
+
       // Add large number of messages
-      component.messages.set(Array.from({ length: 1000 }, (_, i) => ({
-        id: `${i}`,
-        content: `Message ${i}`,
-        type: i % 2 === 0 ? 'user' : 'assistant',
-        timestamp: new Date().toISOString()
-      })));
+      component.messages.set(
+        Array.from({ length: 1000 }, (_, i) => ({
+          id: `${i}`,
+          content: `Message ${i}`,
+          type: i % 2 === 0 ? 'user' : 'assistant',
+          timestamp: new Date().toISOString(),
+        })),
+      );
 
       fixture.detectChanges();
       await fixture.whenStable();
-      
+
       const endTime = performance.now();
       const renderTime = endTime - startTime;
-      
+
       expect(renderTime).toBeLessThan(500); // Should render large lists under 500ms
     });
   });
 
   describe('Custom CSS Elimination Validation', () => {
-    
     it('should not use any custom CSS files', () => {
       // Check that component metadata doesn't include styleUrls
       const componentMetadata = (ChatComponent as any).__annotations__?.[0];
@@ -381,11 +382,11 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should only use Material Design and Tailwind classes', () => {
       const allElements = fixture.nativeElement.querySelectorAll('*');
-      
+
       allElements.forEach((element: Element) => {
         const classList = element.classList;
         for (let className of classList) {
-          const isValidClass = 
+          const isValidClass =
             className.startsWith('mat-') ||
             className.startsWith('egyptian-') ||
             className.startsWith('flex') ||
@@ -403,7 +404,7 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
             className.startsWith('md:') ||
             className.startsWith('lg:') ||
             className.startsWith('xl:');
-            
+
           expect(isValidClass).toBe(true, `Invalid class found: ${className}`);
         }
       });
@@ -411,7 +412,7 @@ describe('ChatComponent - UI/UX Revamp Integration', () => {
 
     it('should use only Material animations', () => {
       const animatedElements = fixture.nativeElement.querySelectorAll('[class*="mat-"]');
-      
+
       animatedElements.forEach((element: Element) => {
         const styles = getComputedStyle(element as HTMLElement);
         if (styles.animation && styles.animation !== 'none') {

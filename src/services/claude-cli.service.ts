@@ -7,22 +7,22 @@ import { ChatMessage, CommandResult, CommandTemplate } from '../types/common.typ
 import { ClaudeCliDetector, ClaudeInstallation } from './claude-cli-detector.service';
 import { SessionId, CorrelationId, BrandedTypeValidator } from '../types/branded.types';
 import { StrictChatMessage, MessageResponse } from '../types/message.types';
-import { 
-  createClaudeMessageTransform, 
-  ClaudeMessageTransformStream 
+import {
+  createClaudeMessageTransform,
+  ClaudeMessageTransformStream,
 } from './streams/claude-message-transform.stream';
-import { 
-  createMessageToJsonTransform, 
-  MessageToJsonTransformStream 
+import {
+  createMessageToJsonTransform,
+  MessageToJsonTransformStream,
 } from './streams/message-json-transform.stream';
-import { 
-  CircuitBreakerService, 
+import {
+  CircuitBreakerService,
   CircuitBreakerState,
-  CircuitBreakerStatus
+  CircuitBreakerStatus,
 } from './resilience/circuit-breaker.service';
-import { 
-  CircuitBreakerStream, 
-  CircuitBreakerStreamConfig 
+import {
+  CircuitBreakerStream,
+  CircuitBreakerStreamConfig,
 } from './resilience/circuit-breaker.stream';
 
 export class ClaudeCliService implements vscode.Disposable {
@@ -38,31 +38,37 @@ export class ClaudeCliService implements vscode.Disposable {
       failureThreshold: 5,
       timeoutMs: 30000,
       monitoringWindowMs: 60000,
-      halfOpenMaxCalls: 3
+      halfOpenMaxCalls: 3,
     });
   }
 
   async verifyInstallation(): Promise<boolean> {
     try {
       Logger.info('🔍 Verifying Claude Code CLI installation...');
-      
+
       if (this.claudeInstallation) {
         const isValid = await this.detector.validateInstallation(this.claudeInstallation);
         if (isValid) {
-          Logger.info(`✅ Existing Claude CLI installation verified: ${this.claudeInstallation.path}`);
+          Logger.info(
+            `✅ Existing Claude CLI installation verified: ${this.claudeInstallation.path}`
+          );
           return true;
         }
       }
 
       // Detect Claude CLI installation using dedicated detector service
       this.claudeInstallation = await this.detector.detectClaudeInstallation();
-      
+
       if (this.claudeInstallation) {
-        Logger.info(`✅ Claude CLI detected: ${this.claudeInstallation.path} (${this.claudeInstallation.source})`);
+        Logger.info(
+          `✅ Claude CLI detected: ${this.claudeInstallation.path} (${this.claudeInstallation.source})`
+        );
         return true;
       }
 
-      Logger.error('❌ Claude Code CLI not found. Please install it with: npm install -g @anthropic-ai/claude-code');
+      Logger.error(
+        '❌ Claude Code CLI not found. Please install it with: npm install -g @anthropic-ai/claude-code'
+      );
       return false;
     } catch (error) {
       Logger.error('Error verifying Claude CLI installation', error);
@@ -76,13 +82,12 @@ export class ClaudeCliService implements vscode.Disposable {
     }
 
     // Validate and convert sessionId to branded type
-    const validatedSessionId = typeof sessionId === 'string' 
-      ? BrandedTypeValidator.validateSessionId(sessionId)
-      : sessionId;
+    const validatedSessionId =
+      typeof sessionId === 'string' ? BrandedTypeValidator.validateSessionId(sessionId) : sessionId;
 
     const args = ['chat'];
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    
+
     if (projectPath) {
       args.push('--project', projectPath);
     } else if (workspaceRoot) {
@@ -94,7 +99,7 @@ export class ClaudeCliService implements vscode.Disposable {
     const childProcess = spawn(this.claudeInstallation.path, args, {
       cwd: projectPath || workspaceRoot,
       stdio: 'pipe',
-      env: { ...process.env }
+      env: { ...process.env },
     });
 
     this.activeProcesses.set(validatedSessionId, childProcess);
@@ -105,7 +110,7 @@ export class ClaudeCliService implements vscode.Disposable {
   /**
    * Create high-performance stream pipeline for Claude CLI processing with circuit breaker resilience
    * Replaces AsyncIterator with Transform streams for 5-7x performance improvement
-   * 
+   *
    * Pipeline: CLI stdout -> CircuitBreakerStream -> ClaudeMessageTransform -> MessageToJsonTransform -> Readable
    */
   private createStreamPipeline(childProcess: ChildProcess, sessionId: SessionId): Readable {
@@ -122,25 +127,25 @@ export class ClaudeCliService implements vscode.Disposable {
       monitoringWindowMs: 60000,
       halfOpenMaxCalls: 3,
       objectMode: true,
-      highWaterMark: 16
+      highWaterMark: 16,
     };
 
     // Create resilient stream pipeline wrapper
     const circuitBreakerStream = new CircuitBreakerStream(circuitBreakerConfig);
-    
+
     // Store circuit breaker stream for management
     this.circuitBreakerStreams.set(sessionId, circuitBreakerStream);
 
     // Create transform stream instances
-    const messageTransform = createClaudeMessageTransform({ 
+    const messageTransform = createClaudeMessageTransform({
       sessionId,
       highWaterMark: 16,
-      maxMessageSize: 50000
+      maxMessageSize: 50000,
     });
 
     const jsonTransform = createMessageToJsonTransform({
       validateOutput: true,
-      highWaterMark: 16
+      highWaterMark: 16,
     });
 
     // Create output stream
@@ -149,22 +154,25 @@ export class ClaudeCliService implements vscode.Disposable {
       highWaterMark: 16,
       read() {
         // Backpressure handled by pipeline
-      }
+      },
     });
 
     // Override circuit breaker transform to use our stream pipeline
-    circuitBreakerStream.executeTransform = async (chunk: Buffer | string | Uint8Array, encoding: BufferEncoding): Promise<Buffer | string | Uint8Array> => {
+    circuitBreakerStream.executeTransform = async (
+      chunk: Buffer | string | Uint8Array,
+      encoding: BufferEncoding
+    ): Promise<Buffer | string | Uint8Array> => {
       return new Promise((resolve, reject) => {
         // Create a mini-pipeline for this chunk
-        const tempMessageTransform = createClaudeMessageTransform({ 
+        const tempMessageTransform = createClaudeMessageTransform({
           sessionId,
           highWaterMark: 1,
-          maxMessageSize: 50000
+          maxMessageSize: 50000,
         });
 
         const tempJsonTransform = createMessageToJsonTransform({
           validateOutput: true,
-          highWaterMark: 1
+          highWaterMark: 1,
         });
 
         // Set up one-time processing
@@ -189,57 +197,59 @@ export class ClaudeCliService implements vscode.Disposable {
 
     // Set up comprehensive error handling including circuit breaker events
     this.setupResilientStreamErrorHandling(
-      childProcess, 
-      circuitBreakerStream, 
-      outputStream, 
+      childProcess,
+      circuitBreakerStream,
+      outputStream,
       sessionId
     );
 
     // Create pipeline with proper error propagation through circuit breaker
     const pipelineAsync = promisify(pipeline);
-    
+
     // Run pipeline asynchronously with circuit breaker protection
-    this.circuitBreaker.execute(async () => {
-      return pipelineAsync(
-        childProcess.stdout!,
-        circuitBreakerStream
-      );
-    }, undefined, { sessionId })
-    .then((result) => {
-      if (result.success) {
-        Logger.info(`Resilient stream pipeline completed successfully for session: ${sessionId}`);
-        outputStream.push(null);
-      } else {
-        Logger.error('Circuit breaker blocked pipeline operation', {
-          error: result.error,
-          state: result.state,
-          sessionId
-        });
-        
-        // Push error response to output
-        const errorResponse: MessageResponse = {
-          requestId: CorrelationId.create(),
-          success: false,
-          error: result.error!,
-          metadata: {
+    this.circuitBreaker
+      .execute(
+        async () => {
+          return pipelineAsync(childProcess.stdout!, circuitBreakerStream);
+        },
+        undefined,
+        { sessionId }
+      )
+      .then((result) => {
+        if (result.success) {
+          Logger.info(`Resilient stream pipeline completed successfully for session: ${sessionId}`);
+          outputStream.push(null);
+        } else {
+          Logger.error('Circuit breaker blocked pipeline operation', {
+            error: result.error,
+            state: result.state,
             sessionId,
-            timestamp: Date.now(),
-            source: 'extension' as const,
-            version: '1.0'
-          }
-        };
-        
-        outputStream.push(errorResponse);
-        outputStream.push(null);
-      }
-    })
-    .catch((error) => {
-      Logger.error('Resilient stream pipeline unexpected error', {
-        error,
-        sessionId
+          });
+
+          // Push error response to output
+          const errorResponse: MessageResponse = {
+            requestId: CorrelationId.create(),
+            success: false,
+            error: result.error!,
+            metadata: {
+              sessionId,
+              timestamp: Date.now(),
+              source: 'extension' as const,
+              version: '1.0',
+            },
+          };
+
+          outputStream.push(errorResponse);
+          outputStream.push(null);
+        }
+      })
+      .catch((error) => {
+        Logger.error('Resilient stream pipeline unexpected error', {
+          error,
+          sessionId,
+        });
+        outputStream.destroy(error);
       });
-      outputStream.destroy(error);
-    });
 
     // Pipe circuitBreakerStream to outputStream
     circuitBreakerStream.on('data', (messageResponse: MessageResponse<StrictChatMessage>) => {
@@ -310,20 +320,21 @@ export class ClaudeCliService implements vscode.Disposable {
   ): void {
     // Handle child process errors with circuit breaker integration
     childProcess.on('error', (error) => {
-      Logger.error('Claude CLI process error with circuit breaker', { 
-        error, 
+      Logger.error('Claude CLI process error with circuit breaker', {
+        error,
         sessionId,
-        circuitStatus: circuitBreakerStream.getCircuitStatus()
+        circuitStatus: circuitBreakerStream.getCircuitStatus(),
       });
-      
+
       // Try to recover through circuit breaker
-      circuitBreakerStream.attemptRecovery()
-        .then(recovered => {
+      circuitBreakerStream
+        .attemptRecovery()
+        .then((recovered) => {
           if (!recovered) {
             outputStream.destroy(error);
           }
         })
-        .catch(recoveryError => {
+        .catch((recoveryError) => {
           Logger.error('Circuit breaker recovery failed', { recoveryError, sessionId });
           outputStream.destroy(error);
         });
@@ -332,22 +343,26 @@ export class ClaudeCliService implements vscode.Disposable {
     childProcess.on('exit', (code, signal) => {
       if (code !== 0) {
         const error = new Error(`Claude CLI process exited with code: ${code}, signal: ${signal}`);
-        Logger.error('Claude CLI process unexpected exit with circuit breaker', { 
-          code, 
-          signal, 
+        Logger.error('Claude CLI process unexpected exit with circuit breaker', {
+          code,
+          signal,
           sessionId,
-          circuitStatus: circuitBreakerStream.getCircuitStatus()
+          circuitStatus: circuitBreakerStream.getCircuitStatus(),
         });
-        
+
         // Attempt recovery through circuit breaker
-        circuitBreakerStream.attemptRecovery()
-          .then(recovered => {
+        circuitBreakerStream
+          .attemptRecovery()
+          .then((recovered) => {
             if (!recovered) {
               outputStream.destroy(error);
             }
           })
-          .catch(recoveryError => {
-            Logger.error('Circuit breaker recovery failed on process exit', { recoveryError, sessionId });
+          .catch((recoveryError) => {
+            Logger.error('Circuit breaker recovery failed on process exit', {
+              recoveryError,
+              sessionId,
+            });
             outputStream.destroy(error);
           });
       }
@@ -358,9 +373,9 @@ export class ClaudeCliService implements vscode.Disposable {
       Logger.warn(`Circuit breaker opened for session ${sessionId}`, {
         state,
         failureCount,
-        sessionId
+        sessionId,
       });
-      
+
       // Emit circuit breaker error to output stream
       const errorResponse: MessageResponse<any> = {
         requestId: CorrelationId.create(),
@@ -372,33 +387,33 @@ export class ClaudeCliService implements vscode.Disposable {
             sessionId,
             state,
             failureCount,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         },
         metadata: {
           sessionId,
           timestamp: Date.now(),
           source: 'extension' as const,
-          version: '1.0'
-        }
+          version: '1.0',
+        },
       };
-      
+
       outputStream.push(errorResponse);
     });
 
     circuitBreakerStream.on('circuit:half-open', ({ state }) => {
       Logger.info(`Circuit breaker attempting recovery for session ${sessionId}`, {
         state,
-        sessionId
+        sessionId,
       });
     });
 
     circuitBreakerStream.on('circuit:closed', ({ state }) => {
       Logger.info(`Circuit breaker recovered for session ${sessionId}`, {
         state,
-        sessionId
+        sessionId,
       });
-      
+
       // Emit recovery success to output stream
       const recoveryResponse: MessageResponse = {
         requestId: CorrelationId.create(),
@@ -408,10 +423,10 @@ export class ClaudeCliService implements vscode.Disposable {
           sessionId,
           timestamp: Date.now(),
           source: 'extension' as const,
-          version: '1.0'
-        }
+          version: '1.0',
+        },
       };
-      
+
       outputStream.push(recoveryResponse);
     });
 
@@ -419,21 +434,22 @@ export class ClaudeCliService implements vscode.Disposable {
       Logger.error('Circuit breaker recorded stream failure', {
         error,
         context,
-        sessionId
+        sessionId,
       });
     });
 
     circuitBreakerStream.on('error', (error) => {
       Logger.error('Circuit breaker stream error', { error, sessionId });
-      
+
       // Try recovery before destroying output
-      circuitBreakerStream.attemptRecovery()
-        .then(recovered => {
+      circuitBreakerStream
+        .attemptRecovery()
+        .then((recovered) => {
           if (!recovered) {
             outputStream.destroy(error);
           }
         })
-        .catch(recoveryError => {
+        .catch((recoveryError) => {
           Logger.error('Final circuit breaker recovery failed', { recoveryError, sessionId });
           outputStream.destroy(error);
         });
@@ -443,50 +459,52 @@ export class ClaudeCliService implements vscode.Disposable {
     outputStream.on('error', (error) => {
       Logger.error(`Output stream error for session ${sessionId} with circuit breaker`, {
         error,
-        circuitStatus: circuitBreakerStream.getCircuitStatus()
+        circuitStatus: circuitBreakerStream.getCircuitStatus(),
       });
     });
 
     // Log stream completion with circuit breaker status
     outputStream.on('end', () => {
       Logger.info(`Output stream ended for session: ${sessionId}`, {
-        circuitStatus: circuitBreakerStream.getCircuitStatus()
+        circuitStatus: circuitBreakerStream.getCircuitStatus(),
       });
-      
+
       // Clean up circuit breaker stream
       this.circuitBreakerStreams.delete(sessionId);
     });
   }
 
   async executeCommand(
-    command: string, 
-    args: string[], 
+    command: string,
+    args: string[],
     options: { timeout?: number } = {}
   ): Promise<CommandResult> {
     return new Promise((resolve, reject) => {
       const process = spawn(command, args, { stdio: 'pipe' });
-      
+
       let stdout = '';
       let stderr = '';
-      
-      process.stdout?.on('data', (data) => stdout += data);
-      process.stderr?.on('data', (data) => stderr += data);
-      
-      const timeoutId = options.timeout ? setTimeout(() => {
-        process.kill();
-        reject(new Error(`Command timeout after ${options.timeout}ms`));
-      }, options.timeout) : null;
-      
+
+      process.stdout?.on('data', (data) => (stdout += data));
+      process.stderr?.on('data', (data) => (stderr += data));
+
+      const timeoutId = options.timeout
+        ? setTimeout(() => {
+            process.kill();
+            reject(new Error(`Command timeout after ${options.timeout}ms`));
+          }, options.timeout)
+        : null;
+
       process.on('close', (code) => {
         if (timeoutId) clearTimeout(timeoutId);
         resolve({
           success: code === 0,
           stdout,
           stderr,
-          code: code || 0
+          code: code || 0,
         });
       });
-      
+
       process.on('error', (error) => {
         if (timeoutId) clearTimeout(timeoutId);
         reject(error);
@@ -499,12 +517,11 @@ export class ClaudeCliService implements vscode.Disposable {
    */
   async sendMessageToSession(sessionId: SessionId | string, message: string): Promise<void> {
     // Validate sessionId for branded type compatibility
-    const validatedSessionId = typeof sessionId === 'string' 
-      ? BrandedTypeValidator.validateSessionId(sessionId)
-      : sessionId;
-      
+    const validatedSessionId =
+      typeof sessionId === 'string' ? BrandedTypeValidator.validateSessionId(sessionId) : sessionId;
+
     const process = this.activeProcesses.get(validatedSessionId);
-    
+
     if (!process || process.killed) {
       throw new Error(`No active Claude CLI process found for session: ${validatedSessionId}`);
     }
@@ -515,7 +532,9 @@ export class ClaudeCliService implements vscode.Disposable {
 
     try {
       process.stdin.write(message + '\n');
-      Logger.info(`Message sent to Claude CLI session ${validatedSessionId}: ${message.substring(0, 100)}...`);
+      Logger.info(
+        `Message sent to Claude CLI session ${validatedSessionId}: ${message.substring(0, 100)}...`
+      );
     } catch (error) {
       Logger.error(`Failed to send message to Claude CLI session ${validatedSessionId}:`, error);
       throw error;
@@ -523,16 +542,15 @@ export class ClaudeCliService implements vscode.Disposable {
   }
 
   endSession(sessionId: SessionId | string): void {
-    const validatedSessionId = typeof sessionId === 'string' 
-      ? BrandedTypeValidator.validateSessionId(sessionId)
-      : sessionId;
-      
+    const validatedSessionId =
+      typeof sessionId === 'string' ? BrandedTypeValidator.validateSessionId(sessionId) : sessionId;
+
     const process = this.activeProcesses.get(validatedSessionId);
     if (process && !process.killed) {
       process.kill();
     }
     this.activeProcesses.delete(validatedSessionId);
-    
+
     // Clean up circuit breaker stream
     const circuitBreakerStream = this.circuitBreakerStreams.get(validatedSessionId);
     if (circuitBreakerStream) {
@@ -545,15 +563,14 @@ export class ClaudeCliService implements vscode.Disposable {
    * Get circuit breaker status for a session
    */
   getCircuitBreakerStatus(sessionId: SessionId | string) {
-    const validatedSessionId = typeof sessionId === 'string' 
-      ? BrandedTypeValidator.validateSessionId(sessionId)
-      : sessionId;
-      
+    const validatedSessionId =
+      typeof sessionId === 'string' ? BrandedTypeValidator.validateSessionId(sessionId) : sessionId;
+
     const circuitBreakerStream = this.circuitBreakerStreams.get(validatedSessionId);
     if (circuitBreakerStream) {
       return circuitBreakerStream.getCircuitStatus();
     }
-    
+
     // Return global circuit breaker status if no session-specific one exists
     return this.circuitBreaker.getStatus();
   }
@@ -563,10 +580,11 @@ export class ClaudeCliService implements vscode.Disposable {
    */
   resetCircuitBreaker(sessionId?: SessionId | string): void {
     if (sessionId) {
-      const validatedSessionId = typeof sessionId === 'string' 
-        ? BrandedTypeValidator.validateSessionId(sessionId)
-        : sessionId;
-        
+      const validatedSessionId =
+        typeof sessionId === 'string'
+          ? BrandedTypeValidator.validateSessionId(sessionId)
+          : sessionId;
+
       const circuitBreakerStream = this.circuitBreakerStreams.get(validatedSessionId);
       if (circuitBreakerStream) {
         circuitBreakerStream.resetCircuit();
@@ -583,15 +601,14 @@ export class ClaudeCliService implements vscode.Disposable {
    * Attempt recovery for a session's circuit breaker
    */
   async attemptCircuitBreakerRecovery(sessionId: SessionId | string): Promise<boolean> {
-    const validatedSessionId = typeof sessionId === 'string' 
-      ? BrandedTypeValidator.validateSessionId(sessionId)
-      : sessionId;
-      
+    const validatedSessionId =
+      typeof sessionId === 'string' ? BrandedTypeValidator.validateSessionId(sessionId) : sessionId;
+
     const circuitBreakerStream = this.circuitBreakerStreams.get(validatedSessionId);
     if (circuitBreakerStream) {
       return circuitBreakerStream.attemptRecovery();
     }
-    
+
     return false;
   }
 
@@ -605,22 +622,22 @@ export class ClaudeCliService implements vscode.Disposable {
     sessionCircuitBreakers: Record<string, CircuitBreakerStatus>;
   } {
     const sessionCircuitBreakers: Record<string, CircuitBreakerStatus> = {};
-    
+
     for (const [sessionId, stream] of this.circuitBreakerStreams) {
       sessionCircuitBreakers[sessionId] = stream.getCircuitStatus();
     }
-    
+
     return {
       activeProcesses: this.activeProcesses.size,
       circuitBreakerStreams: this.circuitBreakerStreams.size,
       globalCircuitBreaker: this.circuitBreaker.getStatus(),
-      sessionCircuitBreakers
+      sessionCircuitBreakers,
     };
   }
 
   dispose(): void {
     Logger.info('Disposing Claude CLI service with circuit breaker cleanup...');
-    
+
     // Clean up all active processes
     for (const [sessionId, process] of this.activeProcesses) {
       if (!process.killed) {
@@ -628,7 +645,7 @@ export class ClaudeCliService implements vscode.Disposable {
       }
     }
     this.activeProcesses.clear();
-    
+
     // Clean up all circuit breaker streams
     for (const [sessionId, stream] of this.circuitBreakerStreams) {
       try {
@@ -638,10 +655,10 @@ export class ClaudeCliService implements vscode.Disposable {
       }
     }
     this.circuitBreakerStreams.clear();
-    
+
     // Reset global circuit breaker
     this.circuitBreaker.reset();
-    
+
     Logger.info('Claude CLI service disposed with circuit breaker cleanup complete');
   }
 }

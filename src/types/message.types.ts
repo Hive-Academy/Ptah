@@ -5,7 +5,14 @@
  */
 
 import { z } from 'zod';
-import { SessionId, MessageId, CorrelationId, SessionIdSchema, MessageIdSchema, CorrelationIdSchema } from './branded.types';
+import {
+  SessionId,
+  MessageId,
+  CorrelationId,
+  SessionIdSchema,
+  MessageIdSchema,
+  CorrelationIdSchema,
+} from './branded.types';
 import { CommandTemplate } from './command-builder.types';
 
 // Re-export for convenience
@@ -14,10 +21,10 @@ export { CorrelationId };
 /**
  * Strict Message Types - replaces generic 'string' with exact literals
  */
-export type StrictMessageType = 
-  | 'chat:sendMessage' 
-  | 'chat:messageChunk' 
-  | 'chat:sessionStart' 
+export type StrictMessageType =
+  | 'chat:sendMessage'
+  | 'chat:messageChunk'
+  | 'chat:sessionStart'
   | 'chat:sessionEnd'
   | 'chat:newSession'
   | 'chat:switchSession'
@@ -44,16 +51,13 @@ export type StrictMessageType =
   | 'state:load'
   | 'state:clear'
   | 'view:changed'
-  | 'view:routeChanged' 
+  | 'view:routeChanged'
   | 'view:generic';
 
 /**
  * System Message Types for webview lifecycle
  */
-export type SystemMessageType = 
-  | 'ready'
-  | 'webview-ready'
-  | 'requestInitialData';
+export type SystemMessageType = 'ready' | 'webview-ready' | 'requestInitialData';
 
 /**
  * Message Payloads - Strict typing for each message type
@@ -295,7 +299,7 @@ export interface MessageError {
 /**
  * Strict Chat Message (replaces loose ChatMessage from common.types.ts)
  */
-export type StrictChatMessage = 
+export type StrictChatMessage =
   | {
       readonly type: 'user';
       readonly id: MessageId;
@@ -344,7 +348,7 @@ export interface StrictChatSession {
  */
 export const StrictMessageTypeSchema = z.enum([
   'chat:sendMessage',
-  'chat:messageChunk', 
+  'chat:messageChunk',
   'chat:sessionStart',
   'chat:sessionEnd',
   'chat:newSession',
@@ -356,52 +360,67 @@ export const StrictMessageTypeSchema = z.enum([
   'chat:sessionSwitched',
   'chat:historyLoaded',
   'context:updateFiles',
-  'analytics:trackEvent'
+  'analytics:trackEvent',
 ]);
 
-export const ChatSendMessagePayloadSchema = z.object({
-  content: z.string().min(1).max(10000),
-  files: z.array(z.string()).optional(),
-  metadata: z.object({
-    model: z.string().optional(),
-    temperature: z.number().min(0).max(2).optional()
-  }).optional()
-}).strict();
+export const ChatSendMessagePayloadSchema = z
+  .object({
+    content: z.string().min(1).max(10000),
+    files: z.array(z.string()).optional(),
+    metadata: z
+      .object({
+        model: z.string().optional(),
+        temperature: z.number().min(0).max(2).optional(),
+      })
+      .optional(),
+  })
+  .strict();
 
-export const ChatMessageChunkPayloadSchema = z.object({
-  sessionId: SessionIdSchema,
-  messageId: MessageIdSchema,
-  content: z.string(),
-  isComplete: z.boolean(),
-  streaming: z.boolean()
-}).strict();
+export const ChatMessageChunkPayloadSchema = z
+  .object({
+    sessionId: SessionIdSchema,
+    messageId: MessageIdSchema,
+    content: z.string(),
+    isComplete: z.boolean(),
+    streaming: z.boolean(),
+  })
+  .strict();
 
-export const MessageMetadataSchema = z.object({
-  timestamp: z.number().positive(),
-  source: z.enum(['extension', 'webview']),
-  sessionId: SessionIdSchema.optional(),
-  version: z.string()
-}).strict();
+export const MessageMetadataSchema = z
+  .object({
+    timestamp: z.number().positive(),
+    source: z.enum(['extension', 'webview']),
+    sessionId: SessionIdSchema.optional(),
+    version: z.string(),
+  })
+  .strict();
 
-export const StrictMessageSchema = <T extends StrictMessageType>(type: T) => z.object({
-  id: CorrelationIdSchema,
-  type: z.literal(type),
-  payload: z.unknown(), // Will be refined by specific payload schema
-  metadata: MessageMetadataSchema
-}).strict();
+export const StrictMessageSchema = <T extends StrictMessageType>(type: T) =>
+  z
+    .object({
+      id: CorrelationIdSchema,
+      type: z.literal(type),
+      payload: z.unknown(), // Will be refined by specific payload schema
+      metadata: MessageMetadataSchema,
+    })
+    .strict();
 
-export const MessageResponseSchema = z.object({
-  requestId: CorrelationIdSchema,
-  success: z.boolean(),
-  data: z.unknown().optional(),
-  error: z.object({
-    code: z.string(),
-    message: z.string(),
-    context: z.record(z.unknown()).optional(),
-    stack: z.string().optional()
-  }).optional(),
-  metadata: MessageMetadataSchema
-}).strict();
+export const MessageResponseSchema = z
+  .object({
+    requestId: CorrelationIdSchema,
+    success: z.boolean(),
+    data: z.unknown().optional(),
+    error: z
+      .object({
+        code: z.string(),
+        message: z.string(),
+        context: z.record(z.unknown()).optional(),
+        stack: z.string().optional(),
+      })
+      .optional(),
+    metadata: MessageMetadataSchema,
+  })
+  .strict();
 
 export const StrictChatMessageSchema = z.discriminatedUnion('type', [
   z.object({
@@ -410,7 +429,7 @@ export const StrictChatMessageSchema = z.discriminatedUnion('type', [
     sessionId: SessionIdSchema,
     content: z.string().min(1).max(10000),
     timestamp: z.number().positive(),
-    files: z.array(z.string()).optional()
+    files: z.array(z.string()).optional(),
   }),
   z.object({
     type: z.literal('assistant'),
@@ -419,7 +438,7 @@ export const StrictChatMessageSchema = z.discriminatedUnion('type', [
     content: z.string(),
     timestamp: z.number().positive(),
     streaming: z.boolean(),
-    isComplete: z.boolean()
+    isComplete: z.boolean(),
   }),
   z.object({
     type: z.literal('system'),
@@ -427,23 +446,27 @@ export const StrictChatMessageSchema = z.discriminatedUnion('type', [
     sessionId: SessionIdSchema,
     content: z.string(),
     timestamp: z.number().positive(),
-    level: z.enum(['info', 'warning', 'error'])
-  })
+    level: z.enum(['info', 'warning', 'error']),
+  }),
 ]);
 
-export const StrictChatSessionSchema = z.object({
-  id: SessionIdSchema,
-  name: z.string(),
-  workspaceId: z.string().optional(),
-  messages: z.array(StrictChatMessageSchema),
-  createdAt: z.number().positive(),
-  lastActiveAt: z.number().positive(),
-  tokenUsage: z.object({
-    input: z.number().nonnegative(),
-    output: z.number().nonnegative(),
-    total: z.number().nonnegative()
-  }).strict()
-}).strict();
+export const StrictChatSessionSchema = z
+  .object({
+    id: SessionIdSchema,
+    name: z.string(),
+    workspaceId: z.string().optional(),
+    messages: z.array(StrictChatMessageSchema),
+    createdAt: z.number().positive(),
+    lastActiveAt: z.number().positive(),
+    tokenUsage: z
+      .object({
+        input: z.number().nonnegative(),
+        output: z.number().nonnegative(),
+        total: z.number().nonnegative(),
+      })
+      .strict(),
+  })
+  .strict();
 
 /**
  * System Message Payloads - For webview lifecycle messages
@@ -464,15 +487,17 @@ export interface SystemRequestInitialDataPayload {
  * System Message Payload Map
  */
 export interface SystemMessagePayloadMap {
-  'ready': SystemReadyPayload;
+  ready: SystemReadyPayload;
   'webview-ready': SystemWebviewReadyPayload;
-  'requestInitialData': SystemRequestInitialDataPayload;
+  requestInitialData: SystemRequestInitialDataPayload;
 }
 
 /**
  * System Message Interface
  */
-export interface SystemMessage<T extends keyof SystemMessagePayloadMap = keyof SystemMessagePayloadMap> {
+export interface SystemMessage<
+  T extends keyof SystemMessagePayloadMap = keyof SystemMessagePayloadMap,
+> {
   readonly type: T;
   readonly payload?: SystemMessagePayloadMap[T];
 }
@@ -489,7 +514,7 @@ export interface RoutableMessage<T extends keyof MessagePayloadMap = keyof Messa
  * Union type for all webview messages (system + routable)
  * This eliminates the 'any' type in handleWebviewMessage
  */
-export type WebviewMessage = 
+export type WebviewMessage =
   | SystemMessage<keyof SystemMessagePayloadMap>
   | RoutableMessage<keyof MessagePayloadMap>;
 

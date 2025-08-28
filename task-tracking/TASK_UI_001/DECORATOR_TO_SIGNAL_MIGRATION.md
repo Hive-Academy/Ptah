@@ -9,7 +9,7 @@ Based on your codebase analysis, you have **52+ decorator-based properties** tha
 ### **Components with @Input/@Output:**
 
 - `EgyptianButtonComponent` - 7 @Input, 1 @Output
-- `EgyptianInputComponent` - 10 @Input, 3 @Output  
+- `EgyptianInputComponent` - 10 @Input, 3 @Output
 - `EgyptianCardComponent` - 4 @Input
 - `LoadingSpinnerComponent` - 4 @Input
 - `StatusBarComponent` - 3 @Input
@@ -28,7 +28,7 @@ Based on your codebase analysis, you have **52+ decorator-based properties** tha
 ```javascript
 // Enforce signal-based inputs/outputs over decorators
 '@angular-eslint/prefer-signals': 'error',
-'@angular-eslint/prefer-signal-inputs': 'error', 
+'@angular-eslint/prefer-signal-inputs': 'error',
 '@angular-eslint/prefer-signal-queries': 'error',
 
 // Prevent legacy patterns
@@ -70,7 +70,7 @@ export class EgyptianButtonComponent {
   readonly variant = input<'primary' | 'secondary' | 'tertiary'>('primary');
   readonly size = input<'sm' | 'md' | 'lg'>('md');
   readonly ariaLabel = input<string>();
-  
+
   // Use in template: {{disabled()}} instead of {{disabled}}
   // Use in code: if (this.disabled()) { ... }
 }
@@ -86,7 +86,7 @@ export class EgyptianInputComponent {
   @Output() inputChange = new EventEmitter<string>();
   @Output() focused = new EventEmitter<void>();
   @Output() blurred = new EventEmitter<void>();
-  
+
   onInput(value: string): void {
     this.inputChange.emit(value);
   }
@@ -103,7 +103,7 @@ export class EgyptianInputComponent {
   readonly inputChange = output<string>();
   readonly focused = output<void>();
   readonly blurred = output<void>();
-  
+
   onInput(value: string): void {
     this.inputChange.emit(value); // Same API!
   }
@@ -118,7 +118,7 @@ export class EgyptianInputComponent {
 export class ChatComponent {
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild(MatDialog) dialog?: MatDialog;
-  
+
   ngAfterViewInit(): void {
     if (this.messageInput) {
       this.messageInput.nativeElement.focus();
@@ -135,7 +135,7 @@ import { viewChild, effect } from '@angular/core';
 export class ChatComponent {
   readonly messageInput = viewChild.required<ElementRef<HTMLTextAreaElement>>('messageInput');
   readonly dialog = viewChild<MatDialog>(MatDialog);
-  
+
   constructor() {
     // Use effect instead of ngAfterViewInit
     effect(() => {
@@ -171,7 +171,7 @@ import { input } from '@angular/core';
 export class EgyptianButtonDirective {
   readonly egyptianButton = input<EgyptianVariant>('default');
   readonly egyptianSize = input<'sm' | 'md' | 'lg'>('md');
-  
+
   // In host bindings, use signal values:
   @HostBinding('class') get classes() {
     return `egyptian-btn-${this.egyptianButton()} egyptian-size-${this.egyptianSize()}`;
@@ -197,7 +197,7 @@ readonly userId = input.required<string>(); // No assertion needed!
 // Old way
 @Input() title?: string;
 
-// New way  
+// New way
 readonly title = input<string>(); // Returns signal<string | undefined>
 ```
 
@@ -217,14 +217,10 @@ readonly size = input<'sm' | 'md' | 'lg'>('md');
 
 ```html
 <!-- Before: Property access -->
-<button [disabled]="disabled" [class]="'btn-' + variant">
-  {{title}}
-</button>
+<button [disabled]="disabled" [class]="'btn-' + variant">{{title}}</button>
 
 <!-- After: Function call access -->
-<button [disabled]="disabled()" [class]="'btn-' + variant()">
-  {{title()}}
-</button>
+<button [disabled]="disabled()" [class]="'btn-' + variant()">{{title()}}</button>
 ```
 
 ### **In Component Logic**
@@ -312,7 +308,7 @@ After running `npm run lint`, you'll see errors like:
 
 ```
 ❌ Use input() function instead of @Input decorator
-❌ Use output() function instead of @Output decorator  
+❌ Use output() function instead of @Output decorator
 ❌ Use viewChild() function instead of @ViewChild decorator
 ❌ Mark signal properties as readonly
 ```

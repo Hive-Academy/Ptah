@@ -15,14 +15,14 @@ module.exports = {
       files: '*.html',
       options: {
         parser: 'angular',
-        printWidth: 120
-      }
+        printWidth: 120,
+      },
     },
     {
       files: '*.json',
       options: {
-        printWidth: 80
-      }
-    }
-  ]
+        printWidth: 80,
+      },
+    },
+  ],
 };

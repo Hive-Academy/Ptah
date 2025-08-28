@@ -72,26 +72,31 @@ Must generate `task-description.md` following enterprise-grade requirements form
 
 #### Document Structure:
 
-````markdown
-# Requirements Document - TASK_[ID]
+```markdown
+# Requirements Document - TASK\_[ID]
 
 ## Introduction
+
 [Business context and project overview with clear value proposition]
 
 ## Requirements
 
 ### Requirement 1: [Functional Area]
+
 **User Story:** As a [user type] using [system/feature], I want [functionality], so that [business value].
 
 #### Acceptance Criteria
+
 1. WHEN [condition] THEN [system behavior] SHALL [expected outcome]
 2. WHEN [condition] THEN [validation] SHALL [verification method]
 3. WHEN [error condition] THEN [error handling] SHALL [recovery process]
 
 ### Requirement 2: [Another Functional Area]
+
 **User Story:** As a [user type] using [system/feature], I want [functionality], so that [business value].
 
 #### Acceptance Criteria
+
 1. WHEN [condition] THEN [system behavior] SHALL [expected outcome]
 2. WHEN [condition] THEN [validation] SHALL [verification method]
 3. WHEN [error condition] THEN [error handling] SHALL [recovery process]
@@ -99,30 +104,35 @@ Must generate `task-description.md` following enterprise-grade requirements form
 ## Non-Functional Requirements
 
 ### Performance Requirements
+
 - **Response Time**: 95% of requests under [X]ms, 99% under [Y]ms
 - **Throughput**: Handle [X] concurrent users
 - **Resource Usage**: Memory usage < [X]MB, CPU usage < [Y]%
 
 ### Security Requirements
+
 - **Authentication**: [Specific auth requirements]
 - **Authorization**: [Access control specifications]
 - **Data Protection**: [Encryption and privacy requirements]
 - **Compliance**: [Regulatory requirements - OWASP, WCAG, etc.]
 
 ### Scalability Requirements
+
 - **Load Capacity**: Handle [X]x current load
 - **Growth Planning**: Support [Y]% yearly growth
 - **Resource Scaling**: Auto-scale based on [metrics]
 
 ### Reliability Requirements
+
 - **Uptime**: 99.9% availability
 - **Error Handling**: Graceful degradation for [scenarios]
 - **Recovery Time**: System recovery within [X] minutes
-````
+```
 
 ### 3. SMART Requirements Framework (Mandatory)
 
 Every requirement MUST be:
+
 - **Specific**: Clearly defined functionality with no ambiguity
 - **Measurable**: Quantifiable success criteria (response time, throughput, etc.)
 - **Achievable**: Technically feasible with current resources
@@ -131,6 +141,7 @@ Every requirement MUST be:
 
 Example:
 **Requirement**: API Response Performance
+
 - Specific: User authentication endpoint performance
 - Measurable: 95% of requests under 200ms, 99% under 500ms
 - Achievable: Current infrastructure can support with optimization
@@ -165,26 +176,30 @@ Feature: [Feature Name]
 Must identify and analyze all stakeholders:
 
 #### Primary Stakeholders:
+
 - **End Users**: [User personas with needs and pain points]
 - **Business Owners**: [ROI expectations and success metrics]
 - **Development Team**: [Technical constraints and capabilities]
 
 #### Secondary Stakeholders:
+
 - **Operations Team**: [Deployment and maintenance requirements]
 - **Support Team**: [Troubleshooting and documentation needs]
 - **Compliance/Security**: [Regulatory and security requirements]
 
 #### Stakeholder Impact Matrix:
-| Stakeholder | Impact Level | Involvement | Success Criteria |
-|-------------|--------------|-------------|------------------|
-| End Users   | High         | Testing/Feedback | User satisfaction > 4.5/5 |
-| Business    | High         | Requirements    | ROI > 150% within 12 months |
-| Dev Team    | Medium       | Implementation  | Code quality score > 9/10 |
-| Operations  | Medium       | Deployment      | Zero-downtime deployment |
+
+| Stakeholder | Impact Level | Involvement      | Success Criteria            |
+| ----------- | ------------ | ---------------- | --------------------------- |
+| End Users   | High         | Testing/Feedback | User satisfaction > 4.5/5   |
+| Business    | High         | Requirements     | ROI > 150% within 12 months |
+| Dev Team    | Medium       | Implementation   | Code quality score > 9/10   |
+| Operations  | Medium       | Deployment       | Zero-downtime deployment    |
 
 ### 6. Risk Analysis Framework (Mandatory)
 
 #### Technical Risks:
+
 - **Risk**: [Technical challenge]
 - **Probability**: High/Medium/Low
 - **Impact**: Critical/High/Medium/Low
@@ -192,20 +207,23 @@ Must identify and analyze all stakeholders:
 - **Contingency**: [Fallback approach]
 
 #### Business Risks:
+
 - **Market Risk**: [Competition, timing, demand]
 - **Resource Risk**: [Team availability, skills, budget]
 - **Integration Risk**: [Dependencies, compatibility]
 
 #### Risk Matrix:
-| Risk | Probability | Impact | Score | Mitigation Strategy |
-|------|-------------|---------|-------|--------------------|
-| API Performance | High | Critical | 9 | Load testing + caching strategy |
-| Third-party Dependencies | Medium | High | 6 | Vendor evaluation + backup options |
-| Team Capacity | Low | Medium | 3 | Resource planning + cross-training |
+
+| Risk                     | Probability | Impact   | Score | Mitigation Strategy                |
+| ------------------------ | ----------- | -------- | ----- | ---------------------------------- |
+| API Performance          | High        | Critical | 9     | Load testing + caching strategy    |
+| Third-party Dependencies | Medium      | High     | 6     | Vendor evaluation + backup options |
+| Team Capacity            | Low         | Medium   | 3     | Resource planning + cross-training |
 
 ### 7. Quality Gates for Requirements (Mandatory)
 
 Before delegation, verify:
+
 - [ ] All requirements follow SMART criteria
 - [ ] Acceptance criteria in proper BDD format
 - [ ] Stakeholder analysis complete

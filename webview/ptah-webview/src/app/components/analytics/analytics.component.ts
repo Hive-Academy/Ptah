@@ -7,17 +7,11 @@ import { AppStateManager } from '../../core/services/app-state.service';
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [
-    CommonModule,
-    LucideAngularModule,
-    SimpleHeaderComponent
-  ],
+  imports: [CommonModule, LucideAngularModule, SimpleHeaderComponent],
   template: `
     <div class="h-full flex flex-col vscode-bg">
       <!-- Header -->
-      <app-simple-header 
-        (newSession)="onNewSession()"
-        (analytics)="onAnalytics()">
+      <app-simple-header (newSession)="onNewSession()" (analytics)="onAnalytics()">
       </app-simple-header>
 
       <!-- Analytics Content -->
@@ -36,28 +30,46 @@ import { AppStateManager } from '../../core/services/app-state.service';
 
           <!-- Stats Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <div class="p-6 rounded-lg vscode-border border bg-gradient-to-br from-blue-500/10 to-blue-600/5">
+            <div
+              class="p-6 rounded-lg vscode-border border bg-gradient-to-br from-blue-500/10 to-blue-600/5"
+            >
               <div class="flex items-center justify-between mb-4">
                 <lucide-angular [img]="ActivityIcon" class="w-6 h-6 text-blue-400"></lucide-angular>
-                <span class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300">Today</span>
+                <span class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300"
+                  >Today</span
+                >
               </div>
               <div class="text-2xl font-bold vscode-fg mb-1">12</div>
               <div class="text-sm vscode-description">Chat Sessions</div>
             </div>
 
-            <div class="p-6 rounded-lg vscode-border border bg-gradient-to-br from-green-500/10 to-green-600/5">
+            <div
+              class="p-6 rounded-lg vscode-border border bg-gradient-to-br from-green-500/10 to-green-600/5"
+            >
               <div class="flex items-center justify-between mb-4">
-                <lucide-angular [img]="TrendingUpIcon" class="w-6 h-6 text-green-400"></lucide-angular>
-                <span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-300">This Week</span>
+                <lucide-angular
+                  [img]="TrendingUpIcon"
+                  class="w-6 h-6 text-green-400"
+                ></lucide-angular>
+                <span class="text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-300"
+                  >This Week</span
+                >
               </div>
               <div class="text-2xl font-bold vscode-fg mb-1">47</div>
               <div class="text-sm vscode-description">Messages Sent</div>
             </div>
 
-            <div class="p-6 rounded-lg vscode-border border bg-gradient-to-br from-purple-500/10 to-purple-600/5">
+            <div
+              class="p-6 rounded-lg vscode-border border bg-gradient-to-br from-purple-500/10 to-purple-600/5"
+            >
               <div class="flex items-center justify-between mb-4">
-                <lucide-angular [img]="BarChart3Icon" class="w-6 h-6 text-purple-400"></lucide-angular>
-                <span class="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">Total</span>
+                <lucide-angular
+                  [img]="BarChart3Icon"
+                  class="w-6 h-6 text-purple-400"
+                ></lucide-angular>
+                <span class="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-300"
+                  >Total</span
+                >
               </div>
               <div class="text-2xl font-bold vscode-fg mb-1">1,234</div>
               <div class="text-sm vscode-description">Tokens Used</div>
@@ -66,7 +78,9 @@ import { AppStateManager } from '../../core/services/app-state.service';
 
           <!-- Coming Soon -->
           <div class="text-center py-12">
-            <div class="w-16 h-16 rounded-full bg-gold-500/20 flex items-center justify-center mx-auto mb-4">
+            <div
+              class="w-16 h-16 rounded-full bg-gold-500/20 flex items-center justify-center mx-auto mb-4"
+            >
               <lucide-angular [img]="BarChart3Icon" class="w-8 h-8 text-gold-400"></lucide-angular>
             </div>
             <h3 class="text-lg font-semibold vscode-fg mb-2">More Analytics Coming Soon</h3>
@@ -77,7 +91,7 @@ import { AppStateManager } from '../../core/services/app-state.service';
         </div>
       </main>
     </div>
-  `
+  `,
 })
 export class AnalyticsComponent {
   readonly BarChart3Icon = BarChart3Icon;

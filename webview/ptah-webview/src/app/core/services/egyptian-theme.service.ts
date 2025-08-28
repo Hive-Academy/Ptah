@@ -152,18 +152,18 @@ export type VSCodeThemeKind = 'light' | 'dark' | 'high-contrast';
 
 /**
  * EgyptianThemeService - Signal-based reactive theme management
- * 
+ *
  * Implements Strategy pattern for theme adaptation with <200ms response time
  * Uses Angular signals for optimal performance and automatic change detection
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EgyptianThemeService {
   private readonly strategies = new Map<string, ThemeStrategy>([
     ['light', new LightThemeStrategy()],
     ['dark', new DarkThemeStrategy()],
-    ['high-contrast', new HighContrastThemeStrategy()]
+    ['high-contrast', new HighContrastThemeStrategy()],
   ]);
 
   // Reactive theme state using Angular signals
@@ -189,7 +189,7 @@ export class EgyptianThemeService {
       surface: strategy.getSurfaceColor(),
       text: strategy.getTextColor(),
       egyptianAccent: strategy.getEgyptianAccentColor(),
-      egyptianGlow: strategy.getEgyptianGlowColor()
+      egyptianGlow: strategy.getEgyptianGlowColor(),
     };
   });
 
@@ -200,11 +200,13 @@ export class EgyptianThemeService {
       const strategy = this.currentStrategy();
       strategy.apply();
       const endTime = performance.now();
-      
+
       // Performance monitoring - ensure <200ms requirement
       const duration = endTime - startTime;
       if (duration > 200) {
-        console.warn(`EgyptianThemeService: Theme switching took ${duration.toFixed(2)}ms (>200ms target)`);
+        console.warn(
+          `EgyptianThemeService: Theme switching took ${duration.toFixed(2)}ms (>200ms target)`,
+        );
       }
     }
   });
@@ -227,7 +229,6 @@ export class EgyptianThemeService {
 
       // Mark as initialized to trigger effect
       this._isInitialized.set(true);
-
     } catch (error) {
       console.error('EgyptianThemeService: Failed to initialize theme detection', error);
       // Fallback to light theme
@@ -246,9 +247,11 @@ export class EgyptianThemeService {
       .trim();
 
     // Check for high contrast mode indicators
-    if (document.body.classList.contains('vscode-high-contrast') ||
-        document.body.classList.contains('hc-black') ||
-        document.body.classList.contains('hc-light')) {
+    if (
+      document.body.classList.contains('vscode-high-contrast') ||
+      document.body.classList.contains('hc-black') ||
+      document.body.classList.contains('hc-light')
+    ) {
       return 'high-contrast';
     }
 
@@ -296,8 +299,10 @@ export class EgyptianThemeService {
   private setupThemeChangeListener(): void {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.type === 'attributes' && 
-           (mutation.attributeName === 'class' || mutation.attributeName === 'style')) {
+        if (
+          mutation.type === 'attributes' &&
+          (mutation.attributeName === 'class' || mutation.attributeName === 'style')
+        ) {
           const newTheme = this.detectVSCodeTheme();
           if (newTheme !== this._currentTheme()) {
             this._currentTheme.set(newTheme);
@@ -308,12 +313,12 @@ export class EgyptianThemeService {
 
     observer.observe(document.body, {
       attributes: true,
-      attributeFilter: ['class', 'style']
+      attributeFilter: ['class', 'style'],
     });
 
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['class', 'style']
+      attributeFilter: ['class', 'style'],
     });
   }
 

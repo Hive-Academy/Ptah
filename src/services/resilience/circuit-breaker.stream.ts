@@ -16,11 +16,11 @@ import { MessageResponse, MessageError } from '../../types/message.types';
 export interface CircuitBreakerStreamConfig extends TransformOptions {
   readonly serviceName: string;
   readonly sessionId?: SessionId;
-  readonly failureThreshold?: number;       // Number of failures before opening circuit
-  readonly timeoutMs?: number;              // Time to wait before attempting recovery
-  readonly monitoringWindowMs?: number;     // Time window for failure counting
-  readonly halfOpenMaxCalls?: number;       // Max calls allowed in HALF_OPEN state
-  readonly restartOnRecovery?: boolean;     // Whether to restart underlying stream on recovery
+  readonly failureThreshold?: number; // Number of failures before opening circuit
+  readonly timeoutMs?: number; // Time to wait before attempting recovery
+  readonly monitoringWindowMs?: number; // Time window for failure counting
+  readonly halfOpenMaxCalls?: number; // Max calls allowed in HALF_OPEN state
+  readonly restartOnRecovery?: boolean; // Whether to restart underlying stream on recovery
 }
 
 /**
@@ -60,48 +60,52 @@ export class CircuitBreakerStream extends Transform {
 
   constructor(config: CircuitBreakerStreamConfig) {
     super(config);
-    
+
     this.config = config;
     this.sessionId = config.sessionId;
-    
+
     // Initialize circuit breaker with provided configuration
     this.circuitBreaker = new CircuitBreakerService(config.serviceName, {
       failureThreshold: config.failureThreshold ?? 5,
       timeoutMs: config.timeoutMs ?? 30000,
       monitoringWindowMs: config.monitoringWindowMs ?? 60000,
-      halfOpenMaxCalls: config.halfOpenMaxCalls ?? 3
+      halfOpenMaxCalls: config.halfOpenMaxCalls ?? 3,
     });
-    
+
     this.setupCircuitBreakerEvents();
-    
+
     Logger.info(`Circuit breaker stream initialized: ${config.serviceName}`, {
       sessionId: this.sessionId,
-      config: this.circuitBreaker.getStatus().config
+      config: this.circuitBreaker.getStatus().config,
     });
   }
 
   /**
    * Transform chunk through circuit breaker
    */
-  _transform(chunk: Buffer | string | Uint8Array, encoding: BufferEncoding, callback: TransformCallback): void {
+  _transform(
+    chunk: Buffer | string | Uint8Array,
+    encoding: BufferEncoding,
+    callback: TransformCallback
+  ): void {
     const correlationId = this.extractCorrelationId(chunk);
     const context: StreamErrorContext = {
       sessionId: this.sessionId,
       correlationId,
       chunkSize: chunk.length || 0,
       streamPosition: this.streamPosition,
-      metadata: { encoding }
+      metadata: { encoding },
     };
 
     // Check if circuit allows operations
     if (!this.circuitBreaker.isCallAllowed()) {
       const status = this.circuitBreaker.getStatus();
-      
+
       Logger.warn(`Circuit breaker blocking stream operation: ${this.config.serviceName}`, {
         state: status.state,
         failureCount: status.failureCount,
         sessionId: this.sessionId,
-        correlationId
+        correlationId,
       });
 
       // Create error response for blocked operation
@@ -117,9 +121,10 @@ export class CircuitBreakerStream extends Transform {
 
     // Execute transform operation through circuit breaker
     const operation = () => this.executeTransform(chunk, encoding);
-    
-    this.circuitBreaker.execute(operation, correlationId, context)
-      .then(result => {
+
+    this.circuitBreaker
+      .execute(operation, correlationId, context)
+      .then((result) => {
         if (result.success) {
           this.streamPosition += chunk?.length || 0;
           callback(null, result.data);
@@ -131,18 +136,18 @@ export class CircuitBreakerStream extends Transform {
             context,
             result.error
           );
-          
+
           callback(null, errorResponse);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         // Fallback error handling
         Logger.error(`Circuit breaker stream unexpected error: ${this.config.serviceName}`, {
           error,
           sessionId: this.sessionId,
-          correlationId
+          correlationId,
         });
-        
+
         callback(error);
       });
   }
@@ -151,7 +156,10 @@ export class CircuitBreakerStream extends Transform {
    * Execute the actual transform operation
    * This is where the wrapped stream logic would go
    */
-  public async executeTransform(chunk: Buffer | string | Uint8Array, encoding: BufferEncoding): Promise<Buffer | string | Uint8Array> {
+  public async executeTransform(
+    chunk: Buffer | string | Uint8Array,
+    encoding: BufferEncoding
+  ): Promise<Buffer | string | Uint8Array> {
     // This would be overridden by subclasses or configured with actual transform logic
     // For now, we pass through the chunk as-is
     return new Promise((resolve, reject) => {
@@ -160,7 +168,7 @@ export class CircuitBreakerStream extends Transform {
         if (this.shouldSimulateFailure(chunk)) {
           throw new Error('Simulated stream processing failure');
         }
-        
+
         // Pass through the chunk
         resolve(chunk);
       } catch (error) {
@@ -177,36 +185,39 @@ export class CircuitBreakerStream extends Transform {
     config: CircuitBreakerStreamConfig
   ): CircuitBreakerStream {
     const wrapper = new CircuitBreakerStream(config);
-    
+
     // Override the transform method to use the wrapped stream
     const createWrappedStream = streamFactory;
     let wrappedStream: T | null = null;
-    
-    wrapper.executeTransform = async (chunk: Buffer | string | Uint8Array, encoding: BufferEncoding): Promise<Buffer | string | Uint8Array> => {
+
+    wrapper.executeTransform = async (
+      chunk: Buffer | string | Uint8Array,
+      encoding: BufferEncoding
+    ): Promise<Buffer | string | Uint8Array> => {
       return new Promise((resolve, reject) => {
         if (!wrappedStream || wrappedStream.destroyed) {
           wrappedStream = createWrappedStream();
         }
-        
+
         // Set up one-time listeners for this chunk
         const onData = (data: any) => {
           wrappedStream!.removeListener('error', onError);
           resolve(data);
         };
-        
+
         const onError = (error: Error) => {
           wrappedStream!.removeListener('data', onData);
           reject(error);
         };
-        
+
         wrappedStream.once('data', onData);
         wrappedStream.once('error', onError);
-        
+
         // Write chunk to wrapped stream
         wrappedStream.write(chunk, encoding);
       });
     };
-    
+
     return wrapper;
   }
 
@@ -222,9 +233,9 @@ export class CircuitBreakerStream extends Transform {
    */
   resetCircuit(): void {
     Logger.info(`Manually resetting circuit breaker: ${this.config.serviceName}`, {
-      sessionId: this.sessionId
+      sessionId: this.sessionId,
     });
-    
+
     this.circuitBreaker.reset();
     this.recoveryAttempts = 0;
     this.isRecovering = false;
@@ -238,36 +249,35 @@ export class CircuitBreakerStream extends Transform {
     if (this.isRecovering) {
       return false;
     }
-    
+
     this.isRecovering = true;
     this.recoveryAttempts++;
-    
+
     Logger.info(`Attempting circuit breaker recovery: ${this.config.serviceName}`, {
       attempt: this.recoveryAttempts,
-      sessionId: this.sessionId
+      sessionId: this.sessionId,
     });
-    
+
     try {
       // Simple recovery test - try to process a minimal chunk
       const testChunk = Buffer.from('test-recovery');
       await this.executeTransform(testChunk, 'utf8');
-      
+
       Logger.info(`Circuit breaker recovery successful: ${this.config.serviceName}`, {
         attempt: this.recoveryAttempts,
-        sessionId: this.sessionId
+        sessionId: this.sessionId,
       });
-      
+
       this.emit('circuit:recovery', { attempts: this.recoveryAttempts });
       this.isRecovering = false;
       return true;
-      
     } catch (error) {
       Logger.warn(`Circuit breaker recovery failed: ${this.config.serviceName}`, {
         attempt: this.recoveryAttempts,
         error,
-        sessionId: this.sessionId
+        sessionId: this.sessionId,
       });
-      
+
       this.isRecovering = false;
       return false;
     }
@@ -281,12 +291,12 @@ export class CircuitBreakerStream extends Transform {
     const checkStateChange = () => {
       const status = this.circuitBreaker.getStatus();
       const currentTime = Date.now();
-      
+
       // Emit events for state transitions
       if (status.state === 'OPEN' && currentTime - this.lastErrorTime < 1000) {
         this.emit('circuit:open', {
           state: status.state,
-          failureCount: status.failureCount
+          failureCount: status.failureCount,
         });
       } else if (status.state === 'HALF_OPEN') {
         this.emit('circuit:half-open', { state: status.state });
@@ -295,10 +305,10 @@ export class CircuitBreakerStream extends Transform {
         this.recoveryAttempts = 0;
       }
     };
-    
+
     // Check state changes periodically
     const stateCheckInterval = setInterval(checkStateChange, 1000);
-    
+
     this.on('close', () => {
       clearInterval(stateCheckInterval);
     });
@@ -310,24 +320,31 @@ export class CircuitBreakerStream extends Transform {
   private extractCorrelationId(chunk: Buffer | string | Uint8Array): CorrelationId | undefined {
     try {
       // Only try to extract from object-like chunks, not binary data
-      if (chunk && typeof chunk === 'object' && !(chunk instanceof Buffer) && !(chunk instanceof Uint8Array)) {
+      if (
+        chunk &&
+        typeof chunk === 'object' &&
+        !(chunk instanceof Buffer) &&
+        !(chunk instanceof Uint8Array)
+      ) {
         const chunkObj = chunk as Record<string, unknown>;
-        
+
         // Check if it's a MessageResponse with correlationId
         if ('correlationId' in chunkObj && chunkObj.correlationId) {
           return chunkObj.correlationId as CorrelationId;
         }
-        
+
         // Check if it has metadata with correlationId
-        if ('metadata' in chunkObj && 
-            chunkObj.metadata && 
-            typeof chunkObj.metadata === 'object' &&
-            'correlationId' in chunkObj.metadata) {
+        if (
+          'metadata' in chunkObj &&
+          chunkObj.metadata &&
+          typeof chunkObj.metadata === 'object' &&
+          'correlationId' in chunkObj.metadata
+        ) {
           const metadata = chunkObj.metadata as Record<string, unknown>;
           return metadata.correlationId as CorrelationId;
         }
       }
-      
+
       return undefined;
     } catch (error) {
       // Ignore correlation ID extraction errors
@@ -353,9 +370,9 @@ export class CircuitBreakerStream extends Transform {
         recoveryAttempts: this.recoveryAttempts,
         circuitState: this.circuitBreaker.getStatus().state,
         ...context,
-        ...(originalError?.context || {})
+        ...(originalError?.context || {}),
       },
-      stack: originalError?.stack
+      stack: originalError?.stack,
     };
 
     return {
@@ -366,8 +383,8 @@ export class CircuitBreakerStream extends Transform {
         sessionId: context.sessionId,
         timestamp: Date.now(),
         source: 'extension' as const,
-        version: '1.0'
-      }
+        version: '1.0',
+      },
     };
   }
 
@@ -381,7 +398,7 @@ export class CircuitBreakerStream extends Transform {
     if (testFailureRate && Math.random() < parseFloat(testFailureRate)) {
       return true;
     }
-    
+
     return false;
   }
 }

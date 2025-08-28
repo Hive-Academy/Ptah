@@ -21,24 +21,23 @@ import { EgyptianThemeService } from '../core/services/egyptian-theme.service';
  * Test Module Builder for Material Components with Egyptian Theming
  */
 export class MaterialTestModuleBuilder {
-
   static async createTestingModule<T>(
     componentType: Type<T>,
-    options: TestModuleOptions = {}
+    options: TestModuleOptions = {},
   ): Promise<TestingModule<T>> {
     const testBed = TestBed.configureTestingModule({
       imports: [
         componentType,
         NoopAnimationsModule,
         ...SHARED_COMPONENTS,
-        ...(options.imports || [])
+        ...(options.imports || []),
       ],
       providers: [
         EgyptianThemeService,
 
         ...(options.providers || []),
-        ...this.createMockProviders(options.mockServices || [])
-      ]
+        ...this.createMockProviders(options.mockServices || []),
+      ],
     });
 
     // Schema configuration handled in TestBed module setup
@@ -53,18 +52,18 @@ export class MaterialTestModuleBuilder {
       component: fixture.componentInstance,
       loader,
       debugElement: fixture.debugElement,
-      nativeElement: fixture.nativeElement
+      nativeElement: fixture.nativeElement,
     };
   }
 
   private static createMockProviders(services: string[]) {
-    return services.map(service => ({
+    return services.map((service) => ({
       provide: service,
       useValue: {
         // Mock implementation
         method1: () => {},
-        method2: () => {}
-      }
+        method2: () => {},
+      },
     }));
   }
 }
@@ -73,19 +72,16 @@ export class MaterialTestModuleBuilder {
  * Egyptian Accent Testing Utilities
  */
 export class EgyptianAccentTester {
-
   constructor(
     private fixture: ComponentFixture<any>,
-    private loader: HarnessLoader
+    private loader: HarnessLoader,
   ) {}
 
   /**
    * Test Egyptian Button Directive - Gold accent hover effects
    */
   async testEgyptianButton(selector: string): Promise<EgyptianButtonTestResult> {
-    const button = await this.loader.getHarness(
-      MatButtonHarness.with({ selector })
-    );
+    const button = await this.loader.getHarness(MatButtonHarness.with({ selector }));
 
     const host = await button.host();
 
@@ -103,7 +99,7 @@ export class EgyptianAccentTester {
       hasGoldenAccent,
       hasHoverGlow,
       rippleColor,
-      isAccessible: await this.checkButtonAccessibility(button)
+      isAccessible: await this.checkButtonAccessibility(button),
     };
   }
 
@@ -111,9 +107,7 @@ export class EgyptianAccentTester {
    * Test Egyptian Input Directive - Gold glow on focus
    */
   async testEgyptianInput(selector: string): Promise<EgyptianInputTestResult> {
-    const input = await this.loader.getHarness(
-      MatInputHarness.with({ selector })
-    );
+    const input = await this.loader.getHarness(MatInputHarness.with({ selector }));
 
     // Test focus glow effect
     await input.focus();
@@ -128,7 +122,7 @@ export class EgyptianAccentTester {
       hasGoldenGlow,
       borderColor,
       boxShadow,
-      isAccessible: await this.checkInputAccessibility(input)
+      isAccessible: await this.checkInputAccessibility(input),
     };
   }
 
@@ -136,9 +130,7 @@ export class EgyptianAccentTester {
    * Test Egyptian Card Directive - Papyrus texture application
    */
   async testEgyptianCard(selector: string): Promise<EgyptianCardTestResult> {
-    const card = await this.loader.getHarness(
-      MatCardHarness.with({ selector })
-    );
+    const card = await this.loader.getHarness(MatCardHarness.with({ selector }));
 
     const host = await card.host();
 
@@ -153,7 +145,7 @@ export class EgyptianAccentTester {
       hasPapyrusTexture,
       backgroundColor,
       borderColor,
-      elevation: await this.getMatCardElevation(host)
+      elevation: await this.getMatCardElevation(host),
     };
   }
 
@@ -161,9 +153,7 @@ export class EgyptianAccentTester {
    * Test Egyptian Spinner Directive - Themed progress indicators
    */
   async testEgyptianSpinner(selector: string): Promise<EgyptianSpinnerTestResult> {
-    const spinner = await this.loader.getHarness(
-      MatProgressSpinnerHarness.with({ selector })
-    );
+    const spinner = await this.loader.getHarness(MatProgressSpinnerHarness.with({ selector }));
 
     const host = await spinner.host();
 
@@ -175,7 +165,7 @@ export class EgyptianAccentTester {
       strokeColor,
       hasEgyptianStyling,
       value: await spinner.getValue(),
-      mode: await spinner.getMode()
+      mode: await spinner.getMode(),
     };
   }
 
@@ -189,7 +179,7 @@ export class EgyptianAccentTester {
       hasAriaLabel: !!ariaLabel,
       hasProperRole: role === 'button',
       isFocusable: tabIndex !== '-1',
-      meetsTouchTarget: await this.checkTouchTargetSize(host)
+      meetsTouchTarget: await this.checkTouchTargetSize(host),
     };
   }
 
@@ -203,7 +193,7 @@ export class EgyptianAccentTester {
       hasAriaLabel: !!ariaLabel,
       hasDescription: !!ariaDescribedBy,
       hasRequiredIndicator: required !== null,
-      meetsTouchTarget: await this.checkTouchTargetSize(host)
+      meetsTouchTarget: await this.checkTouchTargetSize(host),
     };
   }
 
@@ -226,24 +216,25 @@ export class EgyptianAccentTester {
  * VS Code Theme Testing Utilities
  */
 export class VSCodeThemeTester {
-
   constructor(private fixture: ComponentFixture<any>) {}
 
   /**
    * Simulate VS Code theme change and measure response time
    */
-  async testThemeSwitch(targetTheme: 'light' | 'dark' | 'high-contrast'): Promise<ThemeSwitchResult> {
+  async testThemeSwitch(
+    targetTheme: 'light' | 'dark' | 'high-contrast',
+  ): Promise<ThemeSwitchResult> {
     const startTime = performance.now();
 
     // Simulate VS Code CSS variable change
     document.documentElement.style.setProperty(
       '--vscode-editor-background',
-      targetTheme === 'dark' ? '#1e1e1e' : '#ffffff'
+      targetTheme === 'dark' ? '#1e1e1e' : '#ffffff',
     );
 
     document.documentElement.style.setProperty(
       '--vscode-editor-foreground',
-      targetTheme === 'dark' ? '#d4d4d4' : '#000000'
+      targetTheme === 'dark' ? '#d4d4d4' : '#000000',
     );
 
     // Trigger change detection
@@ -257,7 +248,7 @@ export class VSCodeThemeTester {
       switchTime,
       meetsPerformanceTarget: switchTime < 200,
       theme: targetTheme,
-      adaptationComplete: await this.verifyThemeAdaptation(targetTheme)
+      adaptationComplete: await this.verifyThemeAdaptation(targetTheme),
     };
   }
 
@@ -288,13 +279,12 @@ export class VSCodeThemeTester {
  * Performance Testing Utilities
  */
 export class PerformanceTester {
-
   /**
    * Measure component render time
    */
   static async measureRenderTime<T>(
     componentType: Type<T>,
-    iterations: number = 100
+    iterations: number = 100,
   ): Promise<PerformanceResult> {
     const times: number[] = [];
 
@@ -302,7 +292,7 @@ export class PerformanceTester {
       const start = performance.now();
 
       const testBed = TestBed.configureTestingModule({
-        imports: [componentType, NoopAnimationsModule]
+        imports: [componentType, NoopAnimationsModule],
       });
 
       await testBed.compileComponents();
@@ -321,7 +311,7 @@ export class PerformanceTester {
       p99: this.calculatePercentile(times, 99),
       average: times.reduce((a, b) => a + b) / times.length,
       min: Math.min(...times),
-      max: Math.max(...times)
+      max: Math.max(...times),
     };
   }
 
@@ -336,7 +326,6 @@ export class PerformanceTester {
  * Responsive Design Testing Utilities
  */
 export class ResponsiveTester {
-
   constructor(private fixture: ComponentFixture<any>) {}
 
   /**
@@ -347,7 +336,7 @@ export class ResponsiveTester {
       { width: 300, name: 'minimum' },
       { width: 400, name: 'small' },
       { width: 600, name: 'medium' },
-      { width: 800, name: 'large' }
+      { width: 800, name: 'large' },
     ];
 
     const results: ResponsiveTestResult[] = [];
@@ -360,7 +349,7 @@ export class ResponsiveTester {
         hasOverflow: result.hasOverflow || false,
         touchTargetsValid: result.touchTargetsValid || false,
         elementsVisible: result.elementsVisible || false,
-        textReadable: result.textReadable || false
+        textReadable: result.textReadable || false,
       });
     }
 
@@ -380,7 +369,7 @@ export class ResponsiveTester {
       hasOverflow: this.checkForOverflow(container),
       touchTargetsValid: await this.validateTouchTargets(container),
       elementsVisible: this.checkElementVisibility(container),
-      textReadable: this.checkTextReadability(container)
+      textReadable: this.checkTextReadability(container),
     };
   }
 

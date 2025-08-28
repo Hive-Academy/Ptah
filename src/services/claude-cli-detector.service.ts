@@ -45,13 +45,13 @@ export class ClaudeCliDetector {
         () => this.detectNpmGlobalInstallation(),
         () => this.detectCommonInstallationPaths(),
         () => this.detectUserHomeInstallation(),
-        () => this.detectWithSystemCommands()
+        () => this.detectWithSystemCommands(),
       ];
 
       for (const strategy of detectionStrategies) {
         try {
           const installation = await strategy();
-          if (installation && await this.validateClaudeInstallation(installation.path)) {
+          if (installation && (await this.validateClaudeInstallation(installation.path))) {
             // Enrich with version information
             installation.version = await this.detectVersion(installation.path);
             this.detectedInstallation = installation;
@@ -59,7 +59,9 @@ export class ClaudeCliDetector {
             return installation;
           }
         } catch (error) {
-          Logger.warn(`Detection strategy failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          Logger.warn(
+            `Detection strategy failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
         }
       }
 
@@ -91,7 +93,7 @@ export class ClaudeCliDetector {
    */
   private async detectFromUserConfig(): Promise<ClaudeInstallation | null> {
     const configuredPath = vscode.workspace.getConfiguration('ptah').get<string>('claudeCliPath');
-    
+
     if (!configuredPath) {
       return null;
     }
@@ -101,7 +103,7 @@ export class ClaudeCliDetector {
     if (await this.validateClaudeInstallation(configuredPath)) {
       return {
         path: configuredPath,
-        source: 'config'
+        source: 'config',
       };
     }
 
@@ -116,14 +118,14 @@ export class ClaudeCliDetector {
     Logger.info('🔍 Checking system PATH...');
 
     const commands = ['claude', 'claude-code', 'claude.cmd', 'claude.exe'];
-    
+
     for (const cmd of commands) {
       try {
         const result = await this.executeCommand(cmd, ['--version'], { timeout: 5000 });
         if (result.success && this.isValidClaudeOutput(result.stdout + result.stderr)) {
           return {
             path: cmd,
-            source: 'path'
+            source: 'path',
           };
         }
       } catch (error) {
@@ -142,7 +144,9 @@ export class ClaudeCliDetector {
 
     try {
       // Get npm global prefix
-      const npmResult = await this.executeCommand('npm', ['config', 'get', 'prefix'], { timeout: 10000 });
+      const npmResult = await this.executeCommand('npm', ['config', 'get', 'prefix'], {
+        timeout: 10000,
+      });
       if (!npmResult.success) {
         return null;
       }
@@ -154,7 +158,7 @@ export class ClaudeCliDetector {
         if (fs.existsSync(claudePath)) {
           return {
             path: claudePath,
-            source: 'npm-global'
+            source: 'npm-global',
           };
         }
       }
@@ -178,7 +182,7 @@ export class ClaudeCliDetector {
       if (fs.existsSync(claudePath)) {
         return {
           path: claudePath,
-          source: 'common-location'
+          source: 'common-location',
         };
       }
     }
@@ -199,7 +203,7 @@ export class ClaudeCliDetector {
       if (fs.existsSync(claudePath)) {
         return {
           path: claudePath,
-          source: 'user-home'
+          source: 'user-home',
         };
       }
     }
@@ -216,38 +220,46 @@ export class ClaudeCliDetector {
     try {
       const isWindows = os.platform() === 'win32';
       const command = isWindows ? 'where' : 'which';
-      
+
       const result = await this.executeCommand(command, ['claude'], { timeout: 5000 });
       if (result.success) {
-        const paths = result.stdout.trim().split('\n').map(p => p.trim()).filter(p => p);
-        
+        const paths = result.stdout
+          .trim()
+          .split('\n')
+          .map((p) => p.trim())
+          .filter((p) => p);
+
         // On Windows, prefer .cmd/.exe files
         for (const claudePath of paths) {
           if (fs.existsSync(claudePath)) {
             // On Windows, prefer executable files
             if (isWindows) {
-              if (claudePath.endsWith('.cmd') || claudePath.endsWith('.exe') || claudePath.endsWith('.bat')) {
+              if (
+                claudePath.endsWith('.cmd') ||
+                claudePath.endsWith('.exe') ||
+                claudePath.endsWith('.bat')
+              ) {
                 return {
                   path: claudePath,
-                  source: 'which-where'
+                  source: 'which-where',
                 };
               }
             } else {
               return {
                 path: claudePath,
-                source: 'which-where'
+                source: 'which-where',
               };
             }
           }
         }
-        
+
         // If no preferred executable found on Windows, try the first valid path
         if (isWindows && paths.length > 0) {
           const firstPath = paths[0];
           if (fs.existsSync(firstPath)) {
             return {
               path: firstPath,
-              source: 'which-where'
+              source: 'which-where',
             };
           }
         }
@@ -271,7 +283,14 @@ export class ClaudeCliDetector {
         paths.push(
           path.join(globalPrefix, 'claude.cmd'),
           path.join(globalPrefix, 'claude.exe'),
-          path.join(globalPrefix, 'node_modules', '@anthropic-ai', 'claude-code', 'bin', 'claude.js'),
+          path.join(
+            globalPrefix,
+            'node_modules',
+            '@anthropic-ai',
+            'claude-code',
+            'bin',
+            'claude.js'
+          ),
           path.join(globalPrefix, 'node_modules', '.bin', 'claude.cmd'),
           path.join(globalPrefix, 'node_modules', '.bin', 'claude.exe')
         );
@@ -281,7 +300,15 @@ export class ClaudeCliDetector {
       case 'linux':
         paths.push(
           path.join(globalPrefix, 'bin', 'claude'),
-          path.join(globalPrefix, 'lib', 'node_modules', '@anthropic-ai', 'claude-code', 'bin', 'claude.js'),
+          path.join(
+            globalPrefix,
+            'lib',
+            'node_modules',
+            '@anthropic-ai',
+            'claude-code',
+            'bin',
+            'claude.js'
+          ),
           path.join(globalPrefix, 'lib', 'node_modules', '.bin', 'claude')
         );
         break;
@@ -342,7 +369,7 @@ export class ClaudeCliDetector {
       path.join(homeDir, '.local', 'bin', 'claude'),
       path.join(homeDir, 'bin', 'claude'),
       path.join(homeDir, '.npm-global', 'bin', 'claude'),
-      path.join(homeDir, 'npm-global', 'bin', 'claude')
+      path.join(homeDir, 'npm-global', 'bin', 'claude'),
     ];
 
     switch (platform) {
@@ -408,34 +435,36 @@ export class ClaudeCliDetector {
    */
   private isValidClaudeOutput(output: string): boolean {
     const lowerOutput = output.toLowerCase();
-    return lowerOutput.includes('claude') || 
-           lowerOutput.includes('anthropic') || 
-           lowerOutput.includes('@anthropic-ai/claude-code');
+    return (
+      lowerOutput.includes('claude') ||
+      lowerOutput.includes('anthropic') ||
+      lowerOutput.includes('@anthropic-ai/claude-code')
+    );
   }
 
   /**
    * Execute a system command with timeout and proper error handling
    */
   private async executeCommand(
-    command: string, 
-    args: string[], 
+    command: string,
+    args: string[],
     options: { timeout?: number } = {}
   ): Promise<CommandResult> {
     return new Promise((resolve) => {
       const { timeout = 30000 } = options;
-      
+
       // On Windows, use shell mode for .cmd, .bat files or if command doesn't have an extension
       const isWindows = os.platform() === 'win32';
-      const needsShell = isWindows && (
-        command.endsWith('.cmd') || 
-        command.endsWith('.bat') || 
-        (!command.includes('\\') && !command.includes('/') && !command.includes('.'))
-      );
-      
+      const needsShell =
+        isWindows &&
+        (command.endsWith('.cmd') ||
+          command.endsWith('.bat') ||
+          (!command.includes('\\') && !command.includes('/') && !command.includes('.')));
+
       const child = spawn(command, args, {
         stdio: 'pipe',
         windowsHide: true,
-        shell: needsShell
+        shell: needsShell,
       });
 
       let stdout = '';
@@ -450,7 +479,7 @@ export class ClaudeCliDetector {
             success: false,
             stdout: '',
             stderr: 'Command timeout',
-            exitCode: -1
+            exitCode: -1,
           });
         }
       }, timeout);
@@ -471,7 +500,7 @@ export class ClaudeCliDetector {
             success: code === 0,
             stdout,
             stderr,
-            exitCode: code || 0
+            exitCode: code || 0,
           });
         }
       });
@@ -484,7 +513,7 @@ export class ClaudeCliDetector {
             success: false,
             stdout: '',
             stderr: error.message,
-            exitCode: -1
+            exitCode: -1,
           });
         }
       });

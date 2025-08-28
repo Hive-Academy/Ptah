@@ -26,7 +26,7 @@
 #### Acceptance Criteria
 
 1. WHEN messages are sent THEN message bus architecture SHALL replace direct routing with correlation IDs and promise-based responses
-2. WHEN CLI streaming occurs THEN Node.js Transform streams SHALL replace AsyncIterator patterns with proper backpressure handling  
+2. WHEN CLI streaming occurs THEN Node.js Transform streams SHALL replace AsyncIterator patterns with proper backpressure handling
 3. WHEN communication latency is measured THEN 95% of messages SHALL complete under 100ms (target: 5-7x improvement from current 165-755ms)
 4. WHEN high-volume streaming occurs THEN backpressure-aware flow control SHALL prevent UI freezes and message drops
 
@@ -41,7 +41,7 @@
 3. WHEN connection issues arise THEN circuit breaker pattern SHALL enable 99% automatic error recovery
 4. WHEN state divergence occurs THEN synchronization SHALL detect and resolve inconsistencies within 1 second
 
-### Requirement 4: Performance and Scalability Optimization  
+### Requirement 4: Performance and Scalability Optimization
 
 **User Story:** As a power user running multiple concurrent sessions, I want the extension to handle concurrent operations efficiently while maintaining low resource usage, so that my development workflow remains uninterrupted.
 
@@ -86,46 +86,46 @@
 
 ### Primary Stakeholders
 
-| Stakeholder | Impact Level | Success Criteria | Involvement |
-|-------------|--------------|------------------|-------------|
-| **Extension Users** | Critical | Response time < 100ms, zero lost messages | User testing, feedback |
-| **Development Team** | Critical | 80% reduction in debugging time, zero type errors | Implementation, reviews |
-| **Production Operations** | High | Memory stability, automatic error recovery | Monitoring, deployment |
+| Stakeholder               | Impact Level | Success Criteria                                  | Involvement             |
+| ------------------------- | ------------ | ------------------------------------------------- | ----------------------- |
+| **Extension Users**       | Critical     | Response time < 100ms, zero lost messages         | User testing, feedback  |
+| **Development Team**      | Critical     | 80% reduction in debugging time, zero type errors | Implementation, reviews |
+| **Production Operations** | High         | Memory stability, automatic error recovery        | Monitoring, deployment  |
 
 ### Secondary Stakeholders
 
-| Stakeholder | Impact Level | Success Criteria | Involvement |
-|-------------|--------------|------------------|-------------|
-| **VS Code Ecosystem** | Medium | No conflicts with other extensions | Compatibility testing |
-| **Open Source Community** | Medium | Code quality > 9/10, clear architecture | Code reviews, documentation |
-| **Performance Monitoring** | Medium | All metrics within target ranges | Automated testing |
+| Stakeholder                | Impact Level | Success Criteria                        | Involvement                 |
+| -------------------------- | ------------ | --------------------------------------- | --------------------------- |
+| **VS Code Ecosystem**      | Medium       | No conflicts with other extensions      | Compatibility testing       |
+| **Open Source Community**  | Medium       | Code quality > 9/10, clear architecture | Code reviews, documentation |
+| **Performance Monitoring** | Medium       | All metrics within target ranges        | Automated testing           |
 
 ## Risk Analysis Framework
 
 ### Technical Risks
 
-| Risk | Probability | Impact | Score | Mitigation Strategy |
-|------|-------------|--------|-------|-------------------|
-| **Stream Migration Complexity** | High | High | 9 | Phased migration with parallel systems, comprehensive testing |
-| **Type Safety Implementation** | Medium | Critical | 9 | Zod integration, strict TypeScript config, runtime validation |
-| **Performance Regression** | Medium | High | 6 | Performance monitoring, benchmark-driven development |
-| **State Synchronization Bugs** | High | Medium | 6 | Circuit breaker patterns, comprehensive integration testing |
+| Risk                            | Probability | Impact   | Score | Mitigation Strategy                                           |
+| ------------------------------- | ----------- | -------- | ----- | ------------------------------------------------------------- |
+| **Stream Migration Complexity** | High        | High     | 9     | Phased migration with parallel systems, comprehensive testing |
+| **Type Safety Implementation**  | Medium      | Critical | 9     | Zod integration, strict TypeScript config, runtime validation |
+| **Performance Regression**      | Medium      | High     | 6     | Performance monitoring, benchmark-driven development          |
+| **State Synchronization Bugs**  | High        | Medium   | 6     | Circuit breaker patterns, comprehensive integration testing   |
 
 ### Business Risks
 
-| Risk | Probability | Impact | Score | Mitigation Strategy |
-|------|-------------|--------|-------|-------------------|
-| **Development Timeline** | Medium | High | 6 | Phased implementation (4 phases over 9 weeks) |
-| **User Experience During Migration** | Low | Medium | 3 | Feature flags, gradual rollout |
-| **Resource Requirements** | Low | Medium | 3 | Clear resource planning, parallel work streams |
+| Risk                                 | Probability | Impact | Score | Mitigation Strategy                            |
+| ------------------------------------ | ----------- | ------ | ----- | ---------------------------------------------- |
+| **Development Timeline**             | Medium      | High   | 6     | Phased implementation (4 phases over 9 weeks)  |
+| **User Experience During Migration** | Low         | Medium | 3     | Feature flags, gradual rollout                 |
+| **Resource Requirements**            | Low         | Medium | 3     | Clear resource planning, parallel work streams |
 
 ### Integration Risks
 
-| Risk | Probability | Impact | Score | Mitigation Strategy |
-|------|-------------|--------|-------|-------------------|
-| **CLI Process Management** | Medium | Critical | 9 | Proper lifecycle management, process monitoring |
-| **Webview Communication** | Medium | High | 6 | Message bus abstraction, error boundaries |
-| **Angular State Management** | Low | Medium | 3 | Hybrid RxJS + Signals approach |
+| Risk                         | Probability | Impact   | Score | Mitigation Strategy                             |
+| ---------------------------- | ----------- | -------- | ----- | ----------------------------------------------- |
+| **CLI Process Management**   | Medium      | Critical | 9     | Proper lifecycle management, process monitoring |
+| **Webview Communication**    | Medium      | High     | 6     | Message bus abstraction, error boundaries       |
+| **Angular State Management** | Low         | Medium   | 3     | Hybrid RxJS + Signals approach                  |
 
 ## Success Metrics
 
@@ -162,24 +162,28 @@
 ## Implementation Strategy
 
 ### Phase 1: Type Safety Foundation (Weeks 1-2)
+
 - Eliminate all 'any' types with strict discriminated unions
 - Implement branded types for SessionId, MessageId, CorrelationId
 - Integrate Zod schemas for runtime validation
 - Establish structured error hierarchy with contextual information
 
-### Phase 2: Message Bus Architecture (Weeks 3-5)  
+### Phase 2: Message Bus Architecture (Weeks 3-5)
+
 - Replace direct message routing with central message bus
 - Implement correlation IDs and promise-based request-response
 - Add message queuing with proper backpressure handling
 - Establish circuit breaker patterns for resilience
 
 ### Phase 3: Stream Processing Migration (Weeks 6-7)
+
 - Replace AsyncIterator with Node.js Transform streams
 - Implement backpressure-aware CLI communication
 - Add state persistence and automatic recovery
 - Optimize performance to achieve <100ms latency targets
 
 ### Phase 4: Integration and Validation (Weeks 8-9)
+
 - Comprehensive integration testing across all layers
 - Performance benchmarking and optimization
 - Error handling validation and recovery testing
@@ -218,7 +222,7 @@
 The architectural analysis reveals **critical production readiness gaps** that must be addressed systematically:
 
 1. **Type Safety Crisis**: Current use of 'any' types creates runtime vulnerabilities and poor developer experience
-2. **Performance Bottleneck**: 165-755ms message latency severely impacts user experience  
+2. **Performance Bottleneck**: 165-755ms message latency severely impacts user experience
 3. **Error Handling Fragmentation**: Inconsistent error handling across layers makes debugging extremely difficult
 4. **State Synchronization Issues**: Lack of proper recovery mechanisms leads to inconsistent user state
 

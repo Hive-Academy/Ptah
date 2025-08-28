@@ -1,4 +1,9 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection, ErrorHandler } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+  ErrorHandler,
+} from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
 // REMOVED: Angular Router imports - incompatible with VS Code webviews
 
@@ -6,8 +11,15 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 class WebviewErrorHandler implements ErrorHandler {
   handleError(error: any): void {
     // Check if it's a History API error in webview context (should not occur now)
-    if (error && error.name === 'SecurityError' && (error.message?.includes('pushState') || error.message?.includes('replaceState'))) {
-      console.warn('WebView: History API error detected - this should not occur with pure signal navigation', error.message);
+    if (
+      error &&
+      error.name === 'SecurityError' &&
+      (error.message?.includes('pushState') || error.message?.includes('replaceState'))
+    ) {
+      console.warn(
+        'WebView: History API error detected - this should not occur with pure signal navigation',
+        error.message,
+      );
       return;
     }
 
@@ -29,8 +41,8 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideAnimations(), // Enable Material animations
     // Custom error handler for webview compatibility
-    { provide: ErrorHandler, useClass: WebviewErrorHandler }
+    { provide: ErrorHandler, useClass: WebviewErrorHandler },
     // REMOVED: Angular Router configuration - using pure signal-based navigation for VS Code webview compatibility
     // This eliminates all History API calls that are blocked in webviews
-  ]
+  ],
 };

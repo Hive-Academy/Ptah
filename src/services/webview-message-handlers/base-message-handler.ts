@@ -1,4 +1,10 @@
-import { StrictMessageType, MessagePayloadMap, MessageResponse, MessageMetadata, MessageError } from '../../types/message.types';
+import {
+  StrictMessageType,
+  MessagePayloadMap,
+  MessageResponse,
+  MessageMetadata,
+  MessageError,
+} from '../../types/message.types';
 import { CorrelationId } from '../../types/branded.types';
 
 /**
@@ -15,7 +21,9 @@ export type StrictPostMessageFunction = (message: {
  * Follows Interface Segregation Principle - only contains what all handlers need
  * Now with strict typing - eliminates 'any' types
  */
-export interface IWebviewMessageHandler<T extends keyof MessagePayloadMap = keyof MessagePayloadMap> {
+export interface IWebviewMessageHandler<
+  T extends keyof MessagePayloadMap = keyof MessagePayloadMap,
+> {
   readonly messageType: string;
   canHandle(messageType: string): boolean;
   handle<K extends T>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse>;
@@ -26,8 +34,10 @@ export interface IWebviewMessageHandler<T extends keyof MessagePayloadMap = keyo
  * Provides common functionality and enforces consistent patterns
  * Now with strict typing - eliminates all 'any' types
  */
-export abstract class BaseWebviewMessageHandler<T extends keyof MessagePayloadMap = keyof MessagePayloadMap> 
-  implements IWebviewMessageHandler<T> {
+export abstract class BaseWebviewMessageHandler<
+  T extends keyof MessagePayloadMap = keyof MessagePayloadMap,
+> implements IWebviewMessageHandler<T>
+{
   abstract readonly messageType: string;
 
   constructor(protected postMessage: StrictPostMessageFunction) {}
@@ -36,10 +46,13 @@ export abstract class BaseWebviewMessageHandler<T extends keyof MessagePayloadMa
     return messageType.startsWith(this.messageType);
   }
 
-  abstract handle<K extends T>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse>;
+  abstract handle<K extends T>(
+    messageType: K,
+    payload: MessagePayloadMap[K]
+  ): Promise<MessageResponse>;
 
   protected sendSuccessResponse<TData = unknown>(
-    type: string, 
+    type: string,
     data: TData,
     requestId?: CorrelationId
   ): void {
@@ -50,33 +63,34 @@ export abstract class BaseWebviewMessageHandler<T extends keyof MessagePayloadMa
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
-    
+
     this.postMessage({
       type,
-      payload: response
+      payload: response,
     });
   }
 
   protected sendErrorResponse(
-    type: string, 
+    type: string,
     error: string | Error | MessageError,
     requestId?: CorrelationId
   ): void {
-    const messageError: MessageError = error instanceof Error 
-      ? {
-          code: 'HANDLER_ERROR',
-          message: error.message,
-          stack: error.stack
-        }
-      : typeof error === 'string'
-      ? {
-          code: 'HANDLER_ERROR', 
-          message: error
-        }
-      : error;
+    const messageError: MessageError =
+      error instanceof Error
+        ? {
+            code: 'HANDLER_ERROR',
+            message: error.message,
+            stack: error.stack,
+          }
+        : typeof error === 'string'
+          ? {
+              code: 'HANDLER_ERROR',
+              message: error,
+            }
+          : error;
 
     const response: MessageResponse = {
       requestId: requestId || CorrelationId.create(),
@@ -85,13 +99,13 @@ export abstract class BaseWebviewMessageHandler<T extends keyof MessagePayloadMa
       metadata: {
         timestamp: Date.now(),
         source: 'extension',
-        version: '1.0.0'
-      }
+        version: '1.0.0',
+      },
     };
-    
+
     this.postMessage({
       type: type.replace(':', ':error'),
-      payload: response
+      payload: response,
     });
   }
 }

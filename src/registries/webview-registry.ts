@@ -18,15 +18,11 @@ export class WebviewRegistry implements vscode.Disposable {
 
     // Register unified Angular webview for the main panel
     this.disposables.push(
-      vscode.window.registerWebviewViewProvider(
-        'ptah.main',
-        this.services.angularWebviewProvider,
-        { 
-          webviewOptions: { 
-            retainContextWhenHidden: true 
-          } 
-        }
-      )
+      vscode.window.registerWebviewViewProvider('ptah.main', this.services.angularWebviewProvider, {
+        webviewOptions: {
+          retainContextWhenHidden: true,
+        },
+      })
     );
 
     Logger.info('Webview providers registered successfully');
@@ -36,9 +32,7 @@ export class WebviewRegistry implements vscode.Disposable {
    * Get registered webview types
    */
   getRegisteredWebviews(): string[] {
-    return [
-      'ptah.main'
-    ];
+    return ['ptah.main'];
   }
 
   /**
@@ -53,7 +47,7 @@ export class WebviewRegistry implements vscode.Disposable {
    */
   dispose(): void {
     Logger.info('Disposing webview registry...');
-    this.disposables.forEach(d => d.dispose());
+    this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
   }
 }

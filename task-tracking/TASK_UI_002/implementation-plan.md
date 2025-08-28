@@ -3,12 +3,14 @@
 ## 📊 Research Evidence Summary
 
 **Key Requirements Addressed**:
+
 - **Requirement 1**: Code duplication elimination with DRY principle compliance (task-description.md, Lines 9-16)
-- **Requirement 2**: VSCode component removal with Egyptian replacements (Lines 17-25) 
+- **Requirement 2**: VSCode component removal with Egyptian replacements (Lines 17-25)
 - **Requirement 3**: Egyptian button tooltip enhancement using Material patterns (Lines 26-34)
 - **Requirement 4**: Complete Tailwind CSS standardization with custom CSS elimination (Lines 35-44)
 
 **Business Requirements Integration**:
+
 - **Performance**: Bundle size increase <5KB, render time +10ms max (Lines 47-50)
 - **Maintainability**: Components <200 lines, consistent Tailwind patterns (Lines 52-56)
 - **Accessibility**: Screen reader tooltips, keyboard navigation, WCAG AA compliance (Lines 57-61)
@@ -39,7 +41,7 @@
 
 ```typescript
 // SOLUTION: Material functionality + Pure Tailwind styling
-<button 
+<button
   [matTooltip]="tooltip"                    // Material: tooltip positioning logic
   [matTooltipClass]="'bg-egyptian-gold'"   // Tailwind: complete visual control
   class="bg-gray-700 hover:bg-egyptian-gold transition-colors"  // Tailwind: all styling
@@ -50,7 +52,7 @@
 
 1. **Material Components**: Use for functional behaviors only
    - `MatTooltip`: Positioning, timing, accessibility - NO visual styling
-   - `MatButton`: Click handling, ripple mechanics - NO color/typography themes  
+   - `MatButton`: Click handling, ripple mechanics - NO color/typography themes
    - `MatInput`: Form validation, focus management - NO border/background themes
 
 2. **Tailwind Utilities**: Handle ALL visual presentation
@@ -69,42 +71,57 @@
 ### Current Component Conflicts Identified
 
 #### 1. vscode-input.component.ts (REMOVE)
+
 **Conflict**: Custom CSS styles array with hardcoded VS Code theme variables
+
 ```typescript
 // PROBLEM: Custom CSS in styles array
-styles: [`
+styles: [
+  `
   .vscode-input-container {
     border: 1px solid var(--vscode-input-border);
     background: var(--vscode-input-background);
   }
-`]
+`,
+];
 ```
+
 **Solution**: Replace with egyptian-input using pure Tailwind utilities
 
-#### 2. vscode-icon-button.component.ts (REMOVE)  
+#### 2. vscode-icon-button.component.ts (REMOVE)
+
 **Conflict**: Custom CSS + Material tooltip mixing
+
 ```typescript
 // PROBLEM: Custom styles + Material imports fighting
-styles: [`
+styles: [
+  `
   .vscode-icon-button:hover {
     background: var(--vscode-toolbar-hoverBackground);
   }
-`]
+`,
+];
 ```
+
 **Solution**: Replace with egyptian-button using MatTooltip + Tailwind classes
 
 #### 3. egyptian-button.component.ts (CONVERT)
+
 **Conflict**: Custom CSS styles array instead of Tailwind utilities
+
 ```typescript
 // PROBLEM: Custom CSS instead of Tailwind
-styles: [`
+styles: [
+  `
   .pharaoh-button {
     background: var(--vscode-button-background);
     padding: 8px 16px;
     border-radius: 2px;
   }
-`]
+`,
+];
 ```
+
 **Solution**: Convert to pure Tailwind classes with Material tooltip integration
 
 ## 📋 Evidence-Based Subtask Breakdown & Developer Handoff
@@ -121,6 +138,7 @@ styles: [`
 **Backend Developer Handoff**: N/A - Frontend task only
 
 **Frontend Developer Handoff**:
+
 - **File Analysis Required**:
   - `/webview/ptah-webview/src/app/components/**/*.component.ts` - Find all vscode-input usages
   - `/webview/ptah-webview/src/app/components/**/*.component.ts` - Find all vscode-icon-button usages
@@ -130,6 +148,7 @@ styles: [`
 - **Deliverable**: Component usage analysis document with replacement mapping
 
 **Acceptance Criteria**:
+
 - [ ] All vscode-input.component.ts usages documented with file paths and line numbers
 - [ ] All vscode-icon-button.component.ts usages documented with replacement plan
 - [ ] Egyptian-button.component.ts custom CSS analyzed and Tailwind conversion plan created
@@ -146,13 +165,15 @@ styles: [`
 **Requirements**: 2.1, 2.3, 2.4 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **Files to Modify**: All files found in Phase 1.1 analysis that use vscode-input
-- **Template Updates**: Replace `<vscode-input>` with `<app-egyptian-input>` 
+- **Template Updates**: Replace `<vscode-input>` with `<app-egyptian-input>`
 - **Import Updates**: Replace VscodeInputComponent imports with EgyptianInputComponent
 - **Property Mapping**: Ensure all input properties are preserved in replacement
 - **Form Integration**: Verify ReactiveFormsModule compatibility maintained
 
 **Acceptance Criteria**:
+
 - [ ] vscode-input.component.ts file completely deleted
 - [ ] All template usages replaced with egyptian-input equivalent
 - [ ] All imports updated to use EgyptianInputComponent
@@ -168,6 +189,7 @@ styles: [`
 **Requirements**: 2.2, 2.3, 2.4 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **Files to Modify**: All files using vscode-icon-button found in Phase 1.1
 - **Template Updates**: Replace `<vscode-icon-button>` with `<app-egyptian-button>` with icon properties
 - **Property Mapping**: Map icon, tooltip, active, disabled properties correctly
@@ -175,7 +197,8 @@ styles: [`
 - **Click Handlers**: Preserve all (click) event bindings
 
 **Acceptance Criteria**:
-- [ ] vscode-icon-button.component.ts file completely deleted  
+
+- [ ] vscode-icon-button.component.ts file completely deleted
 - [ ] All template usages replaced with egyptian-button + icon configuration
 - [ ] Tooltip functionality preserved (preparation for Phase 3 enhancement)
 - [ ] All click handlers and event bindings working
@@ -192,6 +215,7 @@ styles: [`
 **Requirements**: 4.1, 4.2, 4.3, 4.4 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **File**: `/webview/ptah-webview/src/app/shared/components/egyptian-button.component.ts`
 - **Custom CSS Removal**: Remove entire `styles: []` array
 - **Tailwind Class Implementation**: Convert all custom CSS rules to Tailwind utilities
@@ -200,6 +224,7 @@ styles: [`
 - **VS Code Theme Integration**: Use CSS custom properties with Tailwind's arbitrary value syntax
 
 **Implementation Strategy**:
+
 ```typescript
 // BEFORE: Custom CSS in styles array
 styles: [`
@@ -222,6 +247,7 @@ template: `
 ```
 
 **Custom Tailwind Configuration Required**:
+
 ```javascript
 // tailwind.config.js additions needed
 module.exports = {
@@ -230,14 +256,15 @@ module.exports = {
       colors: {
         'egyptian-gold': '#FFD700',
         'lapis-blue': '#1034A6',
-        'papyrus': '#F5F5DC'
-      }
-    }
-  }
-}
+        papyrus: '#F5F5DC',
+      },
+    },
+  },
+};
 ```
 
 **Acceptance Criteria**:
+
 - [ ] styles: [] array completely removed from component
 - [ ] All visual styling moved to Tailwind utility classes
 - [ ] Egyptian color palette implemented in Tailwind config
@@ -257,6 +284,7 @@ module.exports = {
 **Requirements**: 3.1, 3.2, 3.3, 3.4 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **File**: `/webview/ptah-webview/src/app/shared/components/egyptian-button.component.ts`
 - **Material Import**: Add MatTooltipModule to component imports
 - **Template Enhancement**: Add matTooltip directive with Tailwind styling class
@@ -265,6 +293,7 @@ module.exports = {
 - **Styling Separation**: Use matTooltipClass for pure Tailwind tooltip styling
 
 **Implementation Strategy**:
+
 ```typescript
 // Component enhancement required
 @Component({
@@ -275,7 +304,7 @@ module.exports = {
       [matTooltipPosition]="tooltipPosition"         // Material: positioning
       [matTooltipClass]="'bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg'" // Tailwind: styling
       class="px-4 py-2 bg-gray-700 hover:bg-egyptian-gold transition-colors">
-  `
+  `,
 })
 export class EgyptianButtonComponent {
   @Input() tooltip?: string;
@@ -285,11 +314,13 @@ export class EgyptianButtonComponent {
 ```
 
 **Material/Tailwind Separation Validation**:
+
 - Material provides: tooltip positioning logic, accessibility features, show/hide timing
 - Tailwind provides: background colors, text styling, padding, border radius, shadows
 - No Material theme CSS conflicts with Egyptian Tailwind styling
 
 **Acceptance Criteria**:
+
 - [ ] MatTooltipModule imported and configured correctly
 - [ ] tooltip, tooltipPosition, tooltipClass input properties added
 - [ ] Tooltip displays with pure Tailwind styling (no Material theme conflicts)
@@ -313,7 +344,7 @@ export class EgyptianButtonComponent {
   (click)="handleClick()">                  // Component: business logic
 
 // ❌ INCORRECT: Mixed Material theme + Tailwind conflicts
-<mat-button 
+<mat-button
   color="primary"                           // Material theme conflicts with Tailwind
   class="bg-egyptian-gold">                // Tailwind overridden by Material CSS
 
@@ -334,25 +365,25 @@ module.exports = {
         'egyptian-gold': {
           DEFAULT: '#FFD700',
           light: '#FFED4A',
-          dark: '#B7A100'
+          dark: '#B7A100',
         },
         'lapis-blue': {
           DEFAULT: '#1034A6',
           light: '#3B82F6',
-          dark: '#0F2E7D'
+          dark: '#0F2E7D',
         },
-        'papyrus': {
+        papyrus: {
           DEFAULT: '#F5F5DC',
           light: '#FEFDF8',
-          dark: '#E8E6D3'
-        }
+          dark: '#E8E6D3',
+        },
       },
       fontFamily: {
-        'vscode': ['var(--vscode-font-family)', 'monospace']
-      }
-    }
-  }
-}
+        vscode: ['var(--vscode-font-family)', 'monospace'],
+      },
+    },
+  },
+};
 ```
 
 ## 🛡️ Quality Gates & Standards
@@ -361,7 +392,7 @@ module.exports = {
 
 1. **✅ Component Separation**: Material functional behavior clearly separated from Tailwind styling
 2. **✅ Custom CSS Elimination**: Zero custom CSS in component styles arrays
-3. **✅ Tailwind Conversion**: All visual styling uses Tailwind utility classes exclusively  
+3. **✅ Tailwind Conversion**: All visual styling uses Tailwind utility classes exclusively
 4. **✅ Tooltip Accessibility**: MatTooltip provides full ARIA and keyboard navigation
 5. **✅ Egyptian Theme Preservation**: Gold accents and Egyptian color palette maintained
 6. **✅ Performance Compliance**: Bundle size increase <5KB as specified
@@ -373,16 +404,18 @@ module.exports = {
 ### Performance & Security Standards
 
 #### Performance Validation
+
 ```typescript
 // Performance monitoring requirements
 interface PerformanceMetrics {
-  bundleSizeIncrease: number;    // < 5KB requirement
-  componentRenderTime: number;   // < +10ms requirement  
-  tailwindCompileTime: number;   // < 3 seconds requirement
+  bundleSizeIncrease: number; // < 5KB requirement
+  componentRenderTime: number; // < +10ms requirement
+  tailwindCompileTime: number; // < 3 seconds requirement
 }
 ```
 
 #### Security Compliance
+
 - **CSP Compliance**: No inline styles, all Tailwind utilities are CSP-safe
 - **XSS Prevention**: All tooltip content properly sanitized by Material
 - **VS Code Webview**: Tooltip positioning works within webview security constraints
@@ -405,12 +438,12 @@ describe('Material/Tailwind Separation', () => {
     // Verify MatTooltip provides positioning and accessibility
     // Verify no Material theme CSS affects component appearance
   });
-  
+
   it('should use Tailwind for all visual styling', () => {
     // Verify all colors, spacing, typography from Tailwind
     // Verify Egyptian theme classes work correctly
   });
-  
+
   it('should preserve VS Code integration', () => {
     // Verify CSS custom properties work with Tailwind arbitrary syntax
     // Verify webview tooltip positioning works correctly
@@ -430,9 +463,11 @@ describe('Material/Tailwind Separation', () => {
 **Time Budget**: 13 hours across 4 phases
 
 ### First Priority Task: Component Usage Analysis (Subtask 1.1)
+
 **Complexity Assessment**: LOW (estimated 2 hours)
 **Critical Success Factors**:
-1. Comprehensive search - zero usage patterns missed  
+
+1. Comprehensive search - zero usage patterns missed
 2. Clear replacement mapping for each component type
 3. Documentation of current custom CSS conflicts
 4. Evidence-based conversion strategy for each file
@@ -440,7 +475,7 @@ describe('Material/Tailwind Separation', () => {
 ### Implementation Phases Overview
 
 1. **Phase 1**: Component audit and conflict analysis (2 hours)
-2. **Phase 2**: VSCode component removal and replacement (6 hours) 
+2. **Phase 2**: VSCode component removal and replacement (6 hours)
 3. **Phase 3**: Egyptian button Tailwind conversion (4 hours)
 4. **Phase 4**: Material tooltip integration with Tailwind styling (4 hours)
 

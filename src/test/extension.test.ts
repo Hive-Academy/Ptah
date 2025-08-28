@@ -16,13 +16,13 @@ suite('Extension Test Suite', () => {
 
   test('Should register commands', async () => {
     const commands = await vscode.commands.getCommands();
-    
+
     const ptahCommands = [
       'ptah.quickChat',
       'ptah.reviewCurrentFile',
       'ptah.generateTests',
       'ptah.buildCommand',
-      'ptah.newSession'
+      'ptah.newSession',
     ];
 
     for (const command of ptahCommands) {

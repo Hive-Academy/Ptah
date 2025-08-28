@@ -38,7 +38,7 @@ This audit lists authoritative sources in the Ptah repository to guide generatio
 - src/services/workspace-manager.ts — Workspace awareness
 - src/services/webview-html-generator.ts — CSP and asset URIs
 - src/services/webview-diagnostic.ts — Webview asset checks
-- src/services/webview-message-handlers/* — Angular ↔ VS Code message handling (router + handlers)
+- src/services/webview-message-handlers/\* — Angular ↔ VS Code message handling (router + handlers)
 
 ### Providers (UI)
 
@@ -47,7 +47,7 @@ This audit lists authoritative sources in the Ptah repository to guide generatio
 ### Angular Webview (SPA)
 
 - webview/ptah-webview/angular.json — Build outDir to ../out/webview
-- webview/ptah-webview/src/app/** — Standalone components and services
+- webview/ptah-webview/src/app/\*\* — Standalone components and services
 - webview/ptah-webview/src/app/services/vscode.service.ts — acquireVsCodeApi bridge
 - webview/ptah-webview/src/app/app.routes.ts — Routes for chat, command builder, analytics
 

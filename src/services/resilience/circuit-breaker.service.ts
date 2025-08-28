@@ -17,10 +17,10 @@ export type CircuitBreakerState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
  * Configuration for circuit breaker behavior
  */
 export interface CircuitBreakerConfig {
-  readonly failureThreshold: number;       // Number of failures before opening circuit
-  readonly timeoutMs: number;              // Time to wait before attempting recovery
-  readonly monitoringWindowMs: number;     // Time window for failure counting
-  readonly halfOpenMaxCalls: number;       // Max calls allowed in HALF_OPEN state
+  readonly failureThreshold: number; // Number of failures before opening circuit
+  readonly timeoutMs: number; // Time to wait before attempting recovery
+  readonly monitoringWindowMs: number; // Time window for failure counting
+  readonly halfOpenMaxCalls: number; // Max calls allowed in HALF_OPEN state
 }
 
 /**
@@ -63,7 +63,7 @@ const DEFAULT_CONFIG: CircuitBreakerConfig = {
   failureThreshold: 5,
   timeoutMs: 30000,
   monitoringWindowMs: 60000,
-  halfOpenMaxCalls: 3
+  halfOpenMaxCalls: 3,
 };
 
 /**
@@ -77,16 +77,16 @@ export class CircuitBreakerService {
   private failures: CircuitFailure[] = [];
   private halfOpenCallCount: number = 0;
   private nextAttemptTime: number = 0;
-  
+
   private readonly config: CircuitBreakerConfig;
   private readonly serviceName: string;
 
   constructor(serviceName: string, config: Partial<CircuitBreakerConfig> = {}) {
     this.serviceName = serviceName;
     this.config = { ...DEFAULT_CONFIG, ...config };
-    
+
     Logger.info(`Circuit breaker initialized for service: ${serviceName}`, {
-      config: this.config
+      config: this.config,
     });
   }
 
@@ -99,7 +99,7 @@ export class CircuitBreakerService {
     context?: Readonly<Record<string, unknown>>
   ): Promise<CircuitExecutionResult<T>> {
     const currentTime = Date.now();
-    
+
     // Clean expired failures from monitoring window
     this.cleanExpiredFailures(currentTime);
 
@@ -109,11 +109,11 @@ export class CircuitBreakerService {
     // Handle OPEN state - fail fast
     if (this.state === 'OPEN') {
       const timeUntilRetry = Math.max(0, this.nextAttemptTime - currentTime);
-      
+
       Logger.warn(`Circuit breaker OPEN for ${this.serviceName}, failing fast`, {
         failureCount: this.failureCount,
         timeUntilRetry,
-        correlationId
+        correlationId,
       });
 
       return {
@@ -128,9 +128,9 @@ export class CircuitBreakerService {
             failureCount: this.failureCount,
             timeUntilRetry,
             correlationId,
-            ...context
-          }
-        }
+            ...context,
+          },
+        },
       };
     }
 
@@ -140,7 +140,7 @@ export class CircuitBreakerService {
         Logger.warn(`Circuit breaker HALF_OPEN for ${this.serviceName}, max calls reached`, {
           halfOpenCallCount: this.halfOpenCallCount,
           maxCalls: this.config.halfOpenMaxCalls,
-          correlationId
+          correlationId,
         });
 
         return {
@@ -154,12 +154,12 @@ export class CircuitBreakerService {
               serviceName: this.serviceName,
               halfOpenCallCount: this.halfOpenCallCount,
               correlationId,
-              ...context
-            }
-          }
+              ...context,
+            },
+          },
         };
       }
-      
+
       this.halfOpenCallCount++;
     }
 
@@ -168,25 +168,24 @@ export class CircuitBreakerService {
       Logger.info(`Executing operation through circuit breaker: ${this.serviceName}`, {
         state: this.state,
         failureCount: this.failureCount,
-        correlationId
+        correlationId,
       });
 
       const result = await operation();
-      
+
       // Operation succeeded - handle state transitions
       this.onSuccess(correlationId);
-      
+
       return {
         success: true,
         data: result,
         state: this.state,
-        failureCount: this.failureCount
+        failureCount: this.failureCount,
       };
-      
     } catch (error) {
       // Operation failed - record failure and handle state transitions
       this.onFailure(error as Error, correlationId, context);
-      
+
       return {
         success: false,
         state: this.state,
@@ -199,10 +198,10 @@ export class CircuitBreakerService {
             circuitState: this.state,
             failureCount: this.failureCount,
             correlationId,
-            ...context
+            ...context,
           },
-          stack: (error as Error).stack
-        }
+          stack: (error as Error).stack,
+        },
       };
     }
   }
@@ -217,7 +216,7 @@ export class CircuitBreakerService {
       lastFailureTime: this.lastFailureTime,
       nextAttemptTime: this.nextAttemptTime,
       halfOpenCallCount: this.halfOpenCallCount,
-      config: this.config
+      config: this.config,
     };
   }
 
@@ -261,32 +260,36 @@ export class CircuitBreakerService {
       // HALF_OPEN -> CLOSED: Success in recovery mode
       Logger.info(`Circuit breaker recovery successful for ${this.serviceName}`, {
         correlationId,
-        previousFailureCount: this.failureCount
+        previousFailureCount: this.failureCount,
       });
-      
+
       this.state = 'CLOSED';
       this.failureCount = 0;
       this.failures = [];
       this.halfOpenCallCount = 0;
       this.nextAttemptTime = 0;
     }
-    
+
     // In CLOSED state, successful operations don't change anything
   }
 
   /**
    * Handle failed operation
    */
-  private onFailure(error: Error, correlationId?: CorrelationId, context?: Readonly<Record<string, unknown>>): void {
+  private onFailure(
+    error: Error,
+    correlationId?: CorrelationId,
+    context?: Readonly<Record<string, unknown>>
+  ): void {
     const currentTime = Date.now();
-    
+
     const failure: CircuitFailure = {
       timestamp: currentTime,
       error,
       correlationId,
-      context
+      context,
     };
-    
+
     this.failures.push(failure);
     this.lastFailureTime = currentTime;
     this.failureCount++;
@@ -296,28 +299,27 @@ export class CircuitBreakerService {
       threshold: this.config.failureThreshold,
       state: this.state,
       error: error.message,
-      correlationId
+      correlationId,
     });
 
     if (this.state === 'HALF_OPEN') {
       // HALF_OPEN -> OPEN: Recovery attempt failed
       Logger.error(`Circuit breaker recovery failed for ${this.serviceName}, returning to OPEN`, {
         correlationId,
-        failureCount: this.failureCount
+        failureCount: this.failureCount,
       });
-      
+
       this.state = 'OPEN';
       this.nextAttemptTime = currentTime + this.config.timeoutMs;
       this.halfOpenCallCount = 0;
-      
     } else if (this.state === 'CLOSED' && this.failureCount >= this.config.failureThreshold) {
       // CLOSED -> OPEN: Failure threshold exceeded
       Logger.error(`Circuit breaker threshold exceeded for ${this.serviceName}, opening circuit`, {
         failureCount: this.failureCount,
         threshold: this.config.failureThreshold,
-        correlationId
+        correlationId,
       });
-      
+
       this.state = 'OPEN';
       this.nextAttemptTime = currentTime + this.config.timeoutMs;
     }
@@ -329,10 +331,13 @@ export class CircuitBreakerService {
   private updateStateTransitions(currentTime: number): void {
     if (this.state === 'OPEN' && currentTime >= this.nextAttemptTime) {
       // OPEN -> HALF_OPEN: Timeout elapsed, attempt recovery
-      Logger.info(`Circuit breaker transitioning to HALF_OPEN for recovery attempt: ${this.serviceName}`, {
-        timeoutElapsed: currentTime - (this.nextAttemptTime - this.config.timeoutMs)
-      });
-      
+      Logger.info(
+        `Circuit breaker transitioning to HALF_OPEN for recovery attempt: ${this.serviceName}`,
+        {
+          timeoutElapsed: currentTime - (this.nextAttemptTime - this.config.timeoutMs),
+        }
+      );
+
       this.state = 'HALF_OPEN';
       this.halfOpenCallCount = 0;
     }
@@ -343,18 +348,18 @@ export class CircuitBreakerService {
    */
   private cleanExpiredFailures(currentTime: number): void {
     const windowStart = currentTime - this.config.monitoringWindowMs;
-    
+
     const initialFailureCount = this.failures.length;
-    this.failures = this.failures.filter(failure => failure.timestamp >= windowStart);
-    
+    this.failures = this.failures.filter((failure) => failure.timestamp >= windowStart);
+
     // Update failure count to match cleaned failures (only for CLOSED state)
     if (this.state === 'CLOSED') {
       this.failureCount = this.failures.length;
-      
+
       if (initialFailureCount !== this.failures.length) {
         Logger.info(`Cleaned expired failures for ${this.serviceName}`, {
           removed: initialFailureCount - this.failures.length,
-          remaining: this.failures.length
+          remaining: this.failures.length,
         });
       }
     }

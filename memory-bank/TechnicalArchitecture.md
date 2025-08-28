@@ -25,11 +25,11 @@ Core Patterns and Files
 
 Lifecycle Overview
 
-1) Activation: `activate()` in `src/extension.ts`
-2) Initialize services via ServiceRegistry (detect/verify Claude CLI)
-3) Register registries (commands, webviews, events)
-4) Show webview; start message bridge; handle sessions
-5) Deactivate: dispose services/providers in reverse order
+1. Activation: `activate()` in `src/extension.ts`
+2. Initialize services via ServiceRegistry (detect/verify Claude CLI)
+3. Register registries (commands, webviews, events)
+4. Show webview; start message bridge; handle sessions
+5. Deactivate: dispose services/providers in reverse order
 
 Message Protocol (VS Code ↔ Angular)
 

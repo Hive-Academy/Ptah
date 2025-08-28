@@ -18,10 +18,10 @@ export class EventRegistry implements vscode.Disposable {
 
     // Workspace events
     this.registerWorkspaceEvents();
-    
+
     // Document events
     this.registerDocumentEvents();
-    
+
     // Window events
     this.registerWindowEvents();
 
@@ -124,7 +124,7 @@ export class EventRegistry implements vscode.Disposable {
    */
   dispose(): void {
     Logger.info('Disposing event registry...');
-    this.disposables.forEach(d => d.dispose());
+    this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
   }
 }

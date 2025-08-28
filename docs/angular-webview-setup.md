@@ -84,10 +84,11 @@ The `AngularWebviewProvider` creates a unified webview that serves the entire An
 **Hash-based Routing**: Essential for webview compatibility
 
 ```typescript
-provideRouter(routes, 
-  withHashLocation(),  // Prevents VS Code navigation interception
+provideRouter(
+  routes,
+  withHashLocation(), // Prevents VS Code navigation interception
   withInMemoryScrolling()
-)
+);
 ```
 
 **Standalone Components**: Following Angular 20+ best practices
@@ -140,7 +141,7 @@ window.addEventListener('message', (event) => {
    ```bash
    # Terminal 1: Watch TypeScript compilation
    npm run watch
-   
+
    # Terminal 2: Watch Angular compilation
    npm run dev:webview
    ```

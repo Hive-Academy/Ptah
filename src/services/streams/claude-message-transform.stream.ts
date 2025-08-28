@@ -1,9 +1,9 @@
 /**
  * ClaudeMessageTransformStream - High-Performance Stream-Based Message Parser
- * 
+ *
  * Replaces AsyncIterator with Transform stream for 5-7x performance improvement
  * Target: <10ms per chunk processing time vs 165-755ms AsyncIterator baseline
- * 
+ *
  * Based on architectural analysis:
  * - Stream pipeline eliminates blocking operations
  * - Proper buffering handles partial message chunks
@@ -38,7 +38,7 @@ export interface ClaudeMessageTransformOptions {
 
 /**
  * High-performance Transform stream for parsing Claude CLI output
- * 
+ *
  * Features:
  * - <10ms chunk processing for performance target
  * - Handles partial message chunks with proper buffering
@@ -49,7 +49,7 @@ export interface ClaudeMessageTransformOptions {
 export class ClaudeMessageTransformStream extends Transform {
   private readonly sessionId: SessionId;
   private readonly maxMessageSize: number;
-  
+
   // State for message boundary parsing
   private buffer = '';
   private currentMessage: {
@@ -67,12 +67,12 @@ export class ClaudeMessageTransformStream extends Transform {
       objectMode: true,
       highWaterMark: options.highWaterMark || 16,
       readableObjectMode: true,
-      writableObjectMode: false
+      writableObjectMode: false,
     });
 
     this.sessionId = options.sessionId;
     this.maxMessageSize = options.maxMessageSize || 50000; // 50KB max message size
-    
+
     Logger.info(`Initialized ClaudeMessageTransformStream for session: ${this.sessionId}`);
   }
 
@@ -82,7 +82,7 @@ export class ClaudeMessageTransformStream extends Transform {
    */
   _transform(chunk: Buffer | string, encoding: BufferEncoding, callback: TransformCallback): void {
     const startTime = Date.now();
-    
+
     try {
       // Convert chunk to string and add to buffer
       const chunkStr = chunk instanceof Buffer ? chunk.toString('utf8') : chunk;
@@ -90,7 +90,7 @@ export class ClaudeMessageTransformStream extends Transform {
 
       // Process buffer for complete lines
       const lines = this.buffer.split('\n');
-      
+
       // Keep last incomplete line in buffer
       this.buffer = lines.pop() || '';
 
@@ -110,7 +110,7 @@ export class ClaudeMessageTransformStream extends Transform {
       Logger.error('Error processing chunk in ClaudeMessageTransformStream', {
         error,
         sessionId: this.sessionId,
-        chunkLength: typeof chunk === 'string' ? chunk.length : chunk.length
+        chunkLength: typeof chunk === 'string' ? chunk.length : chunk.length,
       });
       callback(error instanceof Error ? error : new Error('Unknown transform error'));
     }
@@ -176,7 +176,7 @@ export class ClaudeMessageTransformStream extends Transform {
       isComplete: false,
       messageId: MessageId.create(),
       sessionId: this.sessionId,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     Logger.info(`Started new ${messageType} message for session ${this.sessionId}`);
@@ -194,19 +194,20 @@ export class ClaudeMessageTransformStream extends Transform {
         isComplete: false,
         messageId: MessageId.create(),
         sessionId: this.sessionId,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     } else {
       // Append to existing message with newline
-      const newContent = this.currentMessage.content + (this.currentMessage.content ? '\n' : '') + line;
-      
+      const newContent =
+        this.currentMessage.content + (this.currentMessage.content ? '\n' : '') + line;
+
       // Check message size limits
       if (newContent.length > this.maxMessageSize) {
         Logger.warn('Message exceeds size limit, truncating');
-        
+
         this.currentMessage = {
           ...this.currentMessage,
-          content: newContent.substring(0, this.maxMessageSize)
+          content: newContent.substring(0, this.maxMessageSize),
         };
         this.emitMessage(true); // Force completion due to size limit
         return;
@@ -214,7 +215,7 @@ export class ClaudeMessageTransformStream extends Transform {
 
       this.currentMessage = {
         ...this.currentMessage,
-        content: newContent
+        content: newContent,
       };
     }
   }
@@ -233,10 +234,12 @@ export class ClaudeMessageTransformStream extends Transform {
       isComplete,
       messageId: this.currentMessage.messageId!,
       sessionId: this.sessionId,
-      timestamp: this.currentMessage.timestamp || Date.now()
+      timestamp: this.currentMessage.timestamp || Date.now(),
     };
 
-    Logger.info(`Emitting parsed message chunk: ${parsedChunk.type} (${parsedChunk.content.length} chars)`);
+    Logger.info(
+      `Emitting parsed message chunk: ${parsedChunk.type} (${parsedChunk.content.length} chars)`
+    );
 
     // Push to readable side of transform stream
     this.push(parsedChunk);
@@ -258,7 +261,7 @@ export class ClaudeMessageTransformStream extends Transform {
     return {
       sessionId: this.sessionId,
       messagesProcessed: this.messageCount,
-      bufferSize: this.buffer.length
+      bufferSize: this.buffer.length,
     };
   }
 }
@@ -266,6 +269,8 @@ export class ClaudeMessageTransformStream extends Transform {
 /**
  * Factory function for creating ClaudeMessageTransformStream instances
  */
-export function createClaudeMessageTransform(options: ClaudeMessageTransformOptions): ClaudeMessageTransformStream {
+export function createClaudeMessageTransform(
+  options: ClaudeMessageTransformOptions
+): ClaudeMessageTransformStream {
   return new ClaudeMessageTransformStream(options);
 }

@@ -16,7 +16,7 @@ export interface WebviewConfig {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class VSCodeService {
   private vscode: any;
@@ -28,7 +28,7 @@ export class VSCodeService {
     theme: 'dark',
     workspaceRoot: '',
     workspaceName: '',
-    extensionUri: ''
+    extensionUri: '',
   });
 
   private _isConnected = signal(false);
@@ -40,8 +40,8 @@ export class VSCodeService {
   // ANGULAR 20 PATTERN: Computed signals for derived state
   readonly isDevelopmentMode = computed(() => !this.isConnected());
   readonly currentTheme = computed(() => this.config().theme);
-  readonly workspaceDisplayName = computed(() =>
-    this.config().workspaceName || 'Unknown Workspace'
+  readonly workspaceDisplayName = computed(
+    () => this.config().workspaceName || 'Unknown Workspace',
   );
 
   constructor() {
@@ -77,7 +77,7 @@ export class VSCodeService {
           theme: windowConfig.theme || 'dark',
           workspaceRoot: windowConfig.workspaceRoot || '',
           workspaceName: windowConfig.workspaceName || '',
-          extensionUri: windowConfig.extensionUri || ''
+          extensionUri: windowConfig.extensionUri || '',
         });
       }
 
@@ -96,7 +96,7 @@ export class VSCodeService {
       theme: 'dark',
       workspaceRoot: '/mock/workspace',
       workspaceName: 'Mock Workspace',
-      extensionUri: ''
+      extensionUri: '',
     });
   }
 
@@ -108,7 +108,7 @@ export class VSCodeService {
       if (message.type === 'theme-change' || message.type === 'themeChanged') {
         this._config.update((config: WebviewConfig) => ({
           ...config,
-          theme: message.data?.theme || message.data
+          theme: message.data?.theme || message.data,
         }));
       }
 
@@ -132,7 +132,7 @@ export class VSCodeService {
       if (event.detail) {
         this._config.update((config: WebviewConfig) => ({
           ...config,
-          theme: event.detail.theme
+          theme: event.detail.theme,
         }));
       }
     });
@@ -166,8 +166,8 @@ export class VSCodeService {
    */
   onMessageType(messageType: string): Observable<any> {
     return this.messageSubject.pipe(
-      filter(message => message.type === messageType),
-      map(message => message.data)
+      filter((message) => message.type === messageType),
+      map((message) => message.data),
     );
   }
 

@@ -8,12 +8,12 @@ export interface VSCodeMessage {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MessageHandlerService {
   constructor(
     private vscodeService: VSCodeService,
-    private appState: AppStateManager
+    private appState: AppStateManager,
   ) {
     this.setupMessageHandling();
   }

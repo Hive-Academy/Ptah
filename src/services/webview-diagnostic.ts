@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
  * Diagnostic tool for webview issues
  */
 export class WebviewDiagnostic {
-  
   /**
    * Create a simple diagnostic webview to test if webviews work at all
    */
@@ -15,30 +14,31 @@ export class WebviewDiagnostic {
       vscode.ViewColumn.One,
       {
         enableScripts: true,
-        retainContextWhenHidden: true
+        retainContextWhenHidden: true,
       }
     );
 
     panel.webview.html = this.getDiagnosticHtml(panel.webview, context);
 
     // Handle messages from diagnostic webview
-    panel.webview.onDidReceiveMessage(
-      (message) => {
-        switch (message.type) {
-          case 'diagnostic-ready':
-            vscode.window.showInformationMessage('Diagnostic webview is working!');
-            break;
-          case 'test-complete':
-            vscode.window.showInformationMessage(`Diagnostic test complete: ${message.status}`);
-            break;
-        }
+    panel.webview.onDidReceiveMessage((message) => {
+      switch (message.type) {
+        case 'diagnostic-ready':
+          vscode.window.showInformationMessage('Diagnostic webview is working!');
+          break;
+        case 'test-complete':
+          vscode.window.showInformationMessage(`Diagnostic test complete: ${message.status}`);
+          break;
       }
-    );
+    });
 
     return panel;
   }
 
-  private static getDiagnosticHtml(webview: vscode.Webview, context: vscode.ExtensionContext): string {
+  private static getDiagnosticHtml(
+    webview: vscode.Webview,
+    context: vscode.ExtensionContext
+  ): string {
     const nonce = this.generateNonce();
 
     return `

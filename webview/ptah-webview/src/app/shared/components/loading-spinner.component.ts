@@ -13,56 +13,62 @@ import { Component, Input } from '@angular/core';
       }
     </div>
   `,
-  styles: [`
-    .ankh-spinner {
-      @apply relative;
-    }
+  styles: [
+    `
+      .ankh-spinner {
+        @apply relative;
+      }
 
-    .spinner-ankh {
-      @apply text-gold-500 animate-spin;
-      animation-duration: 2s;
-      transform-origin: center;
-    }
+      .spinner-ankh {
+        @apply text-gold-500 animate-spin;
+        animation-duration: 2s;
+        transform-origin: center;
+      }
 
-    .ankh-spinner.sm .spinner-ankh {
-      @apply text-lg;
-    }
+      .ankh-spinner.sm .spinner-ankh {
+        @apply text-lg;
+      }
 
-    .ankh-spinner.md .spinner-ankh {
-      @apply text-2xl;
-    }
+      .ankh-spinner.md .spinner-ankh {
+        @apply text-2xl;
+      }
 
-    .ankh-spinner.lg .spinner-ankh {
-      @apply text-4xl;
-    }
+      .ankh-spinner.lg .spinner-ankh {
+        @apply text-4xl;
+      }
 
-    .ankh-spinner.overlay {
-      @apply absolute inset-0 bg-black bg-opacity-20 z-50;
-    }
+      .ankh-spinner.overlay {
+        @apply absolute inset-0 bg-black bg-opacity-20 z-50;
+      }
 
-    /* Custom spinning animation for the ankh symbol */
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
+      /* Custom spinning animation for the ankh symbol */
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-    .animate-spin {
-      animation: spin 2s linear infinite;
-    }
+      .animate-spin {
+        animation: spin 2s linear infinite;
+      }
 
-    /* VS Code theme adaptations */
-    :host-context(.vscode-dark) .spinner-ankh {
-      @apply text-gold-400;
-    }
+      /* VS Code theme adaptations */
+      :host-context(.vscode-dark) .spinner-ankh {
+        @apply text-gold-400;
+      }
 
-    :host-context(.vscode-light) .spinner-ankh {
-      @apply text-gold-600;
-    }
+      :host-context(.vscode-light) .spinner-ankh {
+        @apply text-gold-600;
+      }
 
-    :host-context(.vscode-high-contrast) .spinner-ankh {
-      @apply text-white;
-    }
-  `]
+      :host-context(.vscode-high-contrast) .spinner-ankh {
+        @apply text-white;
+      }
+    `,
+  ],
 })
 export class LoadingSpinnerComponent {
   @Input() size: 'sm' | 'md' | 'lg' = 'md';

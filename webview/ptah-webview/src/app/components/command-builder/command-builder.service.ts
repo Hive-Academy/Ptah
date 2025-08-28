@@ -2,7 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { CommandTemplate, CommandCategory, CommandBuildResult } from './command-builder.types';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CommandBuilderService {
   // Signals for reactive state
@@ -23,14 +23,14 @@ export class CommandBuilderService {
     const templates = this._templates();
     const categoryMap = new Map<string, CommandCategory>();
 
-    templates.forEach(template => {
+    templates.forEach((template) => {
       if (!categoryMap.has(template.category)) {
         categoryMap.set(template.category, {
           id: template.category,
           name: this.getCategoryDisplayName(template.category),
           description: this.getCategoryDescription(template.category),
           icon: this.getCategoryIcon(template.category),
-          templates: []
+          templates: [],
         });
       }
       categoryMap.get(template.category)!.templates.push(template);
@@ -44,11 +44,12 @@ export class CommandBuilderService {
     const query = this._searchQuery().toLowerCase();
     const category = this._selectedCategory();
 
-    return templates.filter(template => {
-      const matchesSearch = !query ||
+    return templates.filter((template) => {
+      const matchesSearch =
+        !query ||
         template.name.toLowerCase().includes(query) ||
         template.description.toLowerCase().includes(query) ||
-        template.tags?.some(tag => tag.toLowerCase().includes(query));
+        template.tags?.some((tag) => tag.toLowerCase().includes(query));
 
       const matchesCategory = category === 'all' || template.category === category;
 
@@ -72,7 +73,7 @@ export class CommandBuilderService {
     if (!template) return false;
 
     // Check all required parameters are provided
-    return template.parameters.every(param => {
+    return template.parameters.every((param) => {
       if (!param.required) return true;
 
       const value = params[param.name];
@@ -95,7 +96,7 @@ export class CommandBuilderService {
     // Initialize parameters with default values
     if (template) {
       const defaultParams: Record<string, any> = {};
-      template.parameters.forEach(param => {
+      template.parameters.forEach((param) => {
         if (param.defaultValue !== undefined) {
           defaultParams[param.name] = param.defaultValue;
         }
@@ -107,9 +108,9 @@ export class CommandBuilderService {
   }
 
   updateParameter(name: string, value: any): void {
-    this._parameters.update(params => ({
+    this._parameters.update((params) => ({
       ...params,
-      [name]: value
+      [name]: value,
     }));
   }
 
@@ -136,7 +137,7 @@ export class CommandBuilderService {
     return {
       command: this.buildCommand(template, params),
       parameters: { ...params },
-      template
+      template,
     };
   }
 
@@ -144,7 +145,7 @@ export class CommandBuilderService {
     let command = template.template;
 
     // Replace parameter placeholders
-    template.parameters.forEach(param => {
+    template.parameters.forEach((param) => {
       const value = parameters[param.name];
       const placeholder = new RegExp(`\\{\\{${param.name}\\}\\}`, 'g');
 
@@ -170,7 +171,8 @@ export class CommandBuilderService {
         name: 'Comprehensive Code Review',
         description: 'Deep code review with security, performance, and best practices analysis',
         category: 'code-review',
-        template: 'Please perform a comprehensive code review focusing on {{focus}}. Analyze these specific aspects: {{aspects}}. Consider the {{experience_level}} context.\n\n{{code}}',
+        template:
+          'Please perform a comprehensive code review focusing on {{focus}}. Analyze these specific aspects: {{aspects}}. Consider the {{experience_level}} context.\n\n{{code}}',
         icon: 'search-review',
         tags: ['review', 'security', 'bugs', 'quality', 'popular'],
         parameters: [
@@ -179,7 +181,7 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Code file to review',
-            placeholder: 'Select file to review...'
+            placeholder: 'Select file to review...',
           },
           {
             name: 'focus',
@@ -193,8 +195,8 @@ export class CommandBuilderService {
               'code style and best practices',
               'maintainability and readability',
               'architecture and design patterns',
-              'accessibility compliance'
-            ]
+              'accessibility compliance',
+            ],
           },
           {
             name: 'aspects',
@@ -213,8 +215,8 @@ export class CommandBuilderService {
               'Naming conventions',
               'Type safety',
               'Concurrent access',
-              'Resource management'
-            ]
+              'Resource management',
+            ],
           },
           {
             name: 'experience_level',
@@ -222,8 +224,8 @@ export class CommandBuilderService {
             required: true,
             description: 'Developer experience level for feedback',
             defaultValue: 'intermediate',
-            options: ['beginner', 'intermediate', 'senior', 'expert']
-          }
+            options: ['beginner', 'intermediate', 'senior', 'expert'],
+          },
         ],
         examples: [
           {
@@ -231,9 +233,14 @@ export class CommandBuilderService {
             description: 'Comprehensive security vulnerability analysis',
             parameters: {
               focus: 'bugs and security issues',
-              aspects: ['Input validation', 'SQL injection prevention', 'XSS prevention', 'Error handling'],
-              experience_level: 'intermediate'
-            }
+              aspects: [
+                'Input validation',
+                'SQL injection prevention',
+                'XSS prevention',
+                'Error handling',
+              ],
+              experience_level: 'intermediate',
+            },
           },
           {
             title: 'Performance Optimization',
@@ -241,17 +248,18 @@ export class CommandBuilderService {
             parameters: {
               focus: 'performance optimization',
               aspects: ['Memory leaks', 'Performance bottlenecks', 'Resource management'],
-              experience_level: 'senior'
-            }
-          }
-        ]
+              experience_level: 'senior',
+            },
+          },
+        ],
       },
       {
         id: 'quick-code-scan',
         name: 'Quick Code Scan',
         description: 'Fast code quality check for immediate feedback',
         category: 'code-review',
-        template: 'Please do a quick scan of this {{language}} code for obvious {{issue_types}}. Provide a summary of findings:\n\n{{code}}',
+        template:
+          'Please do a quick scan of this {{language}} code for obvious {{issue_types}}. Provide a summary of findings:\n\n{{code}}',
         icon: 'scan',
         tags: ['review', 'quick', 'bugs', 'fast'],
         parameters: [
@@ -260,14 +268,14 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Code file to scan',
-            placeholder: 'Select file to scan...'
+            placeholder: 'Select file to scan...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language (auto-detected if empty)',
-            placeholder: 'e.g., TypeScript, Python, Java'
+            placeholder: 'e.g., TypeScript, Python, Java',
           },
           {
             name: 'issue_types',
@@ -279,10 +287,10 @@ export class CommandBuilderService {
               'bugs and potential issues',
               'security vulnerabilities only',
               'performance problems only',
-              'code style violations only'
-            ]
-          }
-        ]
+              'code style violations only',
+            ],
+          },
+        ],
       },
       // Testing Category
       {
@@ -290,7 +298,8 @@ export class CommandBuilderService {
         name: 'Comprehensive Test Suite',
         description: 'Generate complete test suites with various testing scenarios',
         category: 'testing',
-        template: 'Generate a comprehensive {{testType}} test suite for this {{language}} code. Include tests for {{coverage}}. Use {{framework}} testing framework:\n\n{{code}}',
+        template:
+          'Generate a comprehensive {{testType}} test suite for this {{language}} code. Include tests for {{coverage}}. Use {{framework}} testing framework:\n\n{{code}}',
         icon: 'beaker',
         tags: ['testing', 'unit tests', 'integration', 'e2e', 'popular'],
         parameters: [
@@ -299,7 +308,7 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Code to generate tests for',
-            placeholder: 'Select source file...'
+            placeholder: 'Select source file...',
           },
           {
             name: 'testType',
@@ -307,14 +316,14 @@ export class CommandBuilderService {
             required: true,
             description: 'Type of tests to generate',
             defaultValue: 'unit',
-            options: ['unit', 'integration', 'e2e', 'performance', 'security']
+            options: ['unit', 'integration', 'e2e', 'performance', 'security'],
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language (auto-detected if empty)',
-            placeholder: 'e.g., TypeScript, Python, Java'
+            placeholder: 'e.g., TypeScript, Python, Java',
           },
           {
             name: 'framework',
@@ -331,8 +340,8 @@ export class CommandBuilderService {
               'Pytest',
               'JUnit',
               'Cypress',
-              'Playwright'
-            ]
+              'Playwright',
+            ],
           },
           {
             name: 'coverage',
@@ -348,9 +357,9 @@ export class CommandBuilderService {
               'performance characteristics',
               'concurrent access',
               'mocking/stubbing',
-              'async operations'
-            ]
-          }
+              'async operations',
+            ],
+          },
         ],
         examples: [
           {
@@ -359,8 +368,8 @@ export class CommandBuilderService {
             parameters: {
               testType: 'unit',
               framework: 'Jest',
-              coverage: ['happy paths', 'error cases', 'edge cases', 'mocking/stubbing']
-            }
+              coverage: ['happy paths', 'error cases', 'edge cases', 'mocking/stubbing'],
+            },
           },
           {
             title: 'E2E Test Suite',
@@ -368,17 +377,18 @@ export class CommandBuilderService {
             parameters: {
               testType: 'e2e',
               framework: 'Playwright',
-              coverage: ['happy paths', 'error cases', 'async operations']
-            }
-          }
-        ]
+              coverage: ['happy paths', 'error cases', 'async operations'],
+            },
+          },
+        ],
       },
       {
         id: 'test-improvement',
         name: 'Improve Existing Tests',
         description: 'Enhance and improve existing test suites for better coverage',
         category: 'testing',
-        template: 'Analyze and improve these {{language}} tests. Focus on {{improvements}} and ensure {{quality_aspects}}:\n\n{{tests}}',
+        template:
+          'Analyze and improve these {{language}} tests. Focus on {{improvements}} and ensure {{quality_aspects}}:\n\n{{tests}}',
         icon: 'test-upgrade',
         tags: ['testing', 'improvement', 'coverage', 'quality'],
         parameters: [
@@ -387,14 +397,14 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Existing test file to improve',
-            placeholder: 'Select test file...'
+            placeholder: 'Select test file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'improvements',
@@ -410,8 +420,8 @@ export class CommandBuilderService {
               'test organization',
               'mock usage',
               'error scenarios',
-              'async handling'
-            ]
+              'async handling',
+            ],
           },
           {
             name: 'quality_aspects',
@@ -423,10 +433,10 @@ export class CommandBuilderService {
               'clear test names',
               'proper setup/teardown',
               'isolated tests',
-              'deterministic results'
-            ]
-          }
-        ]
+              'deterministic results',
+            ],
+          },
+        ],
       },
       // Documentation Category
       {
@@ -434,7 +444,8 @@ export class CommandBuilderService {
         name: 'Comprehensive Documentation',
         description: 'Generate complete documentation including API docs, examples, and guides',
         category: 'documentation',
-        template: 'Generate comprehensive {{docType}} documentation for this {{language}} code. Include {{sections}} and target {{audience}} level:\n\n{{code}}',
+        template:
+          'Generate comprehensive {{docType}} documentation for this {{language}} code. Include {{sections}} and target {{audience}} level:\n\n{{code}}',
         icon: 'book',
         tags: ['documentation', 'api-docs', 'examples', 'popular'],
         parameters: [
@@ -443,14 +454,14 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Code to document',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'docType',
@@ -465,8 +476,8 @@ export class CommandBuilderService {
               'JSDoc/docstrings',
               'user guide',
               'tutorial guide',
-              'technical specification'
-            ]
+              'technical specification',
+            ],
           },
           {
             name: 'sections',
@@ -484,8 +495,8 @@ export class CommandBuilderService {
               'performance notes',
               'dependencies',
               'configuration',
-              'troubleshooting'
-            ]
+              'troubleshooting',
+            ],
           },
           {
             name: 'audience',
@@ -493,8 +504,8 @@ export class CommandBuilderService {
             required: true,
             description: 'Target audience level',
             defaultValue: 'intermediate',
-            options: ['beginner', 'intermediate', 'advanced', 'expert']
-          }
+            options: ['beginner', 'intermediate', 'advanced', 'expert'],
+          },
         ],
         examples: [
           {
@@ -503,8 +514,8 @@ export class CommandBuilderService {
             parameters: {
               docType: 'API documentation',
               sections: ['overview', 'parameters', 'return values', 'examples', 'error handling'],
-              audience: 'intermediate'
-            }
+              audience: 'intermediate',
+            },
           },
           {
             title: 'README Documentation',
@@ -512,17 +523,18 @@ export class CommandBuilderService {
             parameters: {
               docType: 'README.md',
               sections: ['overview', 'usage instructions', 'examples', 'configuration'],
-              audience: 'beginner'
-            }
-          }
-        ]
+              audience: 'beginner',
+            },
+          },
+        ],
       },
       {
         id: 'explain-code',
         name: 'Explain Complex Code',
         description: 'Get detailed explanations of complex algorithms and patterns',
         category: 'documentation',
-        template: 'Please explain this {{language}} code in {{style}} style. Focus on {{focus}} and consider {{audience}} audience:\n\n{{code}}',
+        template:
+          'Please explain this {{language}} code in {{style}} style. Focus on {{focus}} and consider {{audience}} audience:\n\n{{code}}',
         icon: 'explain',
         tags: ['documentation', 'explain', 'learning', 'algorithms'],
         parameters: [
@@ -531,14 +543,14 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Code to explain',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'style',
@@ -551,8 +563,8 @@ export class CommandBuilderService {
               'technical detailed analysis',
               'concise summary',
               'step-by-step walkthrough',
-              'visual diagram approach'
-            ]
+              'visual diagram approach',
+            ],
           },
           {
             name: 'focus',
@@ -568,8 +580,8 @@ export class CommandBuilderService {
               'potential improvements',
               'data flow',
               'control flow',
-              'error handling'
-            ]
+              'error handling',
+            ],
           },
           {
             name: 'audience',
@@ -582,18 +594,20 @@ export class CommandBuilderService {
               'intermediate developer',
               'senior developer',
               'technical lead',
-              'non-technical stakeholder'
-            ]
-          }
-        ]
+              'non-technical stakeholder',
+            ],
+          },
+        ],
       },
       // Refactoring Category
       {
         id: 'comprehensive-refactoring',
         name: 'Comprehensive Code Refactoring',
-        description: 'Comprehensive refactoring for better structure, maintainability, and performance',
+        description:
+          'Comprehensive refactoring for better structure, maintainability, and performance',
         category: 'refactoring',
-        template: 'Refactor this {{language}} code to improve {{goals}}. Consider {{principles}} and maintain {{constraints}}:\n\n{{code}}',
+        template:
+          'Refactor this {{language}} code to improve {{goals}}. Consider {{principles}} and maintain {{constraints}}:\n\n{{code}}',
         icon: 'tools',
         tags: ['refactoring', 'optimization', 'structure', 'popular'],
         parameters: [
@@ -602,14 +616,14 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Code to refactor',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'goals',
@@ -625,8 +639,8 @@ export class CommandBuilderService {
               'code reuse',
               'memory efficiency',
               'scalability',
-              'modularity'
-            ]
+              'modularity',
+            ],
           },
           {
             name: 'principles',
@@ -636,21 +650,21 @@ export class CommandBuilderService {
             defaultValue: ['SOLID principles', 'DRY'],
             options: [
               'SOLID principles',
-              'DRY (Don\'t Repeat Yourself)',
+              "DRY (Don't Repeat Yourself)",
               'KISS (Keep It Simple)',
-              'YAGNI (You Aren\'t Gonna Need It)',
+              "YAGNI (You Aren't Gonna Need It)",
               'Design patterns',
               'Clean code principles',
-              'Separation of concerns'
-            ]
+              'Separation of concerns',
+            ],
           },
           {
             name: 'constraints',
             type: 'string',
             required: false,
             description: 'Constraints to maintain',
-            placeholder: 'e.g., Backward compatibility, API contracts, performance requirements'
-          }
+            placeholder: 'e.g., Backward compatibility, API contracts, performance requirements',
+          },
         ],
         examples: [
           {
@@ -659,26 +673,31 @@ export class CommandBuilderService {
             parameters: {
               goals: ['performance', 'memory efficiency'],
               principles: ['Clean code principles'],
-              constraints: 'Maintain API compatibility'
-            }
+              constraints: 'Maintain API compatibility',
+            },
           },
           {
             title: 'Maintainability Focus',
             description: 'Improve code maintainability',
             parameters: {
               goals: ['maintainability', 'readability', 'testability'],
-              principles: ['SOLID principles', 'DRY (Don\'t Repeat Yourself)', 'Separation of concerns'],
-              constraints: 'Keep existing functionality intact'
-            }
-          }
-        ]
+              principles: [
+                'SOLID principles',
+                "DRY (Don't Repeat Yourself)",
+                'Separation of concerns',
+              ],
+              constraints: 'Keep existing functionality intact',
+            },
+          },
+        ],
       },
       {
         id: 'extract-functions',
         name: 'Extract Functions/Methods',
         description: 'Extract reusable functions and methods from complex code',
         category: 'refactoring',
-        template: 'Extract {{extraction_type}} from this {{language}} code. Focus on {{criteria}} and ensure {{quality}}:\n\n{{code}}',
+        template:
+          'Extract {{extraction_type}} from this {{language}} code. Focus on {{criteria}} and ensure {{quality}}:\n\n{{code}}',
         icon: 'extract',
         tags: ['refactoring', 'functions', 'methods', 'reusability'],
         parameters: [
@@ -687,14 +706,14 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Code to extract functions from',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'extraction_type',
@@ -708,8 +727,8 @@ export class CommandBuilderService {
               'helper classes',
               'configuration objects',
               'constants and enums',
-              'type definitions'
-            ]
+              'type definitions',
+            ],
           },
           {
             name: 'criteria',
@@ -723,8 +742,8 @@ export class CommandBuilderService {
               'long methods',
               'mixed responsibilities',
               'hard-coded values',
-              'nested conditionals'
-            ]
+              'nested conditionals',
+            ],
           },
           {
             name: 'quality',
@@ -738,17 +757,18 @@ export class CommandBuilderService {
               'proper typing',
               'comprehensive documentation',
               'error handling',
-              'testable design'
-            ]
-          }
-        ]
+              'testable design',
+            ],
+          },
+        ],
       },
       {
         id: 'design-patterns',
         name: 'Apply Design Patterns',
         description: 'Refactor code to implement appropriate design patterns',
         category: 'refactoring',
-        template: 'Refactor this {{language}} code to implement {{patterns}}. Consider {{context}} and ensure {{benefits}}:\n\n{{code}}',
+        template:
+          'Refactor this {{language}} code to implement {{patterns}}. Consider {{context}} and ensure {{benefits}}:\n\n{{code}}',
         icon: 'pattern',
         tags: ['refactoring', 'patterns', 'architecture', 'design'],
         parameters: [
@@ -757,14 +777,14 @@ export class CommandBuilderService {
             type: 'file',
             required: true,
             description: 'Code to refactor with patterns',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'patterns',
@@ -781,8 +801,8 @@ export class CommandBuilderService {
               'Builder Pattern',
               'Repository Pattern',
               'Dependency Injection',
-              'MVC/MVP/MVVM'
-            ]
+              'MVC/MVP/MVVM',
+            ],
           },
           {
             name: 'context',
@@ -796,8 +816,8 @@ export class CommandBuilderService {
               'mobile application',
               'library/framework',
               'microservice',
-              'CLI application'
-            ]
+              'CLI application',
+            ],
           },
           {
             name: 'benefits',
@@ -811,10 +831,10 @@ export class CommandBuilderService {
               'testability',
               'reusability',
               'flexibility',
-              'decoupling'
-            ]
-          }
-        ]
+              'decoupling',
+            ],
+          },
+        ],
       },
       // Additional templates can be added here for specific categories
     ];
@@ -825,14 +845,14 @@ export class CommandBuilderService {
   getCategoryDisplayName(category: string): string {
     const categoryNames: Record<string, string> = {
       'code-review': 'Code Review',
-      'testing': 'Testing',
-      'documentation': 'Documentation',
-      'refactoring': 'Refactoring',
-      'analysis': 'Code Analysis',
-      'optimization': 'Optimization',
-      'generation': 'Code Generation',
-      'security': 'Security',
-      'debugging': 'Debugging'
+      testing: 'Testing',
+      documentation: 'Documentation',
+      refactoring: 'Refactoring',
+      analysis: 'Code Analysis',
+      optimization: 'Optimization',
+      generation: 'Code Generation',
+      security: 'Security',
+      debugging: 'Debugging',
     };
 
     return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
@@ -841,14 +861,14 @@ export class CommandBuilderService {
   private getCategoryDescription(category: string): string {
     const categoryDescriptions: Record<string, string> = {
       'code-review': 'Comprehensive code review and quality analysis',
-      'testing': 'Generate and improve test suites for better coverage',
-      'documentation': 'Create comprehensive documentation and explanations',
-      'refactoring': 'Refactor and restructure code for better maintainability',
-      'analysis': 'Analyze code for bugs, security issues, and improvements',
-      'optimization': 'Optimize code for performance and efficiency',
-      'generation': 'Generate new code and boilerplate templates',
-      'security': 'Security analysis and hardening techniques',
-      'debugging': 'Debug and troubleshoot code issues'
+      testing: 'Generate and improve test suites for better coverage',
+      documentation: 'Create comprehensive documentation and explanations',
+      refactoring: 'Refactor and restructure code for better maintainability',
+      analysis: 'Analyze code for bugs, security issues, and improvements',
+      optimization: 'Optimize code for performance and efficiency',
+      generation: 'Generate new code and boilerplate templates',
+      security: 'Security analysis and hardening techniques',
+      debugging: 'Debug and troubleshoot code issues',
     };
 
     return categoryDescriptions[category] || `${category} related templates`;
@@ -857,14 +877,14 @@ export class CommandBuilderService {
   private getCategoryIcon(category: string): string {
     const categoryIcons: Record<string, string> = {
       'code-review': 'search-review',
-      'testing': 'beaker',
-      'documentation': 'book',
-      'refactoring': 'tools',
-      'analysis': 'search',
-      'optimization': 'rocket',
-      'generation': 'code',
-      'security': 'shield',
-      'debugging': 'bug'
+      testing: 'beaker',
+      documentation: 'book',
+      refactoring: 'tools',
+      analysis: 'search',
+      optimization: 'rocket',
+      generation: 'code',
+      security: 'shield',
+      debugging: 'bug',
     };
 
     return categoryIcons[category] || 'folder';

@@ -15,7 +15,7 @@ export class CommandBuilderService implements vscode.Disposable {
   }
 
   async getTemplate(id: string): Promise<CommandTemplate | undefined> {
-    return this.templates.find(t => t.id === id);
+    return this.templates.find((t) => t.id === id);
   }
 
   async addCustomTemplate(template: CommandTemplate): Promise<void> {
@@ -24,7 +24,7 @@ export class CommandBuilderService implements vscode.Disposable {
   }
 
   async removeTemplate(id: string): Promise<void> {
-    this.templates = this.templates.filter(t => t.id !== id);
+    this.templates = this.templates.filter((t) => t.id !== id);
     await this.saveCustomTemplates();
   }
 
@@ -45,7 +45,8 @@ export class CommandBuilderService implements vscode.Disposable {
         name: 'Code Review',
         description: 'Comprehensive code review with security and best practices analysis',
         category: 'analysis',
-        template: 'Please review this code for {{focus}}. Pay special attention to {{aspects}}:\\n\\n{{code}}',
+        template:
+          'Please review this code for {{focus}}. Pay special attention to {{aspects}}:\\n\\n{{code}}',
         icon: 'search-review',
         tags: ['review', 'security', 'bugs', 'quality'],
         parameters: [
@@ -54,7 +55,7 @@ export class CommandBuilderService implements vscode.Disposable {
             type: 'file',
             required: true,
             description: 'Code file to review',
-            placeholder: 'Select file to review...'
+            placeholder: 'Select file to review...',
           },
           {
             name: 'focus',
@@ -67,8 +68,8 @@ export class CommandBuilderService implements vscode.Disposable {
               'performance optimization',
               'code style and best practices',
               'maintainability and readability',
-              'architecture and design patterns'
-            ]
+              'architecture and design patterns',
+            ],
           },
           {
             name: 'aspects',
@@ -83,9 +84,9 @@ export class CommandBuilderService implements vscode.Disposable {
               'Memory leaks',
               'Performance bottlenecks',
               'Code duplication',
-              'Naming conventions'
-            ]
-          }
+              'Naming conventions',
+            ],
+          },
         ],
         examples: [
           {
@@ -93,17 +94,18 @@ export class CommandBuilderService implements vscode.Disposable {
             description: 'Focus on security vulnerabilities',
             parameters: {
               focus: 'bugs and security issues',
-              aspects: ['Input validation', 'SQL injection prevention', 'XSS prevention']
-            }
-          }
-        ]
+              aspects: ['Input validation', 'SQL injection prevention', 'XSS prevention'],
+            },
+          },
+        ],
       },
       {
         id: 'generate-tests',
         name: 'Generate Tests',
         description: 'Generate comprehensive test suites for code',
         category: 'testing',
-        template: 'Generate {{testType}} tests for this {{language}} code. Include tests for {{coverage}}:\\n\\n{{code}}',
+        template:
+          'Generate {{testType}} tests for this {{language}} code. Include tests for {{coverage}}:\\n\\n{{code}}',
         icon: 'beaker',
         tags: ['testing', 'unit tests', 'integration', 'e2e'],
         parameters: [
@@ -112,7 +114,7 @@ export class CommandBuilderService implements vscode.Disposable {
             type: 'file',
             required: true,
             description: 'Code to generate tests for',
-            placeholder: 'Select source file...'
+            placeholder: 'Select source file...',
           },
           {
             name: 'testType',
@@ -120,14 +122,14 @@ export class CommandBuilderService implements vscode.Disposable {
             required: true,
             description: 'Type of tests to generate',
             defaultValue: 'unit',
-            options: ['unit', 'integration', 'e2e', 'performance']
+            options: ['unit', 'integration', 'e2e', 'performance'],
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language (auto-detected if empty)',
-            placeholder: 'e.g., TypeScript, Python, Java'
+            placeholder: 'e.g., TypeScript, Python, Java',
           },
           {
             name: 'coverage',
@@ -141,17 +143,18 @@ export class CommandBuilderService implements vscode.Disposable {
               'edge cases',
               'boundary conditions',
               'performance characteristics',
-              'concurrent access'
-            ]
-          }
-        ]
+              'concurrent access',
+            ],
+          },
+        ],
       },
       {
         id: 'explain-code',
         name: 'Explain Code',
         description: 'Get detailed explanations of complex code',
         category: 'documentation',
-        template: 'Please explain this {{language}} code in {{style}} style. Focus on {{focus}}:\\n\\n{{code}}',
+        template:
+          'Please explain this {{language}} code in {{style}} style. Focus on {{focus}}:\\n\\n{{code}}',
         icon: 'book',
         tags: ['documentation', 'explain', 'learning'],
         parameters: [
@@ -160,14 +163,14 @@ export class CommandBuilderService implements vscode.Disposable {
             type: 'file',
             required: true,
             description: 'Code to explain',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'style',
@@ -179,8 +182,8 @@ export class CommandBuilderService implements vscode.Disposable {
               'beginner-friendly',
               'technical detailed',
               'concise summary',
-              'step-by-step walkthrough'
-            ]
+              'step-by-step walkthrough',
+            ],
           },
           {
             name: 'focus',
@@ -193,10 +196,10 @@ export class CommandBuilderService implements vscode.Disposable {
               'algorithm explanation',
               'design patterns used',
               'performance characteristics',
-              'potential improvements'
-            ]
-          }
-        ]
+              'potential improvements',
+            ],
+          },
+        ],
       },
       {
         id: 'optimize-code',
@@ -212,14 +215,14 @@ export class CommandBuilderService implements vscode.Disposable {
             type: 'file',
             required: true,
             description: 'Code to optimize',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'goal',
@@ -227,29 +230,24 @@ export class CommandBuilderService implements vscode.Disposable {
             required: true,
             description: 'Optimization goal',
             defaultValue: 'performance',
-            options: [
-              'performance',
-              'memory usage',
-              'readability',
-              'maintainability',
-              'code size'
-            ]
+            options: ['performance', 'memory usage', 'readability', 'maintainability', 'code size'],
           },
           {
             name: 'constraints',
             type: 'string',
             required: false,
             description: 'Any constraints or requirements',
-            placeholder: 'e.g., Must maintain backwards compatibility'
-          }
-        ]
+            placeholder: 'e.g., Must maintain backwards compatibility',
+          },
+        ],
       },
       {
         id: 'find-bugs',
         name: 'Find Bugs',
         description: 'Identify potential bugs and issues in code',
         category: 'analysis',
-        template: 'Analyze this {{language}} code for potential bugs and issues. Focus on {{severity}} issues:\\n\\n{{code}}',
+        template:
+          'Analyze this {{language}} code for potential bugs and issues. Focus on {{severity}} issues:\\n\\n{{code}}',
         icon: 'bug',
         tags: ['bugs', 'debugging', 'analysis'],
         parameters: [
@@ -258,14 +256,14 @@ export class CommandBuilderService implements vscode.Disposable {
             type: 'file',
             required: true,
             description: 'Code to analyze for bugs',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'severity',
@@ -278,17 +276,18 @@ export class CommandBuilderService implements vscode.Disposable {
               'critical only',
               'high and critical',
               'runtime errors',
-              'logic errors'
-            ]
-          }
-        ]
+              'logic errors',
+            ],
+          },
+        ],
       },
       {
         id: 'add-documentation',
         name: 'Add Documentation',
         description: 'Generate comprehensive documentation for code',
         category: 'documentation',
-        template: 'Generate {{docType}} documentation for this {{language}} code. Include {{sections}}:\\n\\n{{code}}',
+        template:
+          'Generate {{docType}} documentation for this {{language}} code. Include {{sections}}:\\n\\n{{code}}',
         icon: 'book-open',
         tags: ['documentation', 'comments', 'readme'],
         parameters: [
@@ -297,14 +296,14 @@ export class CommandBuilderService implements vscode.Disposable {
             type: 'file',
             required: true,
             description: 'Code to document',
-            placeholder: 'Select code file...'
+            placeholder: 'Select code file...',
           },
           {
             name: 'language',
             type: 'string',
             required: false,
             description: 'Programming language',
-            placeholder: 'Auto-detected'
+            placeholder: 'Auto-detected',
           },
           {
             name: 'docType',
@@ -317,8 +316,8 @@ export class CommandBuilderService implements vscode.Disposable {
               'README.md',
               'API documentation',
               'JSDoc/docstrings',
-              'user guide'
-            ]
+              'user guide',
+            ],
           },
           {
             name: 'sections',
@@ -334,17 +333,17 @@ export class CommandBuilderService implements vscode.Disposable {
               'error handling',
               'performance notes',
               'dependencies',
-              'usage instructions'
-            ]
-          }
-        ]
-      }
+              'usage instructions',
+            ],
+          },
+        ],
+      },
     ];
   }
 
   private async saveCustomTemplates(): Promise<void> {
     try {
-      const customTemplates = this.templates.filter(t => t.tags?.includes('custom'));
+      const customTemplates = this.templates.filter((t) => t.tags?.includes('custom'));
       await this.context.globalState.update('ptah.customTemplates', customTemplates);
     } catch (error) {
       console.error('Failed to save custom templates:', error);

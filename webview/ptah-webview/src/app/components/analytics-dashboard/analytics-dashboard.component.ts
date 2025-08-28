@@ -1,16 +1,18 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, BarChart3Icon, TrendingUpIcon, ClockIcon, ZapIcon } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  BarChart3Icon,
+  TrendingUpIcon,
+  ClockIcon,
+  ZapIcon,
+} from 'lucide-angular';
 
 import { EgyptianCardComponent } from '../../shared/components/egyptian-card.component';
 
 @Component({
   selector: 'app-analytics-dashboard',
-  imports: [
-    CommonModule,
-    LucideAngularModule,
-    EgyptianCardComponent
-  ],
+  imports: [CommonModule, LucideAngularModule, EgyptianCardComponent],
   template: `
     <div class="analytics-dashboard">
       <div class="dashboard-header mb-6">
@@ -44,7 +46,11 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
 
         <app-egyptian-card variant="elevated" class="stat-card">
           <div class="flex items-center p-4">
-            <lucide-angular [img]="TrendingUpIcon" size="32" class="text-gold-500 mr-3"></lucide-angular>
+            <lucide-angular
+              [img]="TrendingUpIcon"
+              size="32"
+              class="text-gold-500 mr-3"
+            ></lucide-angular>
             <div>
               <div class="text-2xl font-bold text-hieroglyph-800">89%</div>
               <div class="text-sm text-hieroglyph-600">Success Rate</div>
@@ -54,7 +60,11 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
 
         <app-egyptian-card variant="elevated" class="stat-card">
           <div class="flex items-center p-4">
-            <lucide-angular [img]="BarChart3Icon" size="32" class="text-gold-500 mr-3"></lucide-angular>
+            <lucide-angular
+              [img]="BarChart3Icon"
+              size="32"
+              class="text-gold-500 mr-3"
+            ></lucide-angular>
             <div>
               <div class="text-2xl font-bold text-hieroglyph-800">156K</div>
               <div class="text-sm text-hieroglyph-600">Tokens Used</div>
@@ -69,7 +79,11 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
             <div class="space-y-3">
               <div class="activity-item flex items-center justify-between">
                 <div class="flex items-center">
-                  <lucide-angular [img]="ZapIcon" size="16" class="text-gold-500 mr-2"></lucide-angular>
+                  <lucide-angular
+                    [img]="ZapIcon"
+                    size="16"
+                    class="text-gold-500 mr-2"
+                  ></lucide-angular>
                   <span class="text-sm">Code review completed</span>
                 </div>
                 <span class="text-xs text-hieroglyph-500">2 min ago</span>
@@ -77,7 +91,11 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
 
               <div class="activity-item flex items-center justify-between">
                 <div class="flex items-center">
-                  <lucide-angular [img]="ZapIcon" size="16" class="text-gold-500 mr-2"></lucide-angular>
+                  <lucide-angular
+                    [img]="ZapIcon"
+                    size="16"
+                    class="text-gold-500 mr-2"
+                  ></lucide-angular>
                   <span class="text-sm">Tests generated for UserService</span>
                 </div>
                 <span class="text-xs text-hieroglyph-500">5 min ago</span>
@@ -85,7 +103,11 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
 
               <div class="activity-item flex items-center justify-between">
                 <div class="flex items-center">
-                  <lucide-angular [img]="ZapIcon" size="16" class="text-gold-500 mr-2"></lucide-angular>
+                  <lucide-angular
+                    [img]="ZapIcon"
+                    size="16"
+                    class="text-gold-500 mr-2"
+                  ></lucide-angular>
                   <span class="text-sm">Bug analysis completed</span>
                 </div>
                 <span class="text-xs text-hieroglyph-500">10 min ago</span>
@@ -132,36 +154,38 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
       </div>
     </div>
   `,
-  styles: [`
-    .analytics-dashboard {
-      @apply max-w-7xl mx-auto p-4;
-    }
+  styles: [
+    `
+      .analytics-dashboard {
+        @apply max-w-7xl mx-auto p-4;
+      }
 
-    .stat-card {
-      @apply transition-transform hover:scale-105;
-    }
+      .stat-card {
+        @apply transition-transform hover:scale-105;
+      }
 
-    .activity-item {
-      @apply border-b border-hieroglyph-100 pb-2 last:border-b-0 last:pb-0;
-    }
+      .activity-item {
+        @apply border-b border-hieroglyph-100 pb-2 last:border-b-0 last:pb-0;
+      }
 
-    .metric-row {
-      @apply last:mb-0;
-    }
+      .metric-row {
+        @apply last:mb-0;
+      }
 
-    /* VS Code theme adaptations */
-    :host-context(.vscode-dark) .analytics-dashboard {
-      @apply text-white;
-    }
+      /* VS Code theme adaptations */
+      :host-context(.vscode-dark) .analytics-dashboard {
+        @apply text-white;
+      }
 
-    :host-context(.vscode-dark) .activity-item {
-      @apply border-hieroglyph-700;
-    }
+      :host-context(.vscode-dark) .activity-item {
+        @apply border-hieroglyph-700;
+      }
 
-    :host-context(.vscode-high-contrast) .analytics-dashboard {
-      @apply text-white;
-    }
-  `]
+      :host-context(.vscode-high-contrast) .analytics-dashboard {
+        @apply text-white;
+      }
+    `,
+  ],
 })
 export class AnalyticsDashboardComponent {
   readonly BarChart3Icon = BarChart3Icon;

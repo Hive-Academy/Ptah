@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./src/**/*.{html,ts}",
-    "./src/**/*.component.{html,ts}"
-  ],
+  content: ['./src/**/*.{html,ts}', './src/**/*.component.{html,ts}'],
   theme: {
     extend: {
       colors: {
@@ -81,31 +78,31 @@ module.exports = {
           700: '#be185d',
           800: '#9d174d',
           900: '#831843',
-        }
+        },
       },
       fontFamily: {
-        'hieroglyphic': ['Papyrus', 'fantasy'],
-        'ancient': ['Trajan Pro', 'serif'],
-        'body': ['Inter', 'system-ui', 'sans-serif'],
-        'mono': ['JetBrains Mono', 'Fira Code', 'monospace'],
+        hieroglyphic: ['Papyrus', 'fantasy'],
+        ancient: ['Trajan Pro', 'serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       borderRadius: {
-        'egyptian': '0.75rem',
+        egyptian: '0.75rem',
       },
       boxShadow: {
-        'papyrus': '0 4px 6px -1px rgba(209, 155, 84, 0.1), 0 2px 4px -1px rgba(209, 155, 84, 0.06)',
-        'hieroglyph': '0 10px 15px -3px rgba(32, 33, 36, 0.1), 0 4px 6px -2px rgba(32, 33, 36, 0.05)',
-        'ankh': '0 20px 25px -5px rgba(236, 72, 153, 0.1), 0 10px 10px -5px rgba(236, 72, 153, 0.04)',
+        papyrus: '0 4px 6px -1px rgba(209, 155, 84, 0.1), 0 2px 4px -1px rgba(209, 155, 84, 0.06)',
+        hieroglyph: '0 10px 15px -3px rgba(32, 33, 36, 0.1), 0 4px 6px -2px rgba(32, 33, 36, 0.05)',
+        ankh: '0 20px 25px -5px rgba(236, 72, 153, 0.1), 0 10px 10px -5px rgba(236, 72, 153, 0.04)',
       },
       animation: {
-        'glow': 'glow 2s ease-in-out infinite alternate',
-        'float': 'float 3s ease-in-out infinite',
+        glow: 'glow 2s ease-in-out infinite alternate',
+        float: 'float 3s ease-in-out infinite',
         'scroll-hieroglyph': 'scroll-hieroglyph 20s linear infinite',
       },
       keyframes: {
         glow: {
-          'from': { boxShadow: '0 0 20px rgba(245, 158, 11, 0.5)' },
-          'to': { boxShadow: '0 0 30px rgba(245, 158, 11, 0.8), 0 0 40px rgba(245, 158, 11, 0.3)' },
+          from: { boxShadow: '0 0 20px rgba(245, 158, 11, 0.5)' },
+          to: { boxShadow: '0 0 30px rgba(245, 158, 11, 0.8), 0 0 40px rgba(245, 158, 11, 0.3)' },
         },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
@@ -114,9 +111,9 @@ module.exports = {
         'scroll-hieroglyph': {
           '0%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-50%)' },
-        }
-      }
+        },
+      },
     },
   },
   plugins: [],
-}
+};

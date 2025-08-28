@@ -3,12 +3,12 @@ import { AppStateManager, ViewType } from './app-state.service';
 import { MessageHandlerService } from './message-handler.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ViewManagerService {
   constructor(
     private appState: AppStateManager,
-    private messageHandler: MessageHandlerService
+    private messageHandler: MessageHandlerService,
   ) {}
 
   /**
@@ -25,10 +25,7 @@ export class ViewManagerService {
    * Check if view switching is allowed
    */
   canSwitchView(view: ViewType): boolean {
-    return (
-      this.appState.canSwitchViews() &&
-      view !== this.appState.currentView()
-    );
+    return this.appState.canSwitchViews() && view !== this.appState.currentView();
   }
 
   /**

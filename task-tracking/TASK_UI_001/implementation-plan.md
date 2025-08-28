@@ -7,7 +7,7 @@
 - **Current Architecture**: Angular 20.2 with Tailwind CSS 3.4.17 + Egyptian custom components (task-description.md, Section 1)
 - **CSS Analysis**: 169 lines of custom CSS across 3 SCSS files with Egyptian-themed utilities (codebase analysis)
 - **Component Structure**: 4 custom Egyptian components (EgyptianButton, EgyptianCard, EgyptianInput, LoadingSpinner) using Tailwind classes
-- **Theme Integration**: VS Code CSS custom properties already integrated with vscode-* utility classes (styles.scss, Lines 9-53)
+- **Theme Integration**: VS Code CSS custom properties already integrated with vscode-\* utility classes (styles.scss, Lines 9-53)
 
 **Business Requirements Addressed**:
 
@@ -98,7 +98,7 @@ class LightThemeStrategy implements ThemeStrategy {
     return {
       primary: { main: '#f59e0b', contrastText: '#fff' }, // Papyrus Gold
       secondary: { main: '#1e40af', contrastText: '#fff' }, // Lapis Blue
-      background: { default: theme.editorBackground, paper: '#fdf9f0' }
+      background: { default: theme.editorBackground, paper: '#fdf9f0' },
     };
   }
 }
@@ -108,7 +108,7 @@ class DarkThemeStrategy implements ThemeStrategy {
     return {
       primary: { main: '#fbbf24', contrastText: '#000' }, // Lighter Gold
       secondary: { main: '#3b82f6', contrastText: '#fff' }, // Lighter Lapis
-      background: { default: theme.editorBackground, paper: '#202124' }
+      background: { default: theme.editorBackground, paper: '#202124' },
     };
   }
 }
@@ -132,16 +132,14 @@ class MaterialButtonFactory implements MaterialComponentFactory<MatButtonConfig>
       color: config.variant === 'primary' ? 'primary' : 'secondary',
       variant: config.variant === 'tertiary' ? 'outlined' : 'raised',
       disableRipple: false,
-      className: this.getEgyptianClasses(config)
+      className: this.getEgyptianClasses(config),
     };
   }
 
   private getEgyptianClasses(config: EgyptianComponentConfig): string {
-    return [
-      'egyptian-component',
-      `egyptian-${config.variant}`,
-      `egyptian-${config.size}`
-    ].join(' ');
+    return ['egyptian-component', `egyptian-${config.variant}`, `egyptian-${config.size}`].join(
+      ' '
+    );
   }
 }
 ```
@@ -158,7 +156,7 @@ class MaterialButtonFactory implements MaterialComponentFactory<MatButtonConfig>
 export class EgyptianThemeService {
   private currentTheme = signal<MaterialThemeConfig>(this.getDefaultTheme());
   private themeStrategy = signal<ThemeStrategy>(new LightThemeStrategy());
-  
+
   readonly theme = computed(() => this.currentTheme());
   readonly egyptianAccents = computed(() => this.themeStrategy().getEgyptianAccents());
 
@@ -308,7 +306,7 @@ export class MaterialConfigService {
     return {
       color: this.mapVariantToMaterialColor(config.variant),
       variant: this.mapVariantToMaterialVariant(config.variant),
-      className: this.generateEgyptianClasses('button', config)
+      className: this.generateEgyptianClasses('button', config),
     };
   }
 
@@ -357,7 +355,7 @@ export class MaterialConfigService {
 <app-egyptian-button variant="primary" size="md">Send</app-egyptian-button>
 
 // After: Material Button with Egyptian theming
-<button mat-raised-button 
+<button mat-raised-button
         egyptianButton="primary"
         egyptianSize="md"
         color="primary">
@@ -396,7 +394,7 @@ export class MaterialConfigService {
 ```typescript
 @Directive({
   selector: '[egyptianButton]',
-  standalone: true
+  standalone: true,
 })
 export class EgyptianButtonDirective implements OnInit {
   @Input() egyptianButton: 'primary' | 'secondary' | 'tertiary' = 'primary';
@@ -409,7 +407,7 @@ export class EgyptianButtonDirective implements OnInit {
 
   ngOnInit() {
     this.applyEgyptianStyling();
-    
+
     // React to theme changes
     this.themeService.theme().subscribe(() => {
       this.updateThemeClasses();
@@ -420,9 +418,9 @@ export class EgyptianButtonDirective implements OnInit {
     const classes = [
       'egyptian-component',
       `egyptian-button-${this.egyptianButton}`,
-      `egyptian-size-${this.egyptianSize}`
+      `egyptian-size-${this.egyptianSize}`,
     ];
-    
+
     this.el.nativeElement.classList.add(...classes);
   }
 }
@@ -501,8 +499,8 @@ const EGYPTIAN_BREAKPOINTS = {
 };
 
 // Component template
-<mat-card fxLayout="column" 
-          fxLayout.lt-md="column" 
+<mat-card fxLayout="column"
+          fxLayout.lt-md="column"
           fxFlex="100"
           class="egyptian-card">
   <!-- Content scales with Material responsive system -->
@@ -512,7 +510,7 @@ const EGYPTIAN_BREAKPOINTS = {
 **Quality Gates**:
 
 - [ ] 300px minimum width fully functional
-- [ ] >600px width scales appropriately
+- [ ] > 600px width scales appropriately
 - [ ] Touch targets meet 44px minimum
 - [ ] Horizontal scrolling implemented correctly
 
@@ -527,7 +525,7 @@ interface VSCodeMaterialBridge {
     responseTime: '<200ms';
     fallbackStrategy: 'default light theme';
   };
-  
+
   cssPropertyBridge: {
     variables: VSCodeCSSVariables;
     materialMapping: MaterialThemeMapping;
@@ -546,13 +544,13 @@ interface EgyptianIdentitySystem {
     accent: '#ec4899'; // Ankh Pink
     surface: 'derived from VS Code theme';
   };
-  
+
   iconography: {
     provider: 'SVG sprite system';
     icons: ['pyramid', 'ankh', 'eye-of-horus'];
     integration: 'Material Icon registry';
   };
-  
+
   typography: {
     primary: 'Inter (body)';
     accent: 'Cinzel (headers)';
@@ -581,7 +579,7 @@ export class EgyptianPerformanceMonitor {
       console.warn(`Component ${component} loaded in ${loadTime}ms`);
     }
   }
-  
+
   trackThemeSwitch(switchTime: number): void {
     if (switchTime > 200) {
       console.warn(`Theme switch took ${switchTime}ms`);
@@ -603,7 +601,7 @@ interface AccessibilityStandards {
 // Material components inherit accessibility features
 // Egyptian directives preserve ARIA attributes
 @Directive({
-  selector: '[egyptianButton]'
+  selector: '[egyptianButton]',
 })
 export class EgyptianButtonDirective {
   ngOnInit() {
@@ -630,9 +628,9 @@ interface CSPRequirements {
 export class EgyptianStyleApplicator {
   applyStyles(element: HTMLElement, styles: EgyptianStyle[]): void {
     // ✅ CSS class application
-    const classNames = styles.map(style => style.className);
+    const classNames = styles.map((style) => style.className);
     element.classList.add(...classNames);
-    
+
     // ❌ Never do this (CSP violation)
     // element.style.background = 'gold';
   }
@@ -708,19 +706,19 @@ interface ArchitectureMetrics {
     measurement: 'analyze dependencies between services';
     tools: 'nx dependency graph, madge analysis';
   };
-  
+
   cohesion: {
     target: 'LCOM4 >0.8';
     measurement: 'service method relationships';
     tools: 'TypeScript AST analysis';
   };
-  
+
   complexity: {
     target: 'cyclomatic complexity <10 per method';
     measurement: 'decision points per function';
     tools: 'ESLint complexity rules';
   };
-  
+
   testability: {
     target: '80% code coverage';
     measurement: 'line/branch/function coverage';
@@ -738,19 +736,19 @@ interface RuntimeMetrics {
     measurement: 'Performance.measure() API';
     alerting: 'console.warn for violations';
   };
-  
+
   themeSwitch: {
     target: '<200ms adaptation time';
     measurement: 'theme change event to DOM update';
     monitoring: 'EgyptianPerformanceMonitor service';
   };
-  
+
   bundleSize: {
     target: '<15% increase from baseline';
     baseline: 'current build size measurement';
     monitoring: 'webpack-bundle-analyzer reports';
   };
-  
+
   memoryUsage: {
     target: '<50MB during normal operation';
     measurement: 'Chrome DevTools memory profiling';
@@ -768,19 +766,19 @@ interface UXMetrics {
     measurement: 'visual regression testing';
     tools: 'Playwright screenshot comparison';
   };
-  
+
   accessibility: {
     target: 'WCAG 2.1 AA compliance';
     measurement: 'automated accessibility scanning';
     tools: 'axe-core, Lighthouse accessibility audit';
   };
-  
+
   egyptianIdentity: {
     target: 'preserved gold accents, hieroglyph icons, color palette';
     measurement: 'design system validation checklist';
     validation: 'manual review against brand guidelines';
   };
-  
+
   responsiveDesign: {
     target: 'functional at 300px-600px sidebar widths';
     measurement: 'responsive breakpoint testing';

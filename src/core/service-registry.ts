@@ -65,7 +65,7 @@ export class ServiceRegistry implements vscode.Disposable {
       // Include context in the returned dependencies
       const dependencies: ServiceDependencies = {
         context: this.context,
-        ...this.services as Required<Omit<ServiceDependencies, 'context'>>
+        ...(this.services as Required<Omit<ServiceDependencies, 'context'>>),
       };
 
       return dependencies;

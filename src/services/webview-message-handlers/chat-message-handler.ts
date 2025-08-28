@@ -1,5 +1,18 @@
-import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
-import { StrictMessageType, MessagePayloadMap, MessageResponse, MessageError, ChatSendMessagePayload, ChatMessageChunkPayload, ChatSessionCreatedPayload, StrictChatMessage } from '../../types/message.types';
+import {
+  BaseWebviewMessageHandler,
+  StrictPostMessageFunction,
+  IWebviewMessageHandler,
+} from './base-message-handler';
+import {
+  StrictMessageType,
+  MessagePayloadMap,
+  MessageResponse,
+  MessageError,
+  ChatSendMessagePayload,
+  ChatMessageChunkPayload,
+  ChatSessionCreatedPayload,
+  StrictChatMessage,
+} from '../../types/message.types';
 import { SessionId, MessageId, CorrelationId } from '../../types/branded.types';
 import { SessionManager } from '../session-manager';
 import { ClaudeCliService } from '../claude-cli.service';
@@ -8,14 +21,20 @@ import { Logger } from '../../core/logger';
 /**
  * Chat Message Types - Strict type definition
  */
-type ChatMessageTypes = 'chat:sendMessage' | 'chat:newSession' | 'chat:switchSession' | 'chat:getHistory';
+type ChatMessageTypes =
+  | 'chat:sendMessage'
+  | 'chat:newSession'
+  | 'chat:switchSession'
+  | 'chat:getHistory';
 
 /**
  * ChatMessageHandler - Single Responsibility: Handle all chat-related webview messages
  * Implements real Claude CLI streaming integration with strict typing
  */
-export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTypes> 
-  implements IWebviewMessageHandler<ChatMessageTypes> {
+export class ChatMessageHandler
+  extends BaseWebviewMessageHandler<ChatMessageTypes>
+  implements IWebviewMessageHandler<ChatMessageTypes>
+{
   readonly messageType = 'chat:';
 
   constructor(
@@ -26,7 +45,10 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
     super(postMessage);
   }
 
-  async handle<K extends ChatMessageTypes>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse> {
+  async handle<K extends ChatMessageTypes>(
+    messageType: K,
+    payload: MessagePayloadMap[K]
+  ): Promise<MessageResponse> {
     try {
       switch (messageType) {
         case 'chat:sendMessage':
@@ -63,8 +85,8 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
           content: data.content,
           files: data.files,
           timestamp: new Date().toISOString(),
-          sessionId: currentSession.id
-        }
+          sessionId: currentSession.id,
+        },
       });
 
       // Add user message to session
@@ -78,7 +100,7 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
 
       // Start real Claude CLI streaming session with high-performance streams
       Logger.info(`Starting Claude CLI streaming for session: ${currentSession.id}`);
-      
+
       const messageStream = await this.claudeService.startChatSession(
         currentSession.id,
         currentSession.workspaceId
@@ -95,19 +117,21 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
       messageStream.on('data', (messageResponse: MessageResponse<StrictChatMessage>) => {
         if (!messageResponse.success) {
           // Handle circuit breaker errors specially
-          if (messageResponse.error?.code === 'CIRCUIT_BREAKER_OPEN' || 
-              messageResponse.error?.code === 'CIRCUIT_BREAKER_BLOCKED' ||
-              messageResponse.error?.code === 'CIRCUIT_BREAKER_HALF_OPEN_LIMIT') {
+          if (
+            messageResponse.error?.code === 'CIRCUIT_BREAKER_OPEN' ||
+            messageResponse.error?.code === 'CIRCUIT_BREAKER_BLOCKED' ||
+            messageResponse.error?.code === 'CIRCUIT_BREAKER_HALF_OPEN_LIMIT'
+          ) {
             Logger.warn('Circuit breaker blocking operation', {
               error: messageResponse.error,
-              sessionId: currentSession?.id
+              sessionId: currentSession?.id,
             });
-            
+
             // Send circuit breaker status to UI
             this.sendCircuitBreakerStatus(currentSession?.id as SessionId, messageResponse.error);
             return;
           }
-          
+
           Logger.error('Received error response from stream', messageResponse.error);
           return;
         }
@@ -125,14 +149,14 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
           }
 
           assistantMessageContent += chatMessage.content;
-          
+
           // Send streaming chunk to Angular with proper typing
           this.sendSuccessResponse('chat:messageChunk', {
             sessionId: chatMessage.sessionId,
             messageId: chatMessage.id,
             content: chatMessage.content,
             isComplete: chatMessage.isComplete,
-            streaming: chatMessage.streaming
+            streaming: chatMessage.streaming,
           });
         }
       });
@@ -153,7 +177,7 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
       // Mark streaming as complete and save the complete message
       if (assistantMessageContent && messageId) {
         await this.sessionManager.addAssistantMessage(currentSession.id, assistantMessageContent);
-        
+
         // Send final completion message with proper typing
         this.sendSuccessResponse('chat:messageComplete', {
           message: {
@@ -163,13 +187,13 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
             content: assistantMessageContent,
             timestamp: Date.now(),
             streaming: false,
-            isComplete: true
-          }
+            isComplete: true,
+          },
         });
       }
 
       Logger.info(`Claude CLI streaming completed for session: ${currentSession.id}`);
-      
+
       return {
         requestId: CorrelationId.create(),
         success: true,
@@ -178,10 +202,9 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
           timestamp: Date.now(),
           source: 'extension',
           sessionId: currentSession?.id as any,
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
-
     } catch (error) {
       Logger.error('Error in Claude CLI streaming:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
@@ -191,13 +214,13 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         success: false,
         error: {
           code: 'MESSAGE_SEND_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -213,8 +236,8 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create session';
@@ -224,13 +247,13 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         success: false,
         error: {
           code: 'SESSION_CREATION_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -247,8 +270,8 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to switch session';
@@ -258,13 +281,13 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         success: false,
         error: {
           code: 'SESSION_SWITCH_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -272,7 +295,7 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
   private async handleGetHistory(data: { sessionId: string }): Promise<MessageResponse> {
     try {
       const sessions = this.sessionManager.getAllSessions();
-      const session = sessions.find(s => s.id === data.sessionId);
+      const session = sessions.find((s) => s.id === data.sessionId);
       const messages = session?.messages || [];
       this.sendSuccessResponse('chat:historyLoaded', { messages });
       return {
@@ -282,8 +305,8 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load history';
@@ -293,13 +316,13 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         success: false,
         error: {
           code: 'HISTORY_LOAD_ERROR',
-          message: errorMessage
+          message: errorMessage,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -307,14 +330,19 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
   /**
    * Send circuit breaker status to Angular UI
    */
-  private sendCircuitBreakerStatus(sessionId: SessionId | undefined, error: MessageError | undefined): void {
+  private sendCircuitBreakerStatus(
+    sessionId: SessionId | undefined,
+    error: MessageError | undefined
+  ): void {
     if (!sessionId) return;
 
     const circuitStatus = this.claudeService.getCircuitBreakerStatus(sessionId);
-    
-    this.sendErrorResponse('chat:circuitBreakerOpen', 
-      `Circuit breaker is ${circuitStatus.state}. Service temporarily unavailable.`);
-      
+
+    this.sendErrorResponse(
+      'chat:circuitBreakerOpen',
+      `Circuit breaker is ${circuitStatus.state}. Service temporarily unavailable.`
+    );
+
     // Send additional circuit breaker status as a separate message
     this.postMessage({
       type: 'chat:circuitBreakerOpen',
@@ -322,16 +350,17 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         circuitState: circuitStatus.state,
         failureCount: circuitStatus.failureCount,
         nextAttemptTime: circuitStatus.nextAttemptTime,
-        canRetry: circuitStatus.state === 'HALF_OPEN' || Date.now() >= circuitStatus.nextAttemptTime,
+        canRetry:
+          circuitStatus.state === 'HALF_OPEN' || Date.now() >= circuitStatus.nextAttemptTime,
         retryIn: Math.max(0, circuitStatus.nextAttemptTime - Date.now()),
-        sessionId
+        sessionId,
       },
       metadata: {
         timestamp: Date.now(),
         source: 'extension' as const,
         sessionId,
-        version: '1.0'
-      }
+        version: '1.0',
+      },
     });
   }
 
@@ -341,19 +370,19 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
   async handleCircuitBreakerRecovery(sessionId: SessionId): Promise<MessageResponse> {
     try {
       Logger.info(`Attempting circuit breaker recovery for session: ${sessionId}`);
-      
+
       const recovered = await this.claudeService.attemptCircuitBreakerRecovery(sessionId);
-      
+
       if (recovered) {
         Logger.info(`Circuit breaker recovery successful for session: ${sessionId}`);
-        
+
         // Send recovery success to UI
         this.sendSuccessResponse('chat:circuitBreakerRecovered', {
           sessionId,
           recovered: true,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-        
+
         return {
           requestId: CorrelationId.create(),
           success: true,
@@ -362,14 +391,14 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
             timestamp: Date.now(),
             source: 'extension',
             sessionId: sessionId as any,
-            version: '1.0.0'
-          }
+            version: '1.0.0',
+          },
         };
       } else {
         Logger.warn(`Circuit breaker recovery failed for session: ${sessionId}`);
-        
+
         const circuitStatus = this.claudeService.getCircuitBreakerStatus(sessionId);
-        
+
         return {
           requestId: CorrelationId.create(),
           success: false,
@@ -380,20 +409,20 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
               sessionId,
               circuitState: circuitStatus.state,
               failureCount: circuitStatus.failureCount,
-              nextAttemptTime: circuitStatus.nextAttemptTime
-            }
+              nextAttemptTime: circuitStatus.nextAttemptTime,
+            },
           },
           metadata: {
             timestamp: Date.now(),
             source: 'extension',
             sessionId: sessionId as any,
-            version: '1.0.0'
-          }
+            version: '1.0.0',
+          },
         };
       }
     } catch (error) {
       Logger.error(`Error during circuit breaker recovery for session: ${sessionId}`, error);
-      
+
       return {
         requestId: CorrelationId.create(),
         success: false,
@@ -402,16 +431,16 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
           message: `Recovery attempt failed: ${(error as Error).message}`,
           context: {
             sessionId,
-            error: (error as Error).message
+            error: (error as Error).message,
           },
-          stack: (error as Error).stack
+          stack: (error as Error).stack,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
           sessionId: sessionId as any,
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -421,17 +450,19 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
    */
   handleCircuitBreakerReset(sessionId?: SessionId): MessageResponse {
     try {
-      Logger.info(`Manual circuit breaker reset${sessionId ? ` for session: ${sessionId}` : ' (global)'}`);
-      
+      Logger.info(
+        `Manual circuit breaker reset${sessionId ? ` for session: ${sessionId}` : ' (global)'}`
+      );
+
       this.claudeService.resetCircuitBreaker(sessionId);
-      
+
       // Send reset confirmation to UI
       this.sendSuccessResponse('chat:circuitBreakerReset', {
         sessionId,
         reset: true,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
+
       return {
         requestId: CorrelationId.create(),
         success: true,
@@ -440,12 +471,15 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
           timestamp: Date.now(),
           source: 'extension',
           sessionId: sessionId as any,
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
-      Logger.error(`Error during circuit breaker reset${sessionId ? ` for session: ${sessionId}` : ' (global)'}`, error);
-      
+      Logger.error(
+        `Error during circuit breaker reset${sessionId ? ` for session: ${sessionId}` : ' (global)'}`,
+        error
+      );
+
       return {
         requestId: CorrelationId.create(),
         success: false,
@@ -454,15 +488,15 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
           message: `Reset failed: ${(error as Error).message}`,
           context: {
             sessionId,
-            error: (error as Error).message
-          }
+            error: (error as Error).message,
+          },
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
           sessionId: sessionId as any,
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }
@@ -473,7 +507,7 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
   getCircuitBreakerHealth(): MessageResponse {
     try {
       const healthStatus = this.claudeService.getHealthStatus();
-      
+
       return {
         requestId: CorrelationId.create(),
         success: true,
@@ -481,24 +515,24 @@ export class ChatMessageHandler extends BaseWebviewMessageHandler<ChatMessageTyp
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     } catch (error) {
       Logger.error('Error getting circuit breaker health status', error);
-      
+
       return {
         requestId: CorrelationId.create(),
         success: false,
         error: {
           code: 'CIRCUIT_BREAKER_HEALTH_ERROR',
-          message: `Health check failed: ${(error as Error).message}`
+          message: `Health check failed: ${(error as Error).message}`,
         },
         metadata: {
           timestamp: Date.now(),
           source: 'extension',
-          version: '1.0.0'
-        }
+          version: '1.0.0',
+        },
       };
     }
   }

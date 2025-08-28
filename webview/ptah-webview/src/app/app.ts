@@ -1,4 +1,12 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  signal,
+  computed,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { LoadingSpinnerComponent } from './shared';
 import { AppStateManager, ViewType } from './core/services/app-state.service';
 import { ViewManagerService } from './core/services/view-manager.service';
@@ -12,22 +20,20 @@ import { AnalyticsComponent } from './components/analytics/analytics.component';
 
 @Component({
   selector: 'app-root',
-  imports: [
-    LoadingSpinnerComponent,
-    ChatComponent,
-    AnalyticsComponent
-  ],
+  imports: [LoadingSpinnerComponent, ChatComponent, AnalyticsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './app.html',
-  styles: [`
-    :host {
-      display: block;
-      height: 100vh;
-      width: 100%;
-      background-color: var(--vscode-editor-background);
-      color: var(--vscode-editor-foreground);
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+        height: 100vh;
+        width: 100%;
+        background-color: var(--vscode-editor-background);
+        color: var(--vscode-editor-foreground);
+      }
+    `,
+  ],
 })
 export class App implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -110,12 +116,11 @@ export class App implements OnInit, OnDestroy {
     // No need for additional VS Code navigation handling here
 
     // Listen for theme changes
-    this.vscodeService.onMessageType('themeChanged')
-      .subscribe((themeData) => {
-        console.log('Theme changed:', themeData);
-        // The theme is already updated in VSCodeService
-        // You can add additional theme handling here if needed
-      });
+    this.vscodeService.onMessageType('themeChanged').subscribe((themeData) => {
+      console.log('Theme changed:', themeData);
+      // The theme is already updated in VSCodeService
+      // You can add additional theme handling here if needed
+    });
   }
 
   // REMOVED: setupRouterLogging - no longer using Angular Router

@@ -3,18 +3,21 @@
 ## 📊 Research Evidence Summary
 
 **Key Research Findings Integration**:
+
 - **Performance Impact**: Current AsyncIterator architecture causes 165-755ms latency (architectural-analysis-report.md, Lines 265-270)
-- **Type Safety Crisis**: 'any' types throughout message handlers eliminate compile-time safety (Lines 493-500)  
+- **Type Safety Crisis**: 'any' types throughout message handlers eliminate compile-time safety (Lines 493-500)
 - **Stream Performance**: Modern Node.js streams achieve <10ms latency vs current AsyncIterator (Lines 381-400, 905-917)
 - **Research Coverage**: 92% of architectural recommendations addressed with documented evidence
 
 **Current Codebase Critical Issues Identified**:
+
 - **Extension Layer**: `payload: any` in message-router.ts:23, chat-message-handler.ts:21
 - **Common Types**: `defaultValue?: any` in common.types.ts:42, missing branded types
 - **Angular State**: `workspaceInfo: any` in app-state.service.ts:10, hardcoded IDs in chat.component.ts:177
 - **CLI Integration**: AsyncIterator memory leaks, no backpressure handling in claude-cli.service.ts:73-112
 
 **Business Requirements Addressed**:
+
 - **Requirement 1.1**: Eliminate all 'any' types for compile-time safety (architectural-analysis-report.md, Section 489-743)
 - **Requirement 1.2**: Achieve <100ms p95 latency (5-7x performance improvement) (Lines 847-848)
 - **Requirement 1.3**: 99% automatic error recovery with structured hierarchy (Lines 852-853)
@@ -107,13 +110,14 @@ type CorrelationId = string & { readonly __brand: 'CorrelationId' };
 // Smart constructors with validation
 export const SessionId = {
   create: (): SessionId => uuidv4() as SessionId,
-  validate: (id: string): id is SessionId => /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id),
+  validate: (id: string): id is SessionId =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id),
   from: (id: string): SessionId => {
     if (!SessionId.validate(id)) {
       throw new TypeError(`Invalid SessionId format: ${id}`);
     }
     return id as SessionId;
-  }
+  },
 };
 ```
 
@@ -133,11 +137,14 @@ interface TypedMessageRequest<T = unknown> {
 }
 
 class TypeSafeMessageHandler {
-  private pendingRequests = new Map<CorrelationId, { 
-    resolve: (value: unknown) => void; 
-    reject: (reason: Error) => void;
-    timeout: NodeJS.Timeout;
-  }>();
+  private pendingRequests = new Map<
+    CorrelationId,
+    {
+      resolve: (value: unknown) => void;
+      reject: (reason: Error) => void;
+      timeout: NodeJS.Timeout;
+    }
+  >();
 }
 ```
 
@@ -151,7 +158,7 @@ class TypeSafeMessageHandler {
 ```typescript
 class StreamBasedCliService extends Readable {
   private childProcess: ChildProcess;
-  
+
   _read(size: number) {
     // Implement backpressure handling
     if (this.childProcess.stdout?.readableFlowing) {
@@ -231,35 +238,37 @@ Quality Attributes:
 **Requirements**: 1.1 (from architectural-analysis-report.md Section 489-743)
 
 **Backend Developer Handoff**:
+
 - **Primary File**: `D:\projects\Ptah\src\types\common.types.ts`
-- **Secondary Files**: 
+- **Secondary Files**:
   - `D:\projects\Ptah\src\types\message.types.ts` (NEW)
   - `D:\projects\Ptah\src\types\branded.types.ts` (NEW)
 
 **Interface Requirements**:
+
 ```typescript
 // Replace current 'any' types with strict discriminated unions
-type StrictMessageType = 
-    | 'chat:sendMessage' 
-    | 'chat:messageChunk' 
-    | 'chat:sessionStart' 
-    | 'chat:sessionEnd'
-    | 'context:updateFiles'
-    | 'analytics:trackEvent';
+type StrictMessageType =
+  | 'chat:sendMessage'
+  | 'chat:messageChunk'
+  | 'chat:sessionStart'
+  | 'chat:sessionEnd'
+  | 'context:updateFiles'
+  | 'analytics:trackEvent';
 
 interface MessagePayloadMap {
-    'chat:sendMessage': ChatSendMessagePayload;
-    'chat:messageChunk': ChatMessageChunkPayload;
-    'chat:sessionStart': SessionStartPayload;
-    'chat:sessionEnd': SessionEndPayload;
-    'context:updateFiles': ContextUpdatePayload;
-    'analytics:trackEvent': AnalyticsEventPayload;
+  'chat:sendMessage': ChatSendMessagePayload;
+  'chat:messageChunk': ChatMessageChunkPayload;
+  'chat:sessionStart': SessionStartPayload;
+  'chat:sessionEnd': SessionEndPayload;
+  'context:updateFiles': ContextUpdatePayload;
+  'analytics:trackEvent': AnalyticsEventPayload;
 }
 
 interface StrictMessage<T extends StrictMessageType = StrictMessageType> {
-    type: T;
-    payload: MessagePayloadMap[T];
-    metadata: MessageMetadata;
+  type: T;
+  payload: MessagePayloadMap[T];
+  metadata: MessageMetadata;
 }
 ```
 
@@ -274,18 +283,18 @@ type SessionId = string & { readonly __brand: 'SessionId' };
 type MessageId = string & { readonly __brand: 'MessageId' };
 type CorrelationId = string & { readonly __brand: 'CorrelationId' };
 
-// NEW: src/types/message.types.ts  
+// NEW: src/types/message.types.ts
 interface TypedMessageRequest<T = unknown> {
-    id: CorrelationId;
-    type: MessageType;
-    payload: T;
-    timestamp: number;
+  id: CorrelationId;
+  type: MessageType;
+  payload: T;
+  timestamp: number;
 }
 
 // MODIFIED: src/types/common.types.ts (remove all 'any' types)
 export interface ChatMessage {
-  id: MessageId;  // Changed from string
-  sessionId: SessionId;  // Changed from string
+  id: MessageId; // Changed from string
+  sessionId: SessionId; // Changed from string
   type: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
@@ -313,10 +322,12 @@ export interface ChatMessage {
 **Requirements**: 1.2 (reliable message delivery)
 
 **Backend Developer Handoff**:
+
 - **Primary File**: `D:\projects\Ptah\src\services\webview-message-handlers\message-router.ts`
 - **Interface**: Replace `routeMessage(messageType: string, payload: any)` with strict typing
 
 **Implementation Steps**:
+
 1. Add generic type constraints to `routeMessage<T extends MessageType>`
 2. Implement correlation ID tracking for request-response matching
 3. Add timeout handling for all message requests (30s default)
@@ -331,7 +342,7 @@ export class TypeSafeWebviewMessageRouter {
   private pendingRequests = new Map<CorrelationId, PendingRequest>();
 
   async routeMessage<T extends MessageType>(
-    messageType: T, 
+    messageType: T,
     payload: MessagePayloadMap[T],
     correlationId?: CorrelationId
   ): Promise<MessageResponseMap[T]> {
@@ -341,6 +352,7 @@ export class TypeSafeWebviewMessageRouter {
 ```
 
 **Quality Gates**:
+
 - [ ] Generic type constraints implemented
 - [ ] Correlation ID tracking functional
 - [ ] Timeout handling with configurable values
@@ -356,10 +368,12 @@ export class TypeSafeWebviewMessageRouter {
 **Requirements**: 1.3 (input validation and sanitization)
 
 **Backend Developer Handoff**:
+
 - **Primary File**: `D:\projects\Ptah\src\services\validation\message-validator.service.ts` (NEW)
 - **Interface**: Runtime validation for all message payloads
 
 **Implementation Steps**:
+
 1. Create Zod schemas for all message types using discriminated unions
 2. Implement ValidationError hierarchy with context information
 3. Add runtime validation wrapper for all message handlers
@@ -372,21 +386,21 @@ export class TypeSafeWebviewMessageRouter {
 import { z } from 'zod';
 
 const ChatMessageSchema = z.discriminatedUnion('type', [
-    z.object({
-        type: z.literal('user'),
-        id: z.string().uuid(),
-        content: z.string().min(1).max(10000),
-        timestamp: z.number().positive(),
-        files: z.array(z.string()).optional()
-    }),
-    z.object({
-        type: z.literal('assistant'),
-        id: z.string().uuid(), 
-        content: z.string(),
-        timestamp: z.number().positive(),
-        streaming: z.boolean(),
-        isComplete: z.boolean()
-    })
+  z.object({
+    type: z.literal('user'),
+    id: z.string().uuid(),
+    content: z.string().min(1).max(10000),
+    timestamp: z.number().positive(),
+    files: z.array(z.string()).optional(),
+  }),
+  z.object({
+    type: z.literal('assistant'),
+    id: z.string().uuid(),
+    content: z.string(),
+    timestamp: z.number().positive(),
+    streaming: z.boolean(),
+    isComplete: z.boolean(),
+  }),
 ]);
 
 export class MessageValidator {
@@ -395,7 +409,7 @@ export class MessageValidator {
     if (!result.success) {
       throw new ValidationError('Invalid message structure', {
         errors: result.error.errors,
-        received: data
+        received: data,
       });
     }
     return result.data;
@@ -404,6 +418,7 @@ export class MessageValidator {
 ```
 
 **Quality Gates**:
+
 - [ ] Zod schemas for all message types
 - [ ] Runtime validation with proper error context
 - [ ] Type inference maintaining compile-time safety
@@ -421,10 +436,12 @@ export class MessageValidator {
 **Requirements**: 2.1 (achieve <100ms p95 latency)
 
 **Backend Developer Handoff**:
+
 - **Primary File**: `D:\projects\Ptah\src\services\claude-cli.service.ts`
 - **Replace**: Lines 73-112 `createChatIterator` method with stream-based approach
 
 **Implementation Steps**:
+
 1. Replace `startChatSession()` return type from `AsyncIterator<ChatMessage>` to `Readable`
 2. Create `ClaudeMessageTransformStream` class extending Transform
 3. Implement backpressure handling with configurable buffer sizes
@@ -436,7 +453,7 @@ export class MessageValidator {
 // MODIFIED: claude-cli.service.ts
 class ClaudeMessageTransformStream extends Transform {
   constructor(sessionId: SessionId) {
-    super({ 
+    super({
       objectMode: true,
       highWaterMark: 16 // Backpressure threshold
     });
@@ -451,7 +468,7 @@ class ClaudeMessageTransformStream extends Transform {
 
 startChatSession(sessionId: SessionId, projectPath?: string): Readable {
   const childProcess = spawn(this.claudeInstallation.path, args, { stdio: 'pipe' });
-  
+
   return childProcess.stdout
     .pipe(new ClaudeMessageTransformStream(sessionId))
     .pipe(new MessageValidationStream());
@@ -459,6 +476,7 @@ startChatSession(sessionId: SessionId, projectPath?: string): Readable {
 ```
 
 **Quality Gates**:
+
 - [ ] AsyncIterator completely removed
 - [ ] Transform streams implemented with proper typing
 - [ ] Backpressure handling functional
@@ -474,10 +492,12 @@ startChatSession(sessionId: SessionId, projectPath?: string): Readable {
 **Requirements**: 2.2 (99% automatic error recovery)
 
 **Backend Developer Handoff**:
+
 - **Primary File**: `D:\projects\Ptah\src\services\resilience\circuit-breaker.service.ts` (NEW)
 - **Integration**: Wrap CLI service calls with circuit breaker
 
 **Implementation Steps**:
+
 1. Create configurable CircuitBreaker class with states (CLOSED/OPEN/HALF_OPEN)
 2. Add failure threshold tracking and recovery timeout logic
 3. Implement graceful degradation strategies for different failure types
@@ -491,7 +511,7 @@ class CircuitBreaker {
   private failureCount = 0;
   private lastFailureTime = 0;
   private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
-  
+
   async execute<T>(operation: () => Promise<T>): Promise<T> {
     if (this.state === 'OPEN') {
       if (Date.now() - this.lastFailureTime > this.timeout) {
@@ -500,7 +520,7 @@ class CircuitBreaker {
         throw new ServiceUnavailableError('Circuit breaker is OPEN');
       }
     }
-    
+
     try {
       const result = await operation();
       this.onSuccess();
@@ -514,6 +534,7 @@ class CircuitBreaker {
 ```
 
 **Quality Gates**:
+
 - [ ] Circuit breaker states implemented correctly
 - [ ] Configurable failure thresholds and timeouts
 - [ ] Graceful degradation strategies
@@ -531,12 +552,14 @@ class CircuitBreaker {
 **Requirements**: 3.1 (frontend type safety)
 
 **Frontend Developer Handoff**:
-- **Primary Files**: 
+
+- **Primary Files**:
   - `D:\projects\Ptah\webview\ptah-webview\src\app\core\services\app-state.service.ts`
   - `D:\projects\Ptah\webview\ptah-webview\src\app\components\chat\chat.component.ts`
 - **Interface**: Replace all 'any' types with proper TypeScript interfaces
 
 **Implementation Steps**:
+
 1. Create proper WorkspaceInfo interface replacing 'any' type
 2. Replace hardcoded string IDs with branded MessageId types
 3. Add type-safe message handling in chat component
@@ -556,7 +579,7 @@ export interface WorkspaceInfo {
 
 private readonly _workspaceInfo = signal<WorkspaceInfo | null>(null);
 
-// MODIFIED: chat.component.ts  
+// MODIFIED: chat.component.ts
 interface TypedChatMessage {
   id: MessageId;  // Branded type instead of string
   type: 'user' | 'assistant' | 'system';
@@ -583,6 +606,7 @@ private handleMessageChunk(data: { content: string; isComplete: boolean }): void
 ```
 
 **Quality Gates**:
+
 - [ ] Zero 'any' types in Angular services
 - [ ] Branded types integrated with Angular signals
 - [ ] Proper error handling with typed error objects
@@ -592,18 +616,21 @@ private handleMessageChunk(data: { content: string; isComplete: boolean }): void
 ## 📊 Evidence-Based Success Metrics
 
 ### Performance Targets (Research-Backed)
+
 - **Message Latency**: <100ms p95 (vs current 165-755ms) - 5-7x improvement (architectural-analysis-report.md Lines 847-848)
 - **Memory Usage**: <50MB steady state (vs unbounded growth) - Lines 849-850
 - **CPU Usage**: <10% during streaming (vs current 15-30%) - Lines 282-285
 - **Type Coverage**: 100% strict typing (zero 'any' types) - Lines 722-725
 
 ### Reliability Targets (Evidence-Based)
+
 - **Error Recovery**: 99% automatic recovery (vs fragmented handling) - Lines 852-853
-- **Message Delivery**: 99.9% delivery guarantee with correlation IDs - Lines 854-855  
+- **Message Delivery**: 99.9% delivery guarantee with correlation IDs - Lines 854-855
 - **State Consistency**: Zero state divergence across layers - Line 855
 - **Request Timeout**: 30s configurable with proper error context
 
 ### Developer Experience (Research Findings)
+
 - **Debug Time**: 80% reduction in issue triage time - Lines 858-860
 - **Error Clarity**: 100% errors include actionable context with structured hierarchy
 - **Type Safety**: Compile-time validation prevents 95% of runtime message errors
@@ -612,29 +639,35 @@ private handleMessageChunk(data: { content: string; isComplete: boolean }): void
 ## 🔄 Migration Strategy Timeline
 
 ### Phase 1: Type Safety Foundation (Week 1) - CRITICAL
+
 **Objective**: Eliminate all 'any' types and establish strict typing foundation
 **Evidence Priority**: Lines 504-538 identify this as highest impact for reliability
-**Success Criteria**: 
+**Success Criteria**:
+
 - Zero 'any' types across all message interfaces
 - Branded type system operational with validation
 - Zod schemas providing runtime safety
 - All message handlers strictly typed
 
-### Phase 2: Stream-Based CLI Integration (Week 2) - PERFORMANCE  
+### Phase 2: Stream-Based CLI Integration (Week 2) - PERFORMANCE
+
 **Objective**: Replace AsyncIterator bottleneck with high-performance streams
 **Evidence Priority**: Lines 381-400 show this eliminates 165-755ms latency
 **Success Criteria**:
+
 - <50ms CLI message processing latency
 - Backpressure handling preventing UI freezes
 - Circuit breaker providing automatic recovery
 - Memory usage stable under load
 
 ### Phase 3: Angular Integration (Week 3) - CONSISTENCY
+
 **Objective**: Complete type safety across frontend with proper state management
 **Evidence Priority**: Lines 402-484 show hybrid RxJS+Signals pattern benefits
 **Success Criteria**:
+
 - Angular components fully typed with branded types
-- Signal-based state management with proper error boundaries  
+- Signal-based state management with proper error boundaries
 - Integration tests covering all communication flows
 - Performance targets met end-to-end
 
@@ -643,7 +676,7 @@ private handleMessageChunk(data: { content: string; isComplete: boolean }): void
 ### Mandatory Quality Checklist (10/10 Required)
 
 1. **Research Integration**: 92% of architectural recommendations addressed with evidence
-2. **Type Safety**: Zero 'any' types, full TypeScript strict mode compliance  
+2. **Type Safety**: Zero 'any' types, full TypeScript strict mode compliance
 3. **Pattern Consistency**: Stream-first, request-response, branded types applied correctly
 4. **Error Handling**: Structured hierarchy with context and automatic recovery
 5. **Testing Strategy**: 90%+ coverage with typed integration tests
@@ -662,6 +695,7 @@ private handleMessageChunk(data: { content: string; isComplete: boolean }): void
 **Decision**: Implement Node.js Transform streams with backpressure handling
 **Evidence**: Research shows <10ms latency achievable (Lines 905-917)  
 **Consequences**:
+
 - (+) 5-7x performance improvement in message processing
 - (+) Proper backpressure prevents UI freezing
 - (+) Better error boundaries and lifecycle management
@@ -675,6 +709,7 @@ private handleMessageChunk(data: { content: string; isComplete: boolean }): void
 **Decision**: Implement branded types with Zod validation for runtime safety
 **Evidence**: Lines 540-564 provide comprehensive branded type strategy
 **Consequences**:
+
 - (+) Prevents ID mixing and type confusion at compile time
 - (+) Runtime validation catches malformed data early
 - (+) 95% reduction in type-related runtime errors
@@ -688,6 +723,7 @@ private handleMessageChunk(data: { content: string; isComplete: boolean }): void
 **Decision**: Implement correlation ID tracking for all message flows
 **Evidence**: Lines 340-378 show exact implementation pattern
 **Consequences**:
+
 - (+) 99.9% message delivery guarantee
 - (+) 80% reduction in debugging complexity
 - (+) Proper timeout handling and error context
@@ -697,28 +733,33 @@ private handleMessageChunk(data: { content: string; isComplete: boolean }): void
 ## 🤝 Next Steps & Developer Assignment
 
 ### Immediate Priority (Week 1)
+
 **Agent**: backend-developer  
 **Task Focus**: Type Safety Foundation (Subtasks 1.1-1.3)
 **Complexity Assessment**: HIGH (12 hours total estimated)
 **Success Criteria**: Zero 'any' types, branded type system operational, Zod validation functional
 
 **Critical Success Factors**:
+
 1. Apply all embedded architectural patterns consistently
 2. Address research recommendations systematically (target 90%+ coverage)
 3. Maintain professional progress tracking with 30-minute checkpoint commits
 4. Meet evidence-backed acceptance criteria before proceeding to Phase 2
 
 ### Quality Gate Requirement
+
 All tasks must include:
-- Specific acceptance criteria with measurable outcomes  
+
+- Specific acceptance criteria with measurable outcomes
 - Professional progress tracking with timestamps
 - Evidence trail documentation with source references
 - File limits compliance (services <200 lines, modules <500 lines)
 - 10/10 embedded quality checklist compliance
 
-**Timeline Commitment**: 
+**Timeline Commitment**:
+
 - Phase 1: 3 business days (type safety foundation)
-- Phase 2: 3 business days (stream integration) 
+- Phase 2: 3 business days (stream integration)
 - Phase 3: 2 business days (Angular integration)
 - **Total Delivery**: 8 business days (1.6 weeks)
 

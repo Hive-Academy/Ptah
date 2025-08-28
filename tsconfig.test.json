@@ -6,15 +6,6 @@
     "noEmit": false,
     "types": ["node", "mocha"]
   },
-  "include": [
-    "test-*.ts",
-    "src/test/**/*.ts",
-    "**/*.test.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    ".vscode-test", 
-    "webview",
-    "docs"
-  ]
+  "include": ["test-*.ts", "src/test/**/*.ts", "**/*.test.ts"],
+  "exclude": ["node_modules", ".vscode-test", "webview", "docs"]
 }

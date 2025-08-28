@@ -372,7 +372,6 @@ console.log('Resuming workflow as [role name] with proper boundaries');
    ```
 
 3. **IMPLEMENT SUBTASK** (Follow architect's specifications)
-
    - Create/modify files as specified
    - Write unit tests
    - Perform integration testing

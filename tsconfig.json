@@ -13,5 +13,13 @@
     "resolveJsonModule": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", ".vscode-test", "webview", "out", "docs", "**/*.test.ts", "test-*.ts"]
+  "exclude": [
+    "node_modules",
+    ".vscode-test",
+    "webview",
+    "out",
+    "docs",
+    "**/*.test.ts",
+    "test-*.ts"
+  ]
 }

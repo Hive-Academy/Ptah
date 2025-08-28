@@ -20,9 +20,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       [style.color]="'var(--vscode-button-foreground)'"
       [style.borderColor]="'var(--vscode-button-border, transparent)'"
       [style.fontFamily]="'var(--vscode-font-family)'"
-      [style.fontSize]="'var(--vscode-font-size)'">
+      [style.fontSize]="'var(--vscode-font-size)'"
+    >
       @if (iconData) {
-        <lucide-angular [img]="iconData" [class]="iconOnly ? 'w-4 h-4' : 'w-4 h-4 mr-2'"></lucide-angular>
+        <lucide-angular
+          [img]="iconData"
+          [class]="iconOnly ? 'w-4 h-4' : 'w-4 h-4 mr-2'"
+        ></lucide-angular>
       }
       @if (!iconOnly) {
         <ng-content></ng-content>
@@ -30,10 +34,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       @if (loading) {
         <div class="animate-spin ml-2 inline-block">⏳</div>
       }
-      
+
       <!-- Egyptian golden accent for active state -->
       @if (active) {
-        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-gold-400 rounded-full opacity-80"></div>
+        <div
+          class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-gold-400 rounded-full opacity-80"
+        ></div>
       }
     </button>
   `,
@@ -42,34 +48,35 @@ export class EgyptianButtonComponent {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() disabled: boolean = false;
   @Input() loading: boolean = false;
-  @Input() icon?: string;  // Deprecated - use iconData
-  @Input() iconData?: LucideIconData;  // New Lucide icon support
-  @Input() iconOnly: boolean = false;  // Icon-only button mode
-  @Input() active: boolean = false;  // Active state support
+  @Input() icon?: string; // Deprecated - use iconData
+  @Input() iconData?: LucideIconData; // New Lucide icon support
+  @Input() iconOnly: boolean = false; // Icon-only button mode
+  @Input() active: boolean = false; // Active state support
   @Input() variant: 'primary' | 'secondary' | 'tertiary' = 'primary';
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
   @Input() ariaLabel?: string;
-  @Input() tooltip: string = '';  // Tooltip text
+  @Input() tooltip: string = ''; // Tooltip text
   @Input() tooltipPosition: 'above' | 'below' | 'left' | 'right' = 'above';
-  @Input() tooltipClass: string = 'bg-hieroglyph-800 text-papyrus-50 text-xs px-3 py-1 rounded-md shadow-papyrus border border-gold-400/20';  // Egyptian-themed Tailwind tooltip
+  @Input() tooltipClass: string =
+    'bg-hieroglyph-800 text-papyrus-50 text-xs px-3 py-1 rounded-md shadow-papyrus border border-gold-400/20'; // Egyptian-themed Tailwind tooltip
   @Output() clicked = new EventEmitter<void>();
 
   get buttonClasses(): string {
     const baseClasses = [
       // Base layout and positioning
       'relative inline-flex items-center justify-center',
-      
+
       // Border and shape
       'border rounded-sm',
-      
+
       // Transitions and cursor
       'transition-all duration-150 ease-in-out cursor-pointer',
-      
+
       // Focus management
       'outline-none focus:outline-none',
-      
+
       // Egyptian golden focus ring
-      'focus:ring-2 focus:ring-gold-400 focus:ring-opacity-30 focus:ring-offset-1'
+      'focus:ring-2 focus:ring-gold-400 focus:ring-opacity-30 focus:ring-offset-1',
     ];
 
     // Size variants
@@ -89,7 +96,7 @@ export class EgyptianButtonComponent {
     if (!this.disabled) {
       baseClasses.push(
         'hover:bg-[var(--vscode-button-hoverBackground)]',
-        'hover:text-[var(--vscode-button-hoverForeground)]'
+        'hover:text-[var(--vscode-button-hoverForeground)]',
       );
     }
 
@@ -107,9 +114,9 @@ export class EgyptianButtonComponent {
     if (this.variant === 'secondary') {
       baseClasses.push(
         'bg-[var(--vscode-button-secondaryBackground)]',
-        'text-[var(--vscode-button-secondaryForeground)]'
+        'text-[var(--vscode-button-secondaryForeground)]',
       );
-      
+
       if (!this.disabled) {
         baseClasses.push('hover:bg-[var(--vscode-button-secondaryHoverBackground)]');
       }

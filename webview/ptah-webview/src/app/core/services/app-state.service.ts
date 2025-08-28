@@ -18,7 +18,7 @@ export interface WorkspaceInfo {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AppStateManager {
   // Core state signals
@@ -115,7 +115,7 @@ export class AppStateManager {
   private persistState(): void {
     const state = {
       currentView: this._currentView(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     this.vscodeService.saveState(state);
@@ -128,7 +128,7 @@ export class AppStateManager {
       isLoading: this._isLoading(),
       statusMessage: this._statusMessage(),
       workspaceInfo: this._workspaceInfo(),
-      isConnected: this._isConnected()
+      isConnected: this._isConnected(),
     };
   }
 }

@@ -2,12 +2,32 @@ import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, filter } from 'rxjs';
-import { LucideAngularModule, SendIcon, PlusIcon, SettingsIcon, HistoryIcon, FileTextIcon, ZapIcon, CodeIcon, RefreshCwIcon, EditIcon, FileIcon, SearchIcon, FlaskConicalIcon, BookOpenIcon, TrendingUpIcon, CommandIcon } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  SendIcon,
+  PlusIcon,
+  SettingsIcon,
+  HistoryIcon,
+  FileTextIcon,
+  ZapIcon,
+  CodeIcon,
+  RefreshCwIcon,
+  EditIcon,
+  FileIcon,
+  SearchIcon,
+  FlaskConicalIcon,
+  BookOpenIcon,
+  TrendingUpIcon,
+  CommandIcon,
+} from 'lucide-angular';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SimpleHeaderComponent } from '../simple-header/simple-header.component';
 import { AgentDropdownComponent, Agent } from '../../shared/components/agent-dropdown.component';
-import { CommandsBottomSheetComponent, CommandTemplate } from '../../shared/components/commands-bottom-sheet.component';
+import {
+  CommandsBottomSheetComponent,
+  CommandTemplate,
+} from '../../shared/components/commands-bottom-sheet.component';
 import { EgyptianButtonComponent } from '../../shared/components/egyptian-button.component';
 import { EgyptianInputComponent } from '../../shared/components/egyptian-input.component';
 import { EgyptianThemeService } from '../../core/services/egyptian-theme.service';
@@ -45,9 +65,10 @@ interface ChatSession {
     AgentDropdownComponent,
     CommandsBottomSheetComponent,
     EgyptianButtonComponent,
-    EgyptianInputComponent
+    EgyptianInputComponent,
   ],
   templateUrl: './chat.component.html',
+
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -80,7 +101,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   messages = signal<ChatMessage[]>([]);
   currentSession = signal<ChatSession | null>(null);
   workspaceInfo = signal<any>(null);
-  
+
   // New UI state
   selectedAgent = signal('general');
   selectedSecondaryAgent = signal<string | undefined>(undefined);
@@ -88,9 +109,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   isConnected = signal(true);
 
   // Computed
-  canSendMessage = computed(() =>
-    this.currentMessage().trim().length > 0 && !this.isStreaming()
-  );
+  canSendMessage = computed(() => this.currentMessage().trim().length > 0 && !this.isStreaming());
 
   ngOnInit(): void {
     this.setupMessageHandlers();
@@ -104,10 +123,14 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   private setupMessageHandlers(): void {
     // Listen for chat-specific messages from VS Code
-    this.vscode.onMessage()
+    this.vscode
+      .onMessage()
       .pipe(
-        filter((message: VSCodeMessage) => message.type.startsWith('chat:') || message.type === 'initialData'),
-        takeUntil(this.destroy$)
+        filter(
+          (message: VSCodeMessage) =>
+            message.type.startsWith('chat:') || message.type === 'initialData',
+        ),
+        takeUntil(this.destroy$),
       )
       .subscribe((message: VSCodeMessage) => {
         switch (message.type) {
@@ -150,7 +173,6 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.isLoading.set(false);
         }
       }, 3000);
-
     } catch (error) {
       console.error('Failed to initialize chat:', error);
       this.isLoading.set(false);
@@ -191,7 +213,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         type: 'assistant',
         content: data.content,
         timestamp: new Date().toISOString(),
-        streaming: true
+        streaming: true,
       });
     } else {
       // Update the streaming message
@@ -212,7 +234,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   private handleMessageComplete(message: ChatMessage): void {
     const currentMessages = this.messages();
-    const streamingMessageIndex = currentMessages.findIndex(m => m.streaming);
+    const streamingMessageIndex = currentMessages.findIndex((m) => m.streaming);
 
     if (streamingMessageIndex !== -1) {
       // Replace streaming message with complete message
@@ -234,7 +256,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       type: 'system',
       content: errorMessage,
       timestamp: new Date().toISOString(),
-      isError: true
+      isError: true,
     });
 
     this.isStreaming.set(false);
@@ -249,7 +271,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       id: Date.now().toString(),
       type: 'user',
       content,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     // Clear input

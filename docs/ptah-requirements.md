@@ -11,7 +11,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **"Zero friction access to Claude Code's complete capabilities within your natural development environment"**
 
 - **Native Workflow Integration** - No context switching between applications
-- **Complete Feature Coverage** - Every Claude Code CLI capability accessible through visual interfaces  
+- **Complete Feature Coverage** - Every Claude Code CLI capability accessible through visual interfaces
 - **Intelligent Context Awareness** - Automatically understands current project and workspace
 - **Familiar UI Patterns** - Uses VS Code paradigms developers already know
 - **Zero Setup Friction** - Install extension and immediately productive
@@ -31,6 +31,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **As a developer, I want to chat with Claude Code directly in my VS Code sidebar without leaving my editor.**
 
 **VS Code Integration:**
+
 - Dedicated activity bar icon with unread indicators
 - Collapsible sidebar webview with full chat interface
 - Integration with VS Code's file explorer for easy file attachment
@@ -38,6 +39,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Status bar integration showing active session status
 
 **Chat Features:**
+
 - Real-time streaming responses with syntax highlighting
 - File attachment via drag-and-drop from VS Code explorer
 - Message history with search and filtering
@@ -46,6 +48,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Context-aware file suggestions from current workspace
 
 **Visual Elements:**
+
 ```
 ├── Activity Bar
 │   └── Ptah Icon (📜) with notification badge
@@ -59,6 +62,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 ```
 
 **Acceptance Criteria:**
+
 - [ ] Chat sidebar integrates seamlessly with VS Code's native UI
 - [ ] File attachments work via drag-and-drop from explorer
 - [ ] Real-time streaming displays responses as they're generated
@@ -70,6 +74,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **As a developer, I want to build Claude Code commands through VS Code's command palette and visual interfaces.**
 
 **Command Palette Integration:**
+
 - `Ptah: Build Command` - Opens visual command builder
 - `Ptah: Quick Review` - Instant code review of current file
 - `Ptah: Generate Tests` - Test generation for current file/selection
@@ -78,6 +83,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - `Ptah: Add Documentation` - Generate docs for current function/class
 
 **Visual Builder Panel:**
+
 - Template gallery with search and categories
 - Dynamic parameter forms with file pickers
 - Live command preview with syntax highlighting
@@ -85,12 +91,14 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Custom template creation and workspace sharing
 
 **Smart Context Integration:**
+
 - Auto-detect current file type and suggest relevant templates
 - Include currently selected code in templates automatically
 - Workspace-aware file suggestions for multi-file operations
 - Git integration for change-based operations
 
 **Acceptance Criteria:**
+
 - [ ] Command palette provides instant access to common templates
 - [ ] Visual builder eliminates need to learn CLI syntax
 - [ ] Generated commands execute identically to manual CLI usage
@@ -102,6 +110,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **As a developer, I want to visually manage what files Claude Code can access with smart workspace integration.**
 
 **File Explorer Integration:**
+
 - Custom TreeView provider showing context-included files
 - Right-click context menus for include/exclude operations
 - Visual indicators (icons) showing file inclusion status
@@ -109,6 +118,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Context templates for different project types
 
 **Context Visualization Panel:**
+
 - Real-time token usage meter with optimization suggestions
 - File size breakdown and type analysis
 - Context optimization recommendations
@@ -116,6 +126,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Preview of what Claude "sees" in the current context
 
 **Workspace Intelligence:**
+
 - Auto-detect project type and suggest optimal context rules
 - Gitignore integration for smart exclusion suggestions
 - Large file detection and summarization options
@@ -123,6 +134,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Multi-root workspace support with per-root context
 
 **Visual Elements:**
+
 ```
 ├── Explorer Panel
 │   ├── Files (with context indicators: ✓ included, ✗ excluded)
@@ -135,6 +147,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 ```
 
 **Acceptance Criteria:**
+
 - [ ] File inclusion status immediately visible in explorer
 - [ ] Context changes update token count in real-time
 - [ ] Optimization suggestions help stay within token limits
@@ -146,6 +159,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **As a developer, I want Claude Code sessions that understand and adapt to my VS Code workspace.**
 
 **Workspace Integration:**
+
 - Automatic session creation per workspace
 - Session isolation between different projects
 - Workspace-specific settings and preferences
@@ -153,6 +167,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Cross-workspace session switching
 
 **Session Features:**
+
 - Visual session timeline with branching conversations
 - Session bookmarking and tagging
 - Quick session switching via command palette
@@ -160,6 +175,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Session templates for common workflows
 
 **Project Intelligence:**
+
 - Auto-detect project type (React, Python, Node.js, etc.)
 - Workspace-specific context rules and templates
 - Integration with VS Code's recent workspaces
@@ -167,6 +183,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Package.json/requirements.txt analysis for better context
 
 **Status Integration:**
+
 ```
 ├── Status Bar Items
 │   ├── "Ptah: React Project • Session #3 • 2.1K tokens"
@@ -178,6 +195,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 ```
 
 **Acceptance Criteria:**
+
 - [ ] Sessions automatically create and restore per workspace
 - [ ] Session switching preserves context and history
 - [ ] Project type detection provides intelligent defaults
@@ -189,6 +207,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **As a developer, I want to create and manage Claude Code subagents through VS Code interfaces.**
 
 **Subagent Library Panel:**
+
 - Visual subagent browser with search and filtering
 - Subagent creation wizard with step-by-step guidance
 - Template library for common development tasks
@@ -196,6 +215,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Performance analytics showing subagent effectiveness
 
 **VS Code Integration:**
+
 - Command palette commands for quick subagent invocation
 - Settings integration for subagent configuration
 - Workspace-specific subagent libraries
@@ -203,6 +223,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Integration with VS Code's extension settings UI
 
 **Creation Workflow:**
+
 ```
 1. Template Selection - Choose base or start from scratch
 2. Configuration - Name, description, system prompt
@@ -212,12 +233,14 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 ```
 
 **Smart Features:**
+
 - Context-aware subagent suggestions
 - Auto-generate subagents from common command patterns
 - Integration with workspace-specific development workflows
 - Team sharing through workspace configuration files
 
 **Acceptance Criteria:**
+
 - [ ] Subagent creation requires no manual configuration file editing
 - [ ] Testing interface helps debug subagent behavior
 - [ ] Command palette provides instant subagent access
@@ -229,6 +252,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **As a developer, I want insights into my Claude Code usage within VS Code's interface.**
 
 **Dashboard Panel:**
+
 - Token usage tracking with daily/weekly/monthly views
 - Cost estimation and budget warnings
 - Session productivity metrics (tasks completed, time saved)
@@ -236,12 +260,14 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Workspace-specific usage patterns
 
 **Status Bar Integration:**
+
 - Real-time token count for current session
 - Click to open analytics dashboard
 - Budget warnings and optimization alerts
 - Quick cost estimates for planned operations
 
 **Insights Features:**
+
 - Usage pattern analysis (peak coding times, most productive workflows)
 - Command effectiveness metrics (success rates, user satisfaction)
 - Optimization recommendations (faster workflows, cost savings)
@@ -249,10 +275,11 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Export data for further analysis
 
 **Visual Components:**
+
 ```
 ├── Analytics Panel (webview)
 │   ├── Usage Charts (token consumption over time)
-│   ├── Cost Tracking (with budget alerts)  
+│   ├── Cost Tracking (with budget alerts)
 │   ├── Productivity Metrics (tasks completed, efficiency)
 │   ├── Command Analytics (most used, most effective)
 │   └── Optimization Suggestions (actionable improvements)
@@ -261,6 +288,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 ```
 
 **Acceptance Criteria:**
+
 - [ ] Analytics provide actionable insights for workflow optimization
 - [ ] Cost tracking helps users manage API usage budgets
 - [ ] Real-time feedback improves session awareness
@@ -276,6 +304,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **Deep integration with VS Code's editor capabilities.**
 
 **Editor Features:**
+
 - Inline code suggestions and improvements
 - Hover providers for code explanation
 - Code lens integration for quick actions
@@ -283,6 +312,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Quick fix providers using Claude Code
 
 **Text Selection Integration:**
+
 - Right-click context menu for Claude actions
 - Selection-based command building
 - Inline diff view for suggested changes
@@ -293,6 +323,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **Leverage VS Code's Git integration for intelligent workflows.**
 
 **Git Features:**
+
 - Commit message generation from staged changes
 - Code review of diffs and pull requests
 - Change impact analysis
@@ -304,6 +335,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 **Integrate with popular VS Code extensions.**
 
 **Popular Extension Integration:**
+
 - Live Share integration for collaborative sessions
 - Debugger integration for error analysis
 - Test explorer integration for test generation
@@ -317,12 +349,14 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 ### VS Code Extension Requirements
 
 **Extension Manifest:**
+
 - Minimum VS Code version: 1.74.0
 - Extension categories: AI, Code Review, Productivity
 - Activation events: onCommand, onLanguage, onStartupFinished
 - Required APIs: webview, filesystem, workspace, commands, window
 
 **Performance Requirements:**
+
 - Extension activation time < 500ms
 - Webview load time < 1s
 - Chat response latency < 100ms UI responsiveness
@@ -330,6 +364,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Support for large workspaces (10k+ files)
 
 **Integration Requirements:**
+
 - Seamless Claude Code CLI integration
 - Support for all Claude Code providers (Anthropic, Bedrock, Vertex)
 - Cross-platform compatibility (Windows, macOS, Linux)
@@ -339,6 +374,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 ### User Experience Requirements
 
 **Professional Integration:**
+
 - Consistent with VS Code's design language
 - Keyboard shortcuts following VS Code conventions
 - Accessible UI following VS Code's accessibility standards
@@ -346,6 +382,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 - Error handling with helpful recovery suggestions
 
 **Performance Standards:**
+
 - Smooth animations and transitions
 - Responsive UI during Claude operations
 - Graceful handling of Claude API timeouts
@@ -436,7 +473,7 @@ Ptah transforms the Claude Code CLI experience by embedding it directly into dev
 ### Key Differentiators:
 
 1. **Complete Claude Code Integration** - Every CLI feature accessible through visual interfaces
-2. **Native Workspace Awareness** - Understands your project context automatically  
+2. **Native Workspace Awareness** - Understands your project context automatically
 3. **Zero Friction Adoption** - Install extension and immediately productive
 4. **Professional Developer Experience** - Matches VS Code's quality and design standards
 5. **Intelligent Automation** - Smart defaults and context-aware suggestions

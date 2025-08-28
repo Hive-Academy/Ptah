@@ -482,14 +482,12 @@ Return status showing which frontend requirements are complete.
 When a task requires both backend and frontend work:
 
 1. **First: Backend Developer**
-
    - Implement API endpoints, services, database logic
    - Create DTOs and interfaces
    - Set up data flow architecture
    - Document API contracts in progress.md
 
 2. **Then: Frontend Developer**
-
    - Consume the backend APIs
    - Create UI components and pages
    - Implement state management
@@ -678,7 +676,6 @@ Return APPROVED if user's requirements are met, otherwise NEEDS_REVISION.
 
 1. Update task registry with completion status
 2. Create completion-report.md with:
-
    - Executive summary
    - Metrics achieved
    - Lessons learned

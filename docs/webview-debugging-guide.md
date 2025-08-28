@@ -106,7 +106,7 @@ out/
 cd webview/ptah-webview
 npm run build:webview
 
-# Test extension compilation works  
+# Test extension compilation works
 npm run compile
 
 # Test both together
@@ -115,11 +115,11 @@ npm run build:all
 
 ## Quick Reference
 
-| Issue | What to Check | Fix Location |
-|-------|---------------|--------------|
-| Empty webview | Console for 404s | `webview-html-generator.ts` |
-| No Angular app | Network tab for failed loads | Angular build process |
-| No VS Code API | Extension logs | Extension registration |
-| Theme not working | VS Code integration script | HTML generator |
+| Issue             | What to Check                | Fix Location                |
+| ----------------- | ---------------------------- | --------------------------- |
+| Empty webview     | Console for 404s             | `webview-html-generator.ts` |
+| No Angular app    | Network tab for failed loads | Angular build process       |
+| No VS Code API    | Extension logs               | Extension registration      |
+| Theme not working | VS Code integration script   | HTML generator              |
 
 Remember: Always check **both** the extension console AND the webview developer tools!

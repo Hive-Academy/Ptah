@@ -24,21 +24,17 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       'postMessage',
       'getState',
       'setState',
-      'onMessage'
+      'onMessage',
     ]);
 
     await TestBed.configureTestingModule({
-      imports: [
-        App,
-        NoopAnimationsModule,
-        ...SHARED_COMPONENTS
-      ],
+      imports: [App, NoopAnimationsModule, ...SHARED_COMPONENTS],
       providers: [
         { provide: VSCodeService, useValue: vscodeServiceSpy },
         AppStateService,
         EgyptianThemeService,
-        MaterialConfigService
-      ]
+        MaterialConfigService,
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(App);
@@ -48,7 +44,6 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
   });
 
   describe('Extension Loading Tests', () => {
-    
     it('should create the application successfully', () => {
       expect(app).toBeTruthy();
     });
@@ -61,9 +56,8 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       expect(materialElements.length).toBeGreaterThan(0);
 
       // Verify Material 20 specific classes exist
-      const hasMaterial20Elements = Array.from(materialElements).some(element => 
-        element.className.includes('mdc-') || 
-        element.className.includes('mat-mdc-')
+      const hasMaterial20Elements = Array.from(materialElements).some(
+        (element) => element.className.includes('mdc-') || element.className.includes('mat-mdc-'),
       );
       expect(hasMaterial20Elements).toBe(true);
     });
@@ -75,7 +69,7 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
 
     it('should establish VS Code communication', () => {
       fixture.detectChanges();
-      
+
       // Should attempt to get initial VS Code state
       expect(mockVSCodeService.getState).toHaveBeenCalled();
     });
@@ -101,16 +95,16 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       expect(console.error).not.toHaveBeenCalled();
       // Allow bundle size warnings
       const warnCalls = (console.warn as jasmine.Spy).calls.all();
-      const nonBundleWarnings = warnCalls.filter(call => 
-        !call.args[0]?.toString().includes('bundle') && 
-        !call.args[0]?.toString().includes('budget')
+      const nonBundleWarnings = warnCalls.filter(
+        (call) =>
+          !call.args[0]?.toString().includes('bundle') &&
+          !call.args[0]?.toString().includes('budget'),
       );
       expect(nonBundleWarnings.length).toBe(0);
     });
   });
 
   describe('Egyptian Identity Integration', () => {
-    
     it('should apply Egyptian accents to Material components', async () => {
       fixture.detectChanges();
       await fixture.whenStable();
@@ -119,8 +113,8 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       expect(egyptianElements.length).toBeGreaterThan(0);
 
       // Verify Egyptian + Material class combinations
-      const hasEgyptianMaterialCombination = Array.from(egyptianElements).some(element =>
-        element.className.includes('mat-') && element.className.includes('egyptian-')
+      const hasEgyptianMaterialCombination = Array.from(egyptianElements).some(
+        (element) => element.className.includes('mat-') && element.className.includes('egyptian-'),
       );
       expect(hasEgyptianMaterialCombination).toBe(true);
     });
@@ -140,17 +134,17 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       expect(iconElements.length).toBeGreaterThan(0);
 
       // Should have some Egyptian-themed icons
-      const hasEgyptianIcons = Array.from(iconElements).some(icon =>
-        icon.textContent?.includes('⚱') || // Urn
-        icon.textContent?.includes('𓋹') || // Ankh-like
-        icon.className.includes('egyptian')
+      const hasEgyptianIcons = Array.from(iconElements).some(
+        (icon) =>
+          icon.textContent?.includes('⚱') || // Urn
+          icon.textContent?.includes('𓋹') || // Ankh-like
+          icon.className.includes('egyptian'),
       );
       expect(hasEgyptianIcons).toBe(true);
     });
   });
 
   describe('Webview Constraints Compliance', () => {
-    
     it('should not use inline styles (CSP compliance)', () => {
       fixture.detectChanges();
 
@@ -176,7 +170,7 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
 
       // Simulate receiving a message from VS Code
       const testMessage = { type: 'theme-change', data: { theme: 'dark' } };
-      
+
       // Should not throw when processing messages
       expect(() => {
         // Mock message processing would happen here
@@ -185,13 +179,12 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
   });
 
   describe('Bundle Size and Performance', () => {
-    
     it('should load within acceptable time limits', async () => {
       const startTime = performance.now();
-      
+
       fixture.detectChanges();
       await fixture.whenStable();
-      
+
       const loadTime = performance.now() - startTime;
       expect(loadTime).toBeLessThan(1000); // Should load under 1 second
     });
@@ -202,10 +195,10 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       // Should only include used Material components
       const materialElements = fixture.nativeElement.querySelectorAll('[class*="mat-"]');
       const uniqueComponents = new Set();
-      
-      materialElements.forEach(element => {
+
+      materialElements.forEach((element) => {
         const classes = element.className.split(' ');
-        classes.forEach(cls => {
+        classes.forEach((cls) => {
           if (cls.startsWith('mat-') && cls.includes('-')) {
             const component = cls.split('-')[1];
             uniqueComponents.add(component);
@@ -222,7 +215,7 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       // Simulate narrow sidebar
       fixture.nativeElement.style.width = '300px';
       fixture.nativeElement.style.maxWidth = '300px';
-      
+
       fixture.detectChanges();
 
       // Should not overflow horizontally
@@ -233,7 +226,6 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
   });
 
   describe('Theme Switching Performance', () => {
-    
     it('should switch themes quickly', async () => {
       fixture.detectChanges();
       await fixture.whenStable();
@@ -246,7 +238,7 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
 
       // Trigger theme detection
       window.dispatchEvent(new Event('vscode-theme-changed'));
-      
+
       fixture.detectChanges();
       await fixture.whenStable();
 
@@ -259,7 +251,8 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       await fixture.whenStable();
 
       // Initial Egyptian elements count
-      const initialEgyptianElements = fixture.nativeElement.querySelectorAll('[class*="egyptian-"]').length;
+      const initialEgyptianElements =
+        fixture.nativeElement.querySelectorAll('[class*="egyptian-"]').length;
 
       // Switch theme
       document.documentElement.style.setProperty('--vscode-editor-background', '#ffffff');
@@ -267,25 +260,27 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       await fixture.whenStable();
 
       // Egyptian elements should remain
-      const afterSwitchElements = fixture.nativeElement.querySelectorAll('[class*="egyptian-"]').length;
+      const afterSwitchElements =
+        fixture.nativeElement.querySelectorAll('[class*="egyptian-"]').length;
       expect(afterSwitchElements).toBe(initialEgyptianElements);
     });
   });
 
   describe('Accessibility in VS Code Context', () => {
-    
     it('should maintain ARIA labels in webview context', () => {
       fixture.detectChanges();
 
-      const interactiveElements = fixture.nativeElement.querySelectorAll('button, input, [role="button"]');
-      
-      interactiveElements.forEach(element => {
-        const hasAccessibleName = 
+      const interactiveElements = fixture.nativeElement.querySelectorAll(
+        'button, input, [role="button"]',
+      );
+
+      interactiveElements.forEach((element) => {
+        const hasAccessibleName =
           element.getAttribute('aria-label') ||
           element.getAttribute('aria-labelledby') ||
           element.textContent?.trim() ||
           element.querySelector('[aria-label]');
-          
+
         expect(hasAccessibleName).toBeTruthy();
       });
     });
@@ -295,13 +290,13 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       await fixture.whenStable();
 
       const focusableElements = fixture.nativeElement.querySelectorAll(
-        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
       );
 
       expect(focusableElements.length).toBeGreaterThan(0);
 
       // Test tab navigation
-      focusableElements.forEach(element => {
+      focusableElements.forEach((element) => {
         expect(element.tabIndex).not.toBe(-1);
       });
     });
@@ -316,7 +311,7 @@ describe('VS Code Extension Integration - UI/UX Revamp', () => {
       await fixture.whenStable();
 
       const elements = fixture.nativeElement.querySelectorAll('button, input, [role="button"]');
-      elements.forEach(element => {
+      elements.forEach((element) => {
         const styles = getComputedStyle(element);
         const borderWidth = parseFloat(styles.borderWidth);
         expect(borderWidth).toBeGreaterThan(0); // Should have visible borders in high contrast

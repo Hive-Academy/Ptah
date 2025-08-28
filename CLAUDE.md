@@ -1,4 +1,3 @@
-
 # 📜 PTAH PROJECT SPECIFICS
 
 ## Project Overview
@@ -19,7 +18,7 @@ npm run compile
 # Watch mode for development
 npm run watch
 
-# Lint TypeScript code  
+# Lint TypeScript code
 npm run lint
 
 # Run tests
@@ -84,7 +83,7 @@ Press `F5` in VS Code to launch Extension Development Host for testing.
 All shared types defined in `src/types/common.types.ts`:
 
 - **ChatMessage** - Core messaging with streaming support
-- **ChatSession** - Session management with token tracking  
+- **ChatSession** - Session management with token tracking
 - **CommandTemplate** - Visual command builder templates
 - **ContextInfo** - File inclusion/optimization suggestions
 
@@ -145,7 +144,7 @@ import { SHARED_COMPONENTS } from '../shared';
 // Extension -> Webview
 webview.postMessage({ type: 'updateChat', data: chatMessage });
 
-// Webview -> Extension  
+// Webview -> Extension
 vscode.postMessage({ type: 'sendMessage', data: { content: 'message' } });
 ```
 
@@ -161,13 +160,13 @@ vscode.postMessage({ type: 'sendMessage', data: { content: 'message' } });
 ### 🔴 ABSOLUTE REQUIREMENTS (VIOLATIONS = IMMEDIATE FAILURE)
 
 1. **MANDATORY AGENT WORKFLOW**: Every development request MUST use `/orchestrate` command - NO direct implementation unless user explicitly confirms "quick fix only"
-2. **TYPE/SCHEMA REUSE PROTOCOL**: Search existing shared/common libraries FIRST, document search in progress.md, extend existing never duplicate  
+2. **TYPE/SCHEMA REUSE PROTOCOL**: Search existing shared/common libraries FIRST, document search in progress.md, extend existing never duplicate
 3. **NO BACKWARD COMPATIBILITY**: Never target backward compatibility unless explicitly requested by user
 4. **NO CROSS-LIBRARY POLLUTION**: Libraries/modules must not re-export types/services from other libraries
 
 ### 🎯 QUALITY ENFORCEMENT STANDARDS
 
-- **Type/Schema Safety**: Zero loose types (any, object, *, etc.) - strict typing always
+- **Type/Schema Safety**: Zero loose types (any, object, \*, etc.) - strict typing always
 - **Import Standards**: Use project-detected alias paths consistently
 - **Code Size Limits**: Services <200 lines, modules <500 lines, functions <30 lines
 - **Test Coverage**: Minimum 80% across line/branch/function coverage
@@ -181,21 +180,21 @@ vscode.postMessage({ type: 'sendMessage', data: { content: 'message' } });
 **MANDATORY**: All agent workflows follow this pattern:
 
 1. **User Request** → **Claude Code Main Thread** → **Registry Check**
-2. **Route Decision** → **Agent Selection** → **Single Agent Execution**  
+2. **Route Decision** → **Agent Selection** → **Single Agent Execution**
 3. **Agent Completion** → **Quality Gate Validation** → **Return to Main Thread**
 4. **Next Agent Selection** OR **Task Completion**
 
 ### Core Agent Roles (Technology Agnostic)
 
-| Agent Role | Symbol | Primary Responsibility | When to Invoke |
-|------------|--------|----------------------|----------------|
-| **project-manager** | 🪃 | Requirements analysis, strategic planning | Complex tasks, new features |
-| **researcher-expert** | 🔎 | Technical research, best practices | Knowledge gaps, technology evaluation |
-| **software-architect** | 🏗️ | System design, architecture planning | After requirements clear |
-| **backend-developer** | 💻 | Server-side implementation | API, services, data layer work |
-| **frontend-developer** | 🎨 | Client-side implementation | UI, components, user interaction |
-| **senior-tester** | 🧪 | Quality assurance, testing strategy | After implementation |
-| **code-reviewer** | 🔍 | Final quality validation | Before task completion |
+| Agent Role             | Symbol | Primary Responsibility                    | When to Invoke                        |
+| ---------------------- | ------ | ----------------------------------------- | ------------------------------------- |
+| **project-manager**    | 🪃     | Requirements analysis, strategic planning | Complex tasks, new features           |
+| **researcher-expert**  | 🔎     | Technical research, best practices        | Knowledge gaps, technology evaluation |
+| **software-architect** | 🏗️     | System design, architecture planning      | After requirements clear              |
+| **backend-developer**  | 💻     | Server-side implementation                | API, services, data layer work        |
+| **frontend-developer** | 🎨     | Client-side implementation                | UI, components, user interaction      |
+| **senior-tester**      | 🧪     | Quality assurance, testing strategy       | After implementation                  |
+| **code-reviewer**      | 🔍     | Final quality validation                  | Before task completion                |
 
 ### Delegation Protocol
 
@@ -239,7 +238,7 @@ vscode.postMessage({ type: 'sendMessage', data: { content: 'message' } });
 **Type/Schema Safety:**
 
 - Comprehensive type definitions for all data structures
-- Runtime validation where static typing unavailable  
+- Runtime validation where static typing unavailable
 - Proper error handling and boundary conditions
 - No escape hatches unless absolutely necessary with documentation
 
@@ -277,7 +276,7 @@ vscode.postMessage({ type: 'sendMessage', data: { content: 'message' } });
 task-tracking/
   TASK_[ID]/
     ├── task-description.md     # Business requirements, acceptance criteria
-    ├── research-report.md      # Technical research (if needed)  
+    ├── research-report.md      # Technical research (if needed)
     ├── implementation-plan.md  # Architecture and design
     ├── progress.md            # Real-time progress updates
     ├── test-report.md         # Testing results and coverage
@@ -301,7 +300,7 @@ task-tracking/
    - [ ] Performance and security implications
    - [ ] Production case studies or examples
 
-3. **Architecture Phase** (Software Architect)  
+3. **Architecture Phase** (Software Architect)
    - [ ] SOLID principles compliance
    - [ ] Design pattern justification
    - [ ] Type/schema reuse documented

@@ -58,14 +58,14 @@ graph TB
         ASM[AppStateManager]
         SIGNAL["currentView() signal"]
         SWITCH["@switch Control Flow"]
-        
+
         subgraph "Direct Signal Navigation - NO ROUTER"
             CHAT[ChatComponent]
-            CMD[CommandBuilderComponent]  
+            CMD[CommandBuilderComponent]
             ANA[AnalyticsDashboardComponent]
             CTX[ContextTreeComponent - NEW]
         end
-        
+
         subgraph "Egyptian UI System"
             BTN[EgyptianButton]
             CARD[EgyptianCard]
@@ -85,7 +85,7 @@ graph TB
     SWITCH -."@case('analytics')".-> ANA
     SWITCH -."@case('context-tree')".-> CTX
     CTX -.contextRequest.-> CM
-    
+
     CHAT --> BTN
     CMD --> CARD
     ANA --> INPUT
@@ -274,29 +274,38 @@ Quality Attributes:
 @Component({
   template: `
     <main class="app-container">
-      <app-navigation 
-        [currentView]="appState.currentView()"
-        (viewChanged)="onViewChanged($event)">
+      <app-navigation [currentView]="appState.currentView()" (viewChanged)="onViewChanged($event)">
       </app-navigation>
 
       <!-- CORE SOLUTION: @switch replaces all routing -->
       @if (isReady() && !appState.isLoading()) {
         <div class="app-content">
           @switch (appState.currentView()) {
-            @case ('chat') { <app-chat /> }
-            @case ('command-builder') { <app-command-builder /> }
-            @case ('analytics') { <app-analytics-dashboard /> }
-            @case ('context-tree') { <app-context-tree /> } // NEW VIEW TO ADD
-            @default { <app-chat /> }
+            @case ('chat') {
+              <app-chat />
+            }
+            @case ('command-builder') {
+              <app-command-builder />
+            }
+            @case ('analytics') {
+              <app-analytics-dashboard />
+            }
+            @case ('context-tree') {
+              <app-context-tree />
+            }
+            // NEW VIEW TO ADD
+            @default {
+              <app-chat />
+            }
           }
         </div>
       }
     </main>
-  `
+  `,
 })
 export class App {
   public appState = inject(AppStateManager);
-  
+
   async onViewChanged(view: ViewType): Promise<void> {
     // Simple signal update - no routing complexity
     this.appState.setCurrentView(view);
@@ -353,19 +362,15 @@ interface ContextTreeComponent {
       <div class="tree-header">
         <h3 class="header-title">Project Context</h3>
         <div class="token-usage">
-          <span [class]="getTokenUsageClass()">
-            {{ tokenUsage() }} / {{ maxTokens }} tokens
-          </span>
+          <span [class]="getTokenUsageClass()"> {{ tokenUsage() }} / {{ maxTokens }} tokens </span>
         </div>
       </div>
-      
+
       <!-- ANGULAR 20 PATTERN: @for instead of *ngFor -->
       <div class="tree-content">
         @for (node of treeNodes(); track node.path) {
           <div class="tree-node" [class.included]="node.included">
-            <button 
-              class="node-toggle" 
-              (click)="toggleNode(node)">
+            <button class="node-toggle" (click)="toggleNode(node)">
               <span class="node-icon">{{ getNodeIcon(node) }}</span>
               <span class="node-label">{{ node.name }}</span>
               <span class="node-status">{{ getNodeStatus(node) }}</span>
@@ -375,32 +380,46 @@ interface ContextTreeComponent {
       </div>
     </app-egyptian-card>
   `,
-  styles: [`
-    /* CSP-COMPLIANT: Only CSS classes, no inline styles */
-    .context-tree-container { @apply h-full flex flex-col; }
-    .tree-header { @apply flex justify-between items-center p-4 border-b border-sand-200; }
-    .header-title { @apply text-xl font-bold text-hieroglyph-800; }
-    .tree-content { @apply flex-1 overflow-auto p-2; }
-    .tree-node { @apply flex items-center hover:bg-papyrus-100 rounded-md transition-colors; }
-    .node-toggle { @apply w-full flex items-center p-2 text-left hover:bg-sand-50 rounded; }
-  `]
+  styles: [
+    `
+      /* CSP-COMPLIANT: Only CSS classes, no inline styles */
+      .context-tree-container {
+        @apply h-full flex flex-col;
+      }
+      .tree-header {
+        @apply flex justify-between items-center p-4 border-b border-sand-200;
+      }
+      .header-title {
+        @apply text-xl font-bold text-hieroglyph-800;
+      }
+      .tree-content {
+        @apply flex-1 overflow-auto p-2;
+      }
+      .tree-node {
+        @apply flex items-center hover:bg-papyrus-100 rounded-md transition-colors;
+      }
+      .node-toggle {
+        @apply w-full flex items-center p-2 text-left hover:bg-sand-50 rounded;
+      }
+    `,
+  ],
 })
 export class ContextTreeComponent {
   treeNodes = signal<TreeNode[]>([]);
   tokenUsage = signal<number>(0);
   private readonly maxTokens = 200000;
-  
+
   // ANGULAR 20 PATTERN: Use inject() instead of constructor injection
   private vscodeService = inject(VSCodeService);
   private appState = inject(AppStateManager);
-  
+
   async toggleNode(node: TreeNode): Promise<void> {
     const action = node.included ? 'exclude' : 'include';
     await this.vscodeService.postMessage('context-file-toggle', {
       filePath: node.path,
-      action
+      action,
     });
-    
+
     node.included = !node.included;
     this.updateTokenUsage();
   }
@@ -533,10 +552,10 @@ interface EnhancedCommandBuilder {
 interface CSPCompliantEgyptianComponents {
   // All existing components must be updated:
   // - egyptian-button.component.ts
-  // - egyptian-card.component.ts  
+  // - egyptian-card.component.ts
   // - egyptian-input.component.ts
   // - loading-spinner.component.ts
-  
+
   // NEW: CSP-compliant styling only
   applyCSSClasses(): void;
   removeInlineStyles(): void;

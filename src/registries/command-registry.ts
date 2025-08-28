@@ -22,22 +22,24 @@ export class CommandRegistry implements vscode.Disposable {
     const commands = [
       // Core commands
       this.registerCommand('ptah.quickChat', () => this.commandHandlers.quickChat()),
-      this.registerCommand('ptah.reviewCurrentFile', () => this.commandHandlers.reviewCurrentFile()),
+      this.registerCommand('ptah.reviewCurrentFile', () =>
+        this.commandHandlers.reviewCurrentFile()
+      ),
       this.registerCommand('ptah.generateTests', () => this.commandHandlers.generateTests()),
       this.registerCommand('ptah.buildCommand', () => this.commandHandlers.buildCommand()),
-      
+
       // Session management
       this.registerCommand('ptah.newSession', () => this.commandHandlers.newSession()),
       this.registerCommand('ptah.switchSession', () => this.commandHandlers.switchSession()),
-      
+
       // Context management
       this.registerCommand('ptah.includeFile', (uri) => this.commandHandlers.includeFile(uri)),
       this.registerCommand('ptah.excludeFile', (uri) => this.commandHandlers.excludeFile(uri)),
       this.registerCommand('ptah.optimizeContext', () => this.commandHandlers.optimizeContext()),
-      
+
       // Analytics and insights
       this.registerCommand('ptah.showAnalytics', () => this.commandHandlers.showAnalytics()),
-      
+
       // Diagnostic (debugging)
       this.registerCommand('ptah.runDiagnostic', () => this.commandHandlers.runDiagnostic()),
     ];
@@ -49,10 +51,7 @@ export class CommandRegistry implements vscode.Disposable {
   /**
    * Register a single command with error handling
    */
-  private registerCommand(
-    command: string, 
-    callback: (...args: any[]) => any
-  ): vscode.Disposable {
+  private registerCommand(command: string, callback: (...args: any[]) => any): vscode.Disposable {
     return vscode.commands.registerCommand(command, async (...args) => {
       try {
         Logger.info(`Executing command: ${command}`);
@@ -72,7 +71,7 @@ export class CommandRegistry implements vscode.Disposable {
   getRegisteredCommands(): string[] {
     return [
       'ptah.quickChat',
-      'ptah.reviewCurrentFile', 
+      'ptah.reviewCurrentFile',
       'ptah.generateTests',
       'ptah.buildCommand',
       'ptah.newSession',
@@ -81,7 +80,7 @@ export class CommandRegistry implements vscode.Disposable {
       'ptah.excludeFile',
       'ptah.optimizeContext',
       'ptah.showAnalytics',
-      'ptah.runDiagnostic'
+      'ptah.runDiagnostic',
     ];
   }
 
@@ -90,7 +89,7 @@ export class CommandRegistry implements vscode.Disposable {
    */
   dispose(): void {
     Logger.info('Disposing command registry...');
-    this.disposables.forEach(d => d.dispose());
+    this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
   }
 }
