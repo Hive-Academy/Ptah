@@ -1,7 +1,7 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component, Output, EventEmitter, Input, signal } from '@angular/core';
 
 export interface NavigationItem {
-  id: 'chat' | 'command-builder' | 'analytics';
+  id: 'chat' | 'command-builder' | 'analytics' | 'context-tree';
   label: string;
   icon?: string;
 }
@@ -31,10 +31,12 @@ export interface NavigationItem {
               [class]="getTabClasses(item.id)"
               [attr.aria-selected]="currentView === item.id"
               [attr.aria-controls]="'panel-' + item.id"
-              [disabled]="disabled"
+              [disabled]="disabled || navigatingToView() === item.id"
               role="tab"
               (click)="onViewChange(item.id)">
-              @if (item.icon) {
+              @if (navigatingToView() === item.id) {
+                <span class="loading loading-spinner loading-xs mr-2"></span>
+              } @else if (item.icon) {
                 <i [class]="'icon-' + item.icon + ' mr-2'"></i>
               }
               {{ item.label }}
@@ -97,23 +99,33 @@ export interface NavigationItem {
   `]
 })
 export class NavigationComponent {
-  @Input() title: string = 'Ptah - Claude Code Assistant';
-  @Input() subtitle?: string;
-  @Input() currentView: 'chat' | 'command-builder' | 'analytics' = 'command-builder';
+  @Input() title: string = 'Ptah';
+  @Input() subtitle?: string = 'Claude Code Editor';
+  @Input() currentView: 'chat' | 'command-builder' | 'analytics' | 'context-tree' = 'command-builder';
   @Input() disabled: boolean = false;
   @Input() showActions: boolean = false;
 
-  @Output() viewChanged = new EventEmitter<'chat' | 'command-builder' | 'analytics'>();
+  @Output() viewChanged = new EventEmitter<'chat' | 'command-builder' | 'analytics' | 'context-tree'>();
+
+  // Loading state for navigation buttons
+  protected navigatingToView = signal<string | null>(null);
 
   readonly navigationItems: NavigationItem[] = [
     { id: 'chat', label: 'Chat', icon: 'message-circle' },
     { id: 'command-builder', label: 'Commands', icon: 'terminal' },
-    { id: 'analytics', label: 'Analytics', icon: 'bar-chart' }
+    { id: 'analytics', label: 'Analytics', icon: 'bar-chart' },
+    { id: 'context-tree', label: 'Context', icon: 'folder-tree' }
   ];
 
-  onViewChange(viewId: 'chat' | 'command-builder' | 'analytics'): void {
-    if (!this.disabled && viewId !== this.currentView) {
+  onViewChange(viewId: 'chat' | 'command-builder' | 'analytics' | 'context-tree'): void {
+    if (!this.disabled && viewId !== this.currentView && this.navigatingToView() !== viewId) {
+      this.navigatingToView.set(viewId);
       this.viewChanged.emit(viewId);
+
+      // Clear navigation loading state after delay (navigation should complete quickly)
+      setTimeout(() => {
+        this.navigatingToView.set(null);
+      }, 1000);
     }
   }
 

@@ -164,14 +164,15 @@ export class CommandBuilderService {
 
   private loadDefaultTemplates(): void {
     const defaultTemplates: CommandTemplate[] = [
+      // Code Review Category
       {
-        id: 'code-review',
-        name: 'Code Review',
-        description: 'Comprehensive code review with security and best practices analysis',
-        category: 'analysis',
-        template: 'Please review this code for {{focus}}. Pay special attention to {{aspects}}:\n\n{{code}}',
+        id: 'comprehensive-code-review',
+        name: 'Comprehensive Code Review',
+        description: 'Deep code review with security, performance, and best practices analysis',
+        category: 'code-review',
+        template: 'Please perform a comprehensive code review focusing on {{focus}}. Analyze these specific aspects: {{aspects}}. Consider the {{experience_level}} context.\n\n{{code}}',
         icon: 'search-review',
-        tags: ['review', 'security', 'bugs', 'quality'],
+        tags: ['review', 'security', 'bugs', 'quality', 'popular'],
         parameters: [
           {
             name: 'code',
@@ -191,7 +192,8 @@ export class CommandBuilderService {
               'performance optimization',
               'code style and best practices',
               'maintainability and readability',
-              'architecture and design patterns'
+              'architecture and design patterns',
+              'accessibility compliance'
             ]
           },
           {
@@ -199,6 +201,7 @@ export class CommandBuilderService {
             type: 'multiselect',
             required: false,
             description: 'Specific aspects to analyze',
+            defaultValue: ['Error handling', 'Input validation'],
             options: [
               'Error handling',
               'Input validation',
@@ -207,37 +210,89 @@ export class CommandBuilderService {
               'Memory leaks',
               'Performance bottlenecks',
               'Code duplication',
-              'Naming conventions'
+              'Naming conventions',
+              'Type safety',
+              'Concurrent access',
+              'Resource management'
             ]
+          },
+          {
+            name: 'experience_level',
+            type: 'select',
+            required: true,
+            description: 'Developer experience level for feedback',
+            defaultValue: 'intermediate',
+            options: ['beginner', 'intermediate', 'senior', 'expert']
           }
         ],
         examples: [
           {
-            title: 'Security Review',
-            description: 'Focus on security vulnerabilities',
+            title: 'Security-First Review',
+            description: 'Comprehensive security vulnerability analysis',
             parameters: {
               focus: 'bugs and security issues',
-              aspects: ['Input validation', 'SQL injection prevention', 'XSS prevention']
+              aspects: ['Input validation', 'SQL injection prevention', 'XSS prevention', 'Error handling'],
+              experience_level: 'intermediate'
             }
           },
           {
-            title: 'Performance Review',
-            description: 'Optimize for better performance',
+            title: 'Performance Optimization',
+            description: 'Focus on performance improvements',
             parameters: {
               focus: 'performance optimization',
-              aspects: ['Memory leaks', 'Performance bottlenecks']
+              aspects: ['Memory leaks', 'Performance bottlenecks', 'Resource management'],
+              experience_level: 'senior'
             }
           }
         ]
       },
       {
-        id: 'generate-tests',
-        name: 'Generate Tests',
-        description: 'Generate comprehensive test suites for code',
+        id: 'quick-code-scan',
+        name: 'Quick Code Scan',
+        description: 'Fast code quality check for immediate feedback',
+        category: 'code-review',
+        template: 'Please do a quick scan of this {{language}} code for obvious {{issue_types}}. Provide a summary of findings:\n\n{{code}}',
+        icon: 'scan',
+        tags: ['review', 'quick', 'bugs', 'fast'],
+        parameters: [
+          {
+            name: 'code',
+            type: 'file',
+            required: true,
+            description: 'Code file to scan',
+            placeholder: 'Select file to scan...'
+          },
+          {
+            name: 'language',
+            type: 'string',
+            required: false,
+            description: 'Programming language (auto-detected if empty)',
+            placeholder: 'e.g., TypeScript, Python, Java'
+          },
+          {
+            name: 'issue_types',
+            type: 'select',
+            required: true,
+            description: 'Types of issues to look for',
+            defaultValue: 'bugs and potential issues',
+            options: [
+              'bugs and potential issues',
+              'security vulnerabilities only',
+              'performance problems only',
+              'code style violations only'
+            ]
+          }
+        ]
+      },
+      // Testing Category
+      {
+        id: 'comprehensive-test-suite',
+        name: 'Comprehensive Test Suite',
+        description: 'Generate complete test suites with various testing scenarios',
         category: 'testing',
-        template: 'Generate {{testType}} tests for this {{language}} code. Include tests for {{coverage}}:\n\n{{code}}',
+        template: 'Generate a comprehensive {{testType}} test suite for this {{language}} code. Include tests for {{coverage}}. Use {{framework}} testing framework:\n\n{{code}}',
         icon: 'beaker',
-        tags: ['testing', 'unit tests', 'integration', 'e2e'],
+        tags: ['testing', 'unit tests', 'integration', 'e2e', 'popular'],
         parameters: [
           {
             name: 'code',
@@ -252,7 +307,7 @@ export class CommandBuilderService {
             required: true,
             description: 'Type of tests to generate',
             defaultValue: 'unit',
-            options: ['unit', 'integration', 'e2e', 'performance']
+            options: ['unit', 'integration', 'e2e', 'performance', 'security']
           },
           {
             name: 'language',
@@ -262,167 +317,126 @@ export class CommandBuilderService {
             placeholder: 'e.g., TypeScript, Python, Java'
           },
           {
+            name: 'framework',
+            type: 'select',
+            required: false,
+            description: 'Testing framework to use',
+            defaultValue: 'auto-detect',
+            options: [
+              'auto-detect',
+              'Jest',
+              'Mocha/Chai',
+              'Jasmine',
+              'Vitest',
+              'Pytest',
+              'JUnit',
+              'Cypress',
+              'Playwright'
+            ]
+          },
+          {
             name: 'coverage',
             type: 'multiselect',
             required: true,
             description: 'What to test',
-            defaultValue: ['happy paths', 'error cases'],
+            defaultValue: ['happy paths', 'error cases', 'edge cases'],
             options: [
               'happy paths',
               'error cases',
               'edge cases',
               'boundary conditions',
               'performance characteristics',
-              'concurrent access'
+              'concurrent access',
+              'mocking/stubbing',
+              'async operations'
             ]
+          }
+        ],
+        examples: [
+          {
+            title: 'Complete Unit Tests',
+            description: 'Full unit test coverage with mocks',
+            parameters: {
+              testType: 'unit',
+              framework: 'Jest',
+              coverage: ['happy paths', 'error cases', 'edge cases', 'mocking/stubbing']
+            }
+          },
+          {
+            title: 'E2E Test Suite',
+            description: 'End-to-end testing scenarios',
+            parameters: {
+              testType: 'e2e',
+              framework: 'Playwright',
+              coverage: ['happy paths', 'error cases', 'async operations']
+            }
           }
         ]
       },
       {
-        id: 'explain-code',
-        name: 'Explain Code',
-        description: 'Get detailed explanations of complex code',
+        id: 'test-improvement',
+        name: 'Improve Existing Tests',
+        description: 'Enhance and improve existing test suites for better coverage',
+        category: 'testing',
+        template: 'Analyze and improve these {{language}} tests. Focus on {{improvements}} and ensure {{quality_aspects}}:\n\n{{tests}}',
+        icon: 'test-upgrade',
+        tags: ['testing', 'improvement', 'coverage', 'quality'],
+        parameters: [
+          {
+            name: 'tests',
+            type: 'file',
+            required: true,
+            description: 'Existing test file to improve',
+            placeholder: 'Select test file...'
+          },
+          {
+            name: 'language',
+            type: 'string',
+            required: false,
+            description: 'Programming language',
+            placeholder: 'Auto-detected'
+          },
+          {
+            name: 'improvements',
+            type: 'multiselect',
+            required: true,
+            description: 'Areas to improve',
+            defaultValue: ['test coverage', 'test readability'],
+            options: [
+              'test coverage',
+              'test readability',
+              'test performance',
+              'assertion quality',
+              'test organization',
+              'mock usage',
+              'error scenarios',
+              'async handling'
+            ]
+          },
+          {
+            name: 'quality_aspects',
+            type: 'multiselect',
+            required: false,
+            description: 'Quality aspects to ensure',
+            options: [
+              'DRY principles',
+              'clear test names',
+              'proper setup/teardown',
+              'isolated tests',
+              'deterministic results'
+            ]
+          }
+        ]
+      },
+      // Documentation Category
+      {
+        id: 'comprehensive-documentation',
+        name: 'Comprehensive Documentation',
+        description: 'Generate complete documentation including API docs, examples, and guides',
         category: 'documentation',
-        template: 'Please explain this {{language}} code in {{style}} style. Focus on {{focus}}:\n\n{{code}}',
+        template: 'Generate comprehensive {{docType}} documentation for this {{language}} code. Include {{sections}} and target {{audience}} level:\n\n{{code}}',
         icon: 'book',
-        tags: ['documentation', 'explain', 'learning'],
-        parameters: [
-          {
-            name: 'code',
-            type: 'file',
-            required: true,
-            description: 'Code to explain',
-            placeholder: 'Select code file...'
-          },
-          {
-            name: 'language',
-            type: 'string',
-            required: false,
-            description: 'Programming language',
-            placeholder: 'Auto-detected'
-          },
-          {
-            name: 'style',
-            type: 'select',
-            required: true,
-            description: 'Explanation style',
-            defaultValue: 'beginner-friendly',
-            options: [
-              'beginner-friendly',
-              'technical detailed',
-              'concise summary',
-              'step-by-step walkthrough'
-            ]
-          },
-          {
-            name: 'focus',
-            type: 'select',
-            required: true,
-            description: 'What to focus on',
-            defaultValue: 'overall functionality',
-            options: [
-              'overall functionality',
-              'algorithm explanation',
-              'design patterns used',
-              'performance characteristics',
-              'potential improvements'
-            ]
-          }
-        ]
-      },
-      {
-        id: 'optimize-code',
-        name: 'Optimize Code',
-        description: 'Optimize code for performance, readability, or maintainability',
-        category: 'optimization',
-        template: 'Optimize this {{language}} code for {{goal}}. {{constraints}}\n\n{{code}}',
-        icon: 'rocket',
-        tags: ['optimization', 'performance', 'refactoring'],
-        parameters: [
-          {
-            name: 'code',
-            type: 'file',
-            required: true,
-            description: 'Code to optimize',
-            placeholder: 'Select code file...'
-          },
-          {
-            name: 'language',
-            type: 'string',
-            required: false,
-            description: 'Programming language',
-            placeholder: 'Auto-detected'
-          },
-          {
-            name: 'goal',
-            type: 'select',
-            required: true,
-            description: 'Optimization goal',
-            defaultValue: 'performance',
-            options: [
-              'performance',
-              'memory usage',
-              'readability',
-              'maintainability',
-              'code size'
-            ]
-          },
-          {
-            name: 'constraints',
-            type: 'string',
-            required: false,
-            description: 'Any constraints or requirements',
-            placeholder: 'e.g., Must maintain backwards compatibility'
-          }
-        ]
-      },
-      {
-        id: 'find-bugs',
-        name: 'Find Bugs',
-        description: 'Identify potential bugs and issues in code',
-        category: 'analysis',
-        template: 'Analyze this {{language}} code for potential bugs and issues. Focus on {{severity}} issues:\n\n{{code}}',
-        icon: 'bug',
-        tags: ['bugs', 'debugging', 'analysis'],
-        parameters: [
-          {
-            name: 'code',
-            type: 'file',
-            required: true,
-            description: 'Code to analyze for bugs',
-            placeholder: 'Select code file...'
-          },
-          {
-            name: 'language',
-            type: 'string',
-            required: false,
-            description: 'Programming language',
-            placeholder: 'Auto-detected'
-          },
-          {
-            name: 'severity',
-            type: 'select',
-            required: true,
-            description: 'Focus on specific severity levels',
-            defaultValue: 'all',
-            options: [
-              'all',
-              'critical only',
-              'high and critical',
-              'runtime errors',
-              'logic errors'
-            ]
-          }
-        ]
-      },
-      {
-        id: 'add-documentation',
-        name: 'Add Documentation',
-        description: 'Generate comprehensive documentation for code',
-        category: 'documentation',
-        template: 'Generate {{docType}} documentation for this {{language}} code. Include {{sections}}:\n\n{{code}}',
-        icon: 'book-open',
-        tags: ['documentation', 'comments', 'readme'],
+        tags: ['documentation', 'api-docs', 'examples', 'popular'],
         parameters: [
           {
             name: 'code',
@@ -443,13 +457,15 @@ export class CommandBuilderService {
             type: 'select',
             required: true,
             description: 'Type of documentation',
-            defaultValue: 'inline comments',
+            defaultValue: 'API documentation',
             options: [
-              'inline comments',
-              'README.md',
               'API documentation',
+              'README.md',
+              'inline comments',
               'JSDoc/docstrings',
-              'user guide'
+              'user guide',
+              'tutorial guide',
+              'technical specification'
             ]
           },
           {
@@ -457,35 +473,366 @@ export class CommandBuilderService {
             type: 'multiselect',
             required: true,
             description: 'Documentation sections to include',
-            defaultValue: ['overview', 'parameters', 'examples'],
+            defaultValue: ['overview', 'parameters', 'examples', 'usage'],
             options: [
               'overview',
               'parameters',
               'return values',
               'examples',
+              'usage instructions',
               'error handling',
               'performance notes',
               'dependencies',
-              'usage instructions'
+              'configuration',
+              'troubleshooting'
+            ]
+          },
+          {
+            name: 'audience',
+            type: 'select',
+            required: true,
+            description: 'Target audience level',
+            defaultValue: 'intermediate',
+            options: ['beginner', 'intermediate', 'advanced', 'expert']
+          }
+        ],
+        examples: [
+          {
+            title: 'Complete API Docs',
+            description: 'Full API documentation with examples',
+            parameters: {
+              docType: 'API documentation',
+              sections: ['overview', 'parameters', 'return values', 'examples', 'error handling'],
+              audience: 'intermediate'
+            }
+          },
+          {
+            title: 'README Documentation',
+            description: 'Project README with usage guide',
+            parameters: {
+              docType: 'README.md',
+              sections: ['overview', 'usage instructions', 'examples', 'configuration'],
+              audience: 'beginner'
+            }
+          }
+        ]
+      },
+      {
+        id: 'explain-code',
+        name: 'Explain Complex Code',
+        description: 'Get detailed explanations of complex algorithms and patterns',
+        category: 'documentation',
+        template: 'Please explain this {{language}} code in {{style}} style. Focus on {{focus}} and consider {{audience}} audience:\n\n{{code}}',
+        icon: 'explain',
+        tags: ['documentation', 'explain', 'learning', 'algorithms'],
+        parameters: [
+          {
+            name: 'code',
+            type: 'file',
+            required: true,
+            description: 'Code to explain',
+            placeholder: 'Select code file...'
+          },
+          {
+            name: 'language',
+            type: 'string',
+            required: false,
+            description: 'Programming language',
+            placeholder: 'Auto-detected'
+          },
+          {
+            name: 'style',
+            type: 'select',
+            required: true,
+            description: 'Explanation style',
+            defaultValue: 'step-by-step walkthrough',
+            options: [
+              'beginner-friendly overview',
+              'technical detailed analysis',
+              'concise summary',
+              'step-by-step walkthrough',
+              'visual diagram approach'
+            ]
+          },
+          {
+            name: 'focus',
+            type: 'multiselect',
+            required: true,
+            description: 'What to focus on',
+            defaultValue: ['overall functionality', 'algorithm explanation'],
+            options: [
+              'overall functionality',
+              'algorithm explanation',
+              'design patterns used',
+              'performance characteristics',
+              'potential improvements',
+              'data flow',
+              'control flow',
+              'error handling'
+            ]
+          },
+          {
+            name: 'audience',
+            type: 'select',
+            required: true,
+            description: 'Target audience',
+            defaultValue: 'intermediate developer',
+            options: [
+              'beginner programmer',
+              'intermediate developer',
+              'senior developer',
+              'technical lead',
+              'non-technical stakeholder'
             ]
           }
         ]
-      }
+      },
+      // Refactoring Category
+      {
+        id: 'comprehensive-refactoring',
+        name: 'Comprehensive Code Refactoring',
+        description: 'Comprehensive refactoring for better structure, maintainability, and performance',
+        category: 'refactoring',
+        template: 'Refactor this {{language}} code to improve {{goals}}. Consider {{principles}} and maintain {{constraints}}:\n\n{{code}}',
+        icon: 'tools',
+        tags: ['refactoring', 'optimization', 'structure', 'popular'],
+        parameters: [
+          {
+            name: 'code',
+            type: 'file',
+            required: true,
+            description: 'Code to refactor',
+            placeholder: 'Select code file...'
+          },
+          {
+            name: 'language',
+            type: 'string',
+            required: false,
+            description: 'Programming language',
+            placeholder: 'Auto-detected'
+          },
+          {
+            name: 'goals',
+            type: 'multiselect',
+            required: true,
+            description: 'Refactoring goals',
+            defaultValue: ['maintainability', 'readability'],
+            options: [
+              'performance',
+              'maintainability',
+              'readability',
+              'testability',
+              'code reuse',
+              'memory efficiency',
+              'scalability',
+              'modularity'
+            ]
+          },
+          {
+            name: 'principles',
+            type: 'multiselect',
+            required: false,
+            description: 'Design principles to apply',
+            defaultValue: ['SOLID principles', 'DRY'],
+            options: [
+              'SOLID principles',
+              'DRY (Don\'t Repeat Yourself)',
+              'KISS (Keep It Simple)',
+              'YAGNI (You Aren\'t Gonna Need It)',
+              'Design patterns',
+              'Clean code principles',
+              'Separation of concerns'
+            ]
+          },
+          {
+            name: 'constraints',
+            type: 'string',
+            required: false,
+            description: 'Constraints to maintain',
+            placeholder: 'e.g., Backward compatibility, API contracts, performance requirements'
+          }
+        ],
+        examples: [
+          {
+            title: 'Performance Refactoring',
+            description: 'Optimize for better performance',
+            parameters: {
+              goals: ['performance', 'memory efficiency'],
+              principles: ['Clean code principles'],
+              constraints: 'Maintain API compatibility'
+            }
+          },
+          {
+            title: 'Maintainability Focus',
+            description: 'Improve code maintainability',
+            parameters: {
+              goals: ['maintainability', 'readability', 'testability'],
+              principles: ['SOLID principles', 'DRY (Don\'t Repeat Yourself)', 'Separation of concerns'],
+              constraints: 'Keep existing functionality intact'
+            }
+          }
+        ]
+      },
+      {
+        id: 'extract-functions',
+        name: 'Extract Functions/Methods',
+        description: 'Extract reusable functions and methods from complex code',
+        category: 'refactoring',
+        template: 'Extract {{extraction_type}} from this {{language}} code. Focus on {{criteria}} and ensure {{quality}}:\n\n{{code}}',
+        icon: 'extract',
+        tags: ['refactoring', 'functions', 'methods', 'reusability'],
+        parameters: [
+          {
+            name: 'code',
+            type: 'file',
+            required: true,
+            description: 'Code to extract functions from',
+            placeholder: 'Select code file...'
+          },
+          {
+            name: 'language',
+            type: 'string',
+            required: false,
+            description: 'Programming language',
+            placeholder: 'Auto-detected'
+          },
+          {
+            name: 'extraction_type',
+            type: 'multiselect',
+            required: true,
+            description: 'What to extract',
+            defaultValue: ['reusable functions'],
+            options: [
+              'reusable functions',
+              'utility methods',
+              'helper classes',
+              'configuration objects',
+              'constants and enums',
+              'type definitions'
+            ]
+          },
+          {
+            name: 'criteria',
+            type: 'multiselect',
+            required: true,
+            description: 'Extraction criteria',
+            defaultValue: ['code duplication', 'complex logic'],
+            options: [
+              'code duplication',
+              'complex logic',
+              'long methods',
+              'mixed responsibilities',
+              'hard-coded values',
+              'nested conditionals'
+            ]
+          },
+          {
+            name: 'quality',
+            type: 'multiselect',
+            required: false,
+            description: 'Quality aspects to ensure',
+            defaultValue: ['clear naming', 'single responsibility'],
+            options: [
+              'clear naming',
+              'single responsibility',
+              'proper typing',
+              'comprehensive documentation',
+              'error handling',
+              'testable design'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'design-patterns',
+        name: 'Apply Design Patterns',
+        description: 'Refactor code to implement appropriate design patterns',
+        category: 'refactoring',
+        template: 'Refactor this {{language}} code to implement {{patterns}}. Consider {{context}} and ensure {{benefits}}:\n\n{{code}}',
+        icon: 'pattern',
+        tags: ['refactoring', 'patterns', 'architecture', 'design'],
+        parameters: [
+          {
+            name: 'code',
+            type: 'file',
+            required: true,
+            description: 'Code to refactor with patterns',
+            placeholder: 'Select code file...'
+          },
+          {
+            name: 'language',
+            type: 'string',
+            required: false,
+            description: 'Programming language',
+            placeholder: 'Auto-detected'
+          },
+          {
+            name: 'patterns',
+            type: 'multiselect',
+            required: true,
+            description: 'Design patterns to apply',
+            options: [
+              'Factory Pattern',
+              'Observer Pattern',
+              'Strategy Pattern',
+              'Command Pattern',
+              'Decorator Pattern',
+              'Singleton Pattern',
+              'Builder Pattern',
+              'Repository Pattern',
+              'Dependency Injection',
+              'MVC/MVP/MVVM'
+            ]
+          },
+          {
+            name: 'context',
+            type: 'select',
+            required: true,
+            description: 'Application context',
+            defaultValue: 'web application',
+            options: [
+              'web application',
+              'desktop application',
+              'mobile application',
+              'library/framework',
+              'microservice',
+              'CLI application'
+            ]
+          },
+          {
+            name: 'benefits',
+            type: 'multiselect',
+            required: false,
+            description: 'Expected benefits',
+            defaultValue: ['maintainability', 'extensibility'],
+            options: [
+              'maintainability',
+              'extensibility',
+              'testability',
+              'reusability',
+              'flexibility',
+              'decoupling'
+            ]
+          }
+        ]
+      },
+      // Additional templates can be added here for specific categories
     ];
 
     this._templates.set(defaultTemplates);
   }
 
-  private getCategoryDisplayName(category: string): string {
+  getCategoryDisplayName(category: string): string {
     const categoryNames: Record<string, string> = {
-      analysis: 'Code Analysis',
-      testing: 'Testing',
-      documentation: 'Documentation',
-      optimization: 'Optimization',
-      generation: 'Code Generation',
-      refactoring: 'Refactoring',
-      security: 'Security',
-      debugging: 'Debugging'
+      'code-review': 'Code Review',
+      'testing': 'Testing',
+      'documentation': 'Documentation',
+      'refactoring': 'Refactoring',
+      'analysis': 'Code Analysis',
+      'optimization': 'Optimization',
+      'generation': 'Code Generation',
+      'security': 'Security',
+      'debugging': 'Debugging'
     };
 
     return categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1);
@@ -493,14 +840,15 @@ export class CommandBuilderService {
 
   private getCategoryDescription(category: string): string {
     const categoryDescriptions: Record<string, string> = {
-      analysis: 'Analyze code for bugs, security issues, and improvements',
-      testing: 'Generate and improve test suites',
-      documentation: 'Create comprehensive documentation',
-      optimization: 'Optimize code for performance and maintainability',
-      generation: 'Generate new code and boilerplate',
-      refactoring: 'Refactor and restructure existing code',
-      security: 'Security analysis and hardening',
-      debugging: 'Debug and troubleshoot issues'
+      'code-review': 'Comprehensive code review and quality analysis',
+      'testing': 'Generate and improve test suites for better coverage',
+      'documentation': 'Create comprehensive documentation and explanations',
+      'refactoring': 'Refactor and restructure code for better maintainability',
+      'analysis': 'Analyze code for bugs, security issues, and improvements',
+      'optimization': 'Optimize code for performance and efficiency',
+      'generation': 'Generate new code and boilerplate templates',
+      'security': 'Security analysis and hardening techniques',
+      'debugging': 'Debug and troubleshoot code issues'
     };
 
     return categoryDescriptions[category] || `${category} related templates`;
@@ -508,14 +856,15 @@ export class CommandBuilderService {
 
   private getCategoryIcon(category: string): string {
     const categoryIcons: Record<string, string> = {
-      analysis: 'search-review',
-      testing: 'beaker',
-      documentation: 'book',
-      optimization: 'rocket',
-      generation: 'code',
-      refactoring: 'tools',
-      security: 'shield',
-      debugging: 'bug'
+      'code-review': 'search-review',
+      'testing': 'beaker',
+      'documentation': 'book',
+      'refactoring': 'tools',
+      'analysis': 'search',
+      'optimization': 'rocket',
+      'generation': 'code',
+      'security': 'shield',
+      'debugging': 'bug'
     };
 
     return categoryIcons[category] || 'folder';

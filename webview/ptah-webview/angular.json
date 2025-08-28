@@ -49,23 +49,23 @@
                   "maximumError": "20kB"
                 }
               ],
-              "outputHashing": "none",
+              "outputHashing": "all",
               "optimization": true,
-              "sourceMap": false,
+              "sourceMap": true,
               "extractLicenses": true,
-              "namedChunks": false
+              "namedChunks": true
             },
             "development": {
-              "optimization": false,
-              "extractLicenses": false,
+              "optimization": true,
+              "extractLicenses": true,
               "sourceMap": true,
-              "outputHashing": "none"
+              "outputHashing": "all"
             },
             "webview": {
-              "optimization": false,
-              "outputHashing": "none",
+              "optimization": true,
+              "outputHashing": "all",
               "sourceMap": true,
-              "extractLicenses": false,
+              "extractLicenses": true,
               "namedChunks": true,
               "budgets": [
                 {

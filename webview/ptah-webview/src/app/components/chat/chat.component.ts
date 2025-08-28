@@ -4,7 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { LucideAngularModule, SendIcon, PlusIcon, SettingsIcon, HistoryIcon, FileTextIcon, ZapIcon, CodeIcon, RefreshCwIcon } from 'lucide-angular';
 
-import { EgyptianButtonComponent, LoadingSpinnerComponent } from '../../shared';
+import { 
+  MATERIAL_IMPORTS, 
+  EgyptianButtonDirective, 
+  EgyptianInputDirective,
+  EgyptianCardDirective,
+  EgyptianSpinnerDirective
+} from '../../shared';
+import { EgyptianThemeService } from '../../core/services/egyptian-theme.service';
 import { MessageHandlerService } from '../../services/message-handler.service';
 import { VSCodeService, VSCodeMessage } from '../../services/vscode.service';
 import { AppStateManager } from '../../services/app-state.service';
@@ -35,17 +42,20 @@ interface ChatSession {
     CommonModule,
     FormsModule,
     LucideAngularModule,
-    EgyptianButtonComponent,
-    LoadingSpinnerComponent
+    ...MATERIAL_IMPORTS,
+    EgyptianButtonDirective,
+    EgyptianInputDirective,
+    EgyptianCardDirective,
+    EgyptianSpinnerDirective
   ],
-  templateUrl: './chat.component.html',
-  styleUrls: ['./chat.component.scss']
+  templateUrl: './chat.component.html'
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private messageHandler = inject(MessageHandlerService);
   private vscode = inject(VSCodeService);
   private appState = inject(AppStateManager);
+  private themeService = inject(EgyptianThemeService);
 
   // Lucide Icons for template
   readonly SendIcon = SendIcon;
@@ -285,6 +295,18 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   getFileName(filePath: string): string {
     return filePath.split('/').pop() || filePath;
+  }
+
+  getTokenUsageClasses(): string {
+    const session = this.currentSession();
+    if (!session?.tokenUsage) return '';
+    
+    // Generate width class based on percentage without inline styles
+    const percentage = session.tokenUsage.percentage;
+    const width = Math.round(percentage);
+    
+    // Create dynamic width class - this avoids CSP violation
+    return `token-usage-width-${width}`;
   }
 
   private scrollToBottom(): void {

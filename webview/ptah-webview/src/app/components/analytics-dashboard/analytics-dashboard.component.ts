@@ -103,7 +103,7 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
                   <span class="text-sm text-hieroglyph-600">78%</span>
                 </div>
                 <div class="w-full bg-hieroglyph-200 rounded-full h-2">
-                  <div class="bg-gold-500 h-2 rounded-full" style="width: 78%"></div>
+                  <div class="bg-gold-500 h-2 rounded-full w-3/4"></div>
                 </div>
               </div>
 
@@ -113,7 +113,7 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
                   <span class="text-sm text-hieroglyph-600">Good</span>
                 </div>
                 <div class="w-full bg-hieroglyph-200 rounded-full h-2">
-                  <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                  <div class="bg-green-500 h-2 rounded-full w-5/6"></div>
                 </div>
               </div>
 
@@ -123,7 +123,7 @@ import { EgyptianCardComponent } from '../../shared/components/egyptian-card.com
                   <span class="text-sm text-hieroglyph-600">Excellent</span>
                 </div>
                 <div class="w-full bg-hieroglyph-200 rounded-full h-2">
-                  <div class="bg-green-500 h-2 rounded-full" style="width: 89%"></div>
+                  <div class="bg-green-500 h-2 rounded-full w-11/12"></div>
                 </div>
               </div>
             </div>

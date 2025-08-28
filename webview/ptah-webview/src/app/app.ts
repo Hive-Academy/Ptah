@@ -1,100 +1,55 @@
 import { Component, OnInit, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { StatusBarComponent } from './components/status-bar/status-bar.component';
 import { LoadingSpinnerComponent } from './shared';
 import { AppStateManager, ViewType } from './services/app-state.service';
 import { ViewManagerService } from './services/view-manager.service';
 import { VSCodeService } from './services/vscode.service';
-import { filter, takeUntil } from 'rxjs/operators';
+import { WebviewNavigationService } from './services/webview-navigation.service';
+import { EgyptianThemeService } from './core/services/egyptian-theme.service';
 import { Subject } from 'rxjs';
+// Individual component imports for pure signal-based navigation
+import { ChatComponent } from './components/chat/chat.component';
+import { CommandBuilderComponent } from './components/command-builder/command-builder.component';
+import { AnalyticsDashboardComponent } from './components/analytics-dashboard/analytics-dashboard.component';
+import { ContextTreeComponent } from './components/context-tree/context-tree.component';
+// REMOVED: Angular Router imports - incompatible with VS Code webviews
 
 @Component({
   selector: 'app-root',
   imports: [
-    RouterOutlet,
     NavigationComponent,
     StatusBarComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
+    ChatComponent,
+    CommandBuilderComponent,
+    AnalyticsDashboardComponent,
+    ContextTreeComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <main class="app-container">
-      <!-- Navigation -->
-      <app-navigation
-        [title]="appState.appTitle()"
-        [currentView]="appState.currentView()"
-        [disabled]="!appState.canSwitchViews()"
-        (viewChanged)="onViewChanged($event)">
-      </app-navigation>
-
-      <!-- ANGULAR 20 PATTERN: Use @if instead of *ngIf -->
-      @if (appState.isLoading() || isInitializing()) {
-        <div class="app-content flex items-center justify-center">
-          <app-loading-spinner
-            size="lg"
-            [message]="appState.statusMessage()">
-          </app-loading-spinner>
-        </div>
-      }
-
-      <!-- Main Content with Router - ANGULAR 20 PATTERN: Use @if -->
-      @if (isReady() && !appState.isLoading()) {
-        <div class="app-content">
-          <router-outlet></router-outlet>
-        </div>
-      }
-
-      <!-- Error State - ANGULAR 20 PATTERN: Use @if -->
-      @if (hasError()) {
-        <div class="app-content flex items-center justify-center">
-          <div class="text-center text-red-600">
-            <h3>Initialization Error</h3>
-            <p>Failed to initialize the application. Please try refreshing.</p>
-          </div>
-        </div>
-      }
-
-      <!-- Status Bar -->
-      <app-status-bar
-        [statusMessage]="appState.statusMessage()"
-        [isConnected]="vscodeService.isConnected()"
-        [workspaceInfo]="vscodeService.config()">
-      </app-status-bar>
-    </main>
-  `,
+  templateUrl: './app.html',
   styles: [`
     .app-container {
-      @apply h-screen w-full flex flex-col bg-papyrus-50;
-      /* Ensure the app takes full height in webview */
-      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       height: 100vh;
+      min-height: 100vh;
+      width: 100%;
+      background-color: var(--vscode-editor-background);
+      color: var(--vscode-editor-foreground);
     }
 
     .app-content {
-      @apply flex-1 overflow-auto p-4;
-      /* Important: ensure proper scrolling in webview */
-      height: 0; /* Flex child needs this for proper sizing */
-    }
-
-    /* VS Code theme adaptations */
-    :host-context(.vscode-dark) .app-container {
-      @apply bg-hieroglyph-900;
-    }
-
-    :host-context(.vscode-light) .app-container {
-      @apply bg-papyrus-25;
-    }
-
-    :host-context(.vscode-high-contrast) .app-container {
-      @apply bg-black text-white;
-      border: 1px solid white;
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+      height: 0; /* Required for flex child proper sizing */
     }
 
     /* Responsive design for different webview sizes */
     @media (max-width: 768px) {
       .app-content {
-        @apply p-2;
+        padding: 8px;
       }
     }
   `]
@@ -105,8 +60,10 @@ export class App implements OnInit, OnDestroy {
   // ANGULAR 20 PATTERN: Use inject() instead of constructor injection
   public appState = inject(AppStateManager);
   private viewManager = inject(ViewManagerService);
-  private router = inject(Router);
   public vscodeService = inject(VSCodeService);
+  private navigationService = inject(WebviewNavigationService);
+  public themeService = inject(EgyptianThemeService);
+  // REMOVED: Router injection - using pure signal-based navigation
 
   // ANGULAR 20 PATTERN: Signal-based state for reactive UI
   private initializationStatus = signal<'idle' | 'initializing' | 'ready' | 'error'>('idle');
@@ -116,10 +73,15 @@ export class App implements OnInit, OnDestroy {
   readonly hasError = computed(() => this.initializationStatus() === 'error');
   readonly isInitializing = computed(() => this.initializationStatus() === 'initializing');
 
+  // Theme-related computed values
+  readonly currentTheme = this.themeService.currentTheme;
+  readonly themeColors = this.themeService.themeColors;
+  readonly isThemeInitialized = this.themeService.isInitialized;
+
   constructor() {
-    console.log('Ptah App constructor - initializing...');
+    console.log('Ptah App constructor - initializing with pure signal navigation...');
     this.setupVSCodeIntegration();
-    this.setupRouterLogging();
+    // REMOVED: Router logging setup - no router used
   }
 
   async ngOnInit(): Promise<void> {
@@ -134,8 +96,8 @@ export class App implements OnInit, OnDestroy {
       // Notify VS Code that the app is ready
       this.vscodeService.notifyReady();
 
-      // Handle initial route from VS Code if provided
-      this.handleInitialRoute();
+      // Handle initial view setup
+      await this.handleInitialView();
 
       this.initializationStatus.set('ready');
     } catch (error) {
@@ -151,45 +113,29 @@ export class App implements OnInit, OnDestroy {
     this.viewManager.dispose();
   }
 
-  onViewChanged(view: ViewType): void {
+  async onViewChanged(view: ViewType): Promise<void> {
     console.log('Ptah App - View changed to:', view);
-    this.viewManager.switchView(view);
 
-    // Navigate to the corresponding route using hash navigation with error handling
-    try {
-      this.router.navigate([`/${view}`]).catch(error => {
-        console.warn('Navigation error (suppressed in webview):', error);
-        // Fallback: just update the view state without routing
-        this.appState.setCurrentView(view);
-      });
-    } catch (error) {
-      console.warn('Router navigate error (suppressed in webview):', error);
-      // Fallback: just update the view state
-      this.appState.setCurrentView(view);
+    // Use hybrid navigation service for reliable navigation
+    const success = await this.navigationService.navigateToView(view);
+
+    if (success) {
+      // Update view manager for consistency
+      this.viewManager.switchView(view);
+      console.log(`Ptah App - Navigation to ${view} completed successfully`);
+    } else {
+      console.error(`Ptah App - Navigation to ${view} failed`);
+      // Show user-friendly error message
+      this.appState.handleError(`Failed to navigate to ${view}`);
     }
-
-    // Notify VS Code about route change
-    this.vscodeService.navigateToRoute(`/${view}`);
   }
 
   private setupVSCodeIntegration(): void {
-    // Listen for navigation requests from VS Code
-    this.vscodeService.onMessageType('navigate')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((data: { route: string }) => {
-        console.log('Received navigation request from VS Code:', data.route);
-        try {
-          this.router.navigate([data.route]).catch(error => {
-            console.warn('VS Code navigation error (suppressed in webview):', error);
-          });
-        } catch (error) {
-          console.warn('VS Code router error (suppressed in webview):', error);
-        }
-      });
+    // Navigation is now handled directly in WebviewNavigationService
+    // No need for additional VS Code navigation handling here
 
     // Listen for theme changes
     this.vscodeService.onMessageType('themeChanged')
-      .pipe(takeUntil(this.destroy$))
       .subscribe((themeData) => {
         console.log('Theme changed:', themeData);
         // The theme is already updated in VSCodeService
@@ -197,42 +143,16 @@ export class App implements OnInit, OnDestroy {
       });
   }
 
-  private setupRouterLogging(): void {
-    // Log route changes for debugging
-    this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((event: NavigationEnd) => {
-        console.log('Router navigation completed:', event.url);
+  // REMOVED: setupRouterLogging - no longer using Angular Router
 
-        // Update view state based on route
-        const route = event.url.replace('/', '').replace('#/', '') || 'chat';
-        if (['chat', 'command-builder', 'analytics'].includes(route)) {
-          this.appState.setCurrentView(route as ViewType);
-        }
-      });
-  }
+  private async handleInitialView(): Promise<void> {
+    console.log('Setting up initial view with pure signal navigation');
 
-  private handleInitialRoute(): void {
-    // Check if there's an initial route specified
-    const currentRoute = this.router.url;
-    console.log('Current route on init:', currentRoute);
-
-    // If we're at root, navigate to chat with error handling
-    if (currentRoute === '/' || currentRoute === '') {
-      try {
-        this.router.navigate(['/chat']).catch(error => {
-          console.warn('Initial navigation error (suppressed in webview):', error);
-          // Fallback: set view state directly
-          this.appState.setCurrentView('chat');
-        });
-      } catch (error) {
-        console.warn('Initial router error (suppressed in webview):', error);
-        // Fallback: set view state directly
-        this.appState.setCurrentView('chat');
-      }
+    // Initialize to chat view by default
+    const success = await this.navigationService.navigateToView('chat');
+    if (!success) {
+      console.warn('Initial navigation to chat failed, using fallback');
+      this.appState.setCurrentView('chat');
     }
   }
 }

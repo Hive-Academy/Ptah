@@ -9,7 +9,14 @@
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "watch:webview": "ng build --watch --configuration webview",
-    "test": "ng test"
+    "test": "ng test",
+    "test:coverage": "ng test --code-coverage",
+    "test:headless": "ng test --watch=false --browsers=ChromeHeadless",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
+    "typecheck": "ng build --dry-run",
+    "format": "prettier --write \"src/**/*.{ts,html,css,scss,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html,css,scss,json}\""
   },
   "prettier": {
     "printWidth": 100,
@@ -25,10 +32,13 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/animations": "^20.2.0",
+    "@angular/cdk": "^20.2.0",
     "@angular/common": "^20.2.0",
     "@angular/compiler": "^20.2.0",
     "@angular/core": "^20.2.0",
     "@angular/forms": "^20.2.0",
+    "@angular/material": "^20.2.0",
     "@angular/platform-browser": "^20.2.0",
     "@angular/router": "^20.2.0",
     "@types/chart.js": "^2.9.41",

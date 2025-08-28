@@ -1,14 +1,20 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection, ErrorHandler } from '@angular/core';
-import { provideRouter, withHashLocation, withInMemoryScrolling, withNavigationErrorHandler } from '@angular/router';
-
-import { routes } from './app.routes';
+import { provideAnimations } from '@angular/platform-browser/animations';
+// REMOVED: Angular Router imports - incompatible with VS Code webviews
 
 // Custom error handler for webview-specific issues
 class WebviewErrorHandler implements ErrorHandler {
   handleError(error: any): void {
-    // Check if it's a router/history API error in webview context
-    if (error && error.name === 'SecurityError' && error.message && error.message.includes('pushState')) {
-      console.warn('WebView Router: History API error suppressed (normal in VS Code webview)', error.message);
+    // Check if it's a History API error in webview context (should not occur now)
+    if (error && error.name === 'SecurityError' && (error.message?.includes('pushState') || error.message?.includes('replaceState'))) {
+      console.warn('WebView: History API error detected - this should not occur with pure signal navigation', error.message);
+      return;
+    }
+
+    // Check for CSP violations and provide helpful guidance
+    if (error && error.message?.includes('Content Security Policy')) {
+      console.error('CSP Violation detected:', error.message);
+      console.error('Solution: Remove inline styles and use external CSS classes only');
       return;
     }
 
@@ -21,21 +27,10 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
+    provideAnimations(), // Enable Material animations
     // Custom error handler for webview compatibility
-    { provide: ErrorHandler, useClass: WebviewErrorHandler },
-    // Use hash location strategy for webview compatibility
-    // This prevents VS Code from intercepting navigation
-    provideRouter(routes,
-      withHashLocation(),
-      withInMemoryScrolling({
-        scrollPositionRestoration: 'enabled',
-        anchorScrolling: 'enabled'
-      }),
-      // Handle navigation errors gracefully
-      withNavigationErrorHandler((error) => {
-        console.warn('Navigation error in webview (suppressed):', error);
-        return true; // Continue navigation despite error
-      })
-    )
+    { provide: ErrorHandler, useClass: WebviewErrorHandler }
+    // REMOVED: Angular Router configuration - using pure signal-based navigation for VS Code webview compatibility
+    // This eliminates all History API calls that are blocked in webviews
   ]
 };

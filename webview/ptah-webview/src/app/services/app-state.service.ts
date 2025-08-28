@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { VSCodeService } from './vscode.service';
 
-export type ViewType = 'chat' | 'command-builder' | 'analytics';
+export type ViewType = 'chat' | 'command-builder' | 'analytics' | 'context-tree';
 
 export interface AppState {
   currentView: ViewType;
@@ -39,7 +39,7 @@ export class AppStateManager {
   readonly canSwitchViews = computed(() => !this._isLoading() && this._isConnected());
   readonly appTitle = computed(() => {
     const workspace = this._workspaceInfo();
-    return workspace ? `Ptah - ${workspace.name}` : 'Ptah - Claude Code Assistant';
+    return workspace ? `Ptah - ${workspace.name}` : 'Ptah';
   });
 
   constructor(private vscodeService: VSCodeService) {

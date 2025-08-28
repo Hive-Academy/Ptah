@@ -1,9 +1,160 @@
-# Universal Agent Framework
 
-**Purpose**: Drop-in agent orchestration system for any software development project  
-**Compatibility**: Zero customization required - works with any technology stack, language, or project structure
+# 📜 PTAH PROJECT SPECIFICS
 
----
+## Project Overview
+
+**Ptah** is a VS Code extension that provides a complete visual interface for Claude Code CLI. Built with TypeScript and Angular webviews, it transforms Claude Code's CLI experience into native, integrated VS Code functionality.
+
+## Development Commands
+
+### Core Extension Development
+
+```bash
+# Install dependencies
+npm install
+
+# Compile TypeScript (main extension)
+npm run compile
+
+# Watch mode for development
+npm run watch
+
+# Lint TypeScript code  
+npm run lint
+
+# Run tests
+npm run test
+
+# Build everything (extension + webview)
+npm run build:all
+
+# Quality gates (linting & typechecking)
+npm run lint:all
+npm run typecheck:all
+```
+
+### Angular Webview Development
+
+```bash
+# Install webview dependencies
+npm run install:webview
+
+# Build webview for extension
+npm run build:webview
+
+# Watch mode for webview development
+npm run dev:webview
+
+# Quality assurance
+npm run lint:webview
+npm run typecheck:webview
+npm run test:webview
+```
+
+### Extension Testing
+
+Press `F5` in VS Code to launch Extension Development Host for testing.
+
+## Architecture
+
+### Dual-Architecture System
+
+- **Extension Host** (`src/`) - TypeScript VS Code extension with registry-based service architecture
+- **Angular Webview** (`webview/ptah-webview/`) - Angular 20+ app with standalone components and zoneless change detection
+
+### Key Extension Components
+
+- **PtahExtension** (`src/core/ptah-extension.ts`) - Main coordinator using registry pattern
+- **ServiceRegistry** (`src/core/service-registry.ts`) - Dependency injection container
+- **ClaudeCliService** (`src/services/claude-cli.service.ts`) - Claude Code CLI integration with streaming
+- **Message Handlers** (`src/services/webview-message-handlers/`) - Extension ↔ Webview communication
+
+### Angular Webview Architecture
+
+- **Angular 20.2+** with zoneless change detection
+- **Standalone components** throughout
+- **Tailwind CSS** with Egyptian-themed custom components
+- **Hash-based routing** for webview compatibility
+- **Shared components** in `src/app/shared/`
+
+## Type System & Import Standards
+
+### Shared Types
+
+All shared types defined in `src/types/common.types.ts`:
+
+- **ChatMessage** - Core messaging with streaming support
+- **ChatSession** - Session management with token tracking  
+- **CommandTemplate** - Visual command builder templates
+- **ContextInfo** - File inclusion/optimization suggestions
+
+### Import Patterns
+
+```typescript
+// Extension code (relative imports)
+import { Logger } from '../core/logger';
+import { ChatMessage } from '../types/common.types';
+
+// Angular webview (standard Angular patterns)
+import { Component } from '@angular/core';
+import { SHARED_COMPONENTS } from '../shared';
+```
+
+### VS Code Integration Points
+
+- **Activity Bar** - Ptah icon (📜) main entry point
+- **Commands** - Command palette integration (`ptah.*` commands)
+- **Context Menus** - File-level actions (review, test generation)
+- **Webview Communication** - Message passing for extension ↔ webview
+
+## Quality Standards
+
+### Code Quality & Linting
+
+- **ESLint + Angular ESLint** with modern Angular 16+ rules
+- **Signal-based APIs**: `input()`, `output()`, `viewChild()` over decorators
+- **Control Flow Syntax**: `@if`, `@for`, `@switch` over structural directives
+- **OnPush change detection** enforced for performance
+- **Prettier formatting** with pre-commit hooks via Husky
+
+### TypeScript Configuration
+
+- **Strict mode enabled** with ES2020 target
+- **CommonJS modules** for extension compatibility
+- **Source maps** enabled for debugging
+- **Separate configs** for main extension and tests
+
+### Angular Best Practices
+
+- **Standalone components** (no NgModules)
+- **Signal-based reactivity** with computed() and effect()
+- **WebView-optimized routing** with hash location strategy
+- **Egyptian-themed component system** with shared design tokens
+
+## Error Handling & Communication
+
+### Extension Error Boundaries
+
+- **ErrorHandler** class with contextual information
+- **Service-level** error boundaries with graceful fallback
+- **Logger service** with structured logging
+
+### Webview Communication Protocol
+
+```typescript
+// Extension -> Webview
+webview.postMessage({ type: 'updateChat', data: chatMessage });
+
+// Webview -> Extension  
+vscode.postMessage({ type: 'sendMessage', data: { content: 'message' } });
+```
+
+## Claude CLI Integration
+
+- **Automatic detection** via ClaudeCliDetector service
+- **Process spawning** with streaming response handling
+- **Session management** with workspace-aware context
+- **Real-time token tracking** and optimization suggestions
 
 ## 🚨 UNIVERSAL CRITICAL CONSTRAINTS
 
@@ -22,42 +173,6 @@
 - **Test Coverage**: Minimum 80% across line/branch/function coverage
 - **Progress Tracking**: Update progress.md every 30 minutes during active development
 - **Documentation**: Document architectural decisions and patterns used In their Respective files **DON'T GENERATE MORE FILES THAN NECESSARY ASK USERS BEFORE GENERATING ANY NEW DOCUMENT.**
-
----
-
-## 🔧 UNIVERSAL AUTO-DETECTION
-
-### Project Context Discovery (Automatic)
-
-Agents automatically detect and adapt to project structure:
-
-**Technology Stack Detection:**
-
-```bash
-# Auto-detect from common files
-detect_project_context() {
-  # Language & framework detection
-  if [ -f "package.json" ]; then PROJECT_STACK="node"; fi
-  if [ -f "requirements.txt" ]; then PROJECT_STACK="python"; fi
-  if [ -f "Cargo.toml" ]; then PROJECT_STACK="rust"; fi
-  if [ -f "go.mod" ]; then PROJECT_STACK="go"; fi
-  
-  # Build system detection  
-  if [ -f "nx.json" ]; then BUILD_CMD="npx nx"; fi
-  if [ -f "lerna.json" ]; then BUILD_CMD="lerna"; fi
-  if [ -f "rush.json" ]; then BUILD_CMD="rush"; fi
-  
-  # Import alias detection
-  IMPORT_PREFIX=$(find . -name "*.ts" -o -name "*.js" | head -3 | xargs grep -h "from ['\"]@" | grep -o '@[^/]*' | head -1 || echo "@shared")
-  
-  # Shared library detection
-  SHARED_PATH=$(find . -type d -name "*shared*" -o -name "*common*" | head -1 || echo "src/shared")
-}
-```
-
-**No Configuration Required**: Agents automatically adapt to discovered patterns
-
----
 
 ## ⚡ AGENT WORKFLOW ORCHESTRATION
 
@@ -243,3 +358,5 @@ task-tracking/
 ---
 
 **The framework automatically adapts to ANY project structure with zero configuration required. Just copy the `.claude` directory and start using `/orchestrate`.**
+
+---
