@@ -16,13 +16,12 @@ import { By } from '@angular/platform-browser';
 
 import { SHARED_COMPONENTS } from '../shared';
 import { EgyptianThemeService } from '../core/services/egyptian-theme.service';
-import { MaterialConfigService } from '../core/services/material-config.service';
 
 /**
  * Test Module Builder for Material Components with Egyptian Theming
  */
 export class MaterialTestModuleBuilder {
-  
+
   static async createTestingModule<T>(
     componentType: Type<T>,
     options: TestModuleOptions = {}
@@ -36,7 +35,7 @@ export class MaterialTestModuleBuilder {
       ],
       providers: [
         EgyptianThemeService,
-        MaterialConfigService,
+
         ...(options.providers || []),
         ...this.createMockProviders(options.mockServices || [])
       ]
@@ -74,7 +73,7 @@ export class MaterialTestModuleBuilder {
  * Egyptian Accent Testing Utilities
  */
 export class EgyptianAccentTester {
-  
+
   constructor(
     private fixture: ComponentFixture<any>,
     private loader: HarnessLoader
@@ -87,19 +86,19 @@ export class EgyptianAccentTester {
     const button = await this.loader.getHarness(
       MatButtonHarness.with({ selector })
     );
-    
+
     const host = await button.host();
-    
+
     // Test golden accent class application
     const hasGoldenAccent = await host.hasClass('egyptian-golden-accent');
-    
+
     // Test hover state
     await host.hover();
     const hasHoverGlow = await host.hasClass('egyptian-hover-glow');
-    
+
     // Test ripple color
     const rippleColor = await host.getCssValue('--mdc-ripple-color');
-    
+
     return {
       hasGoldenAccent,
       hasHoverGlow,
@@ -115,16 +114,16 @@ export class EgyptianAccentTester {
     const input = await this.loader.getHarness(
       MatInputHarness.with({ selector })
     );
-    
+
     // Test focus glow effect
     await input.focus();
     const host = await input.host();
     const hasGoldenGlow = await host.hasClass('egyptian-focus-glow');
-    
+
     // Test Egyptian blue outline
     const borderColor = await host.getCssValue('border-color');
     const boxShadow = await host.getCssValue('box-shadow');
-    
+
     return {
       hasGoldenGlow,
       borderColor,
@@ -140,16 +139,16 @@ export class EgyptianAccentTester {
     const card = await this.loader.getHarness(
       MatCardHarness.with({ selector })
     );
-    
+
     const host = await card.host();
-    
+
     // Test papyrus background class
     const hasPapyrusTexture = await host.hasClass('egyptian-papyrus-texture');
-    
+
     // Test Egyptian color palette
     const backgroundColor = await host.getCssValue('background-color');
     const borderColor = await host.getCssValue('border-color');
-    
+
     return {
       hasPapyrusTexture,
       backgroundColor,
@@ -165,13 +164,13 @@ export class EgyptianAccentTester {
     const spinner = await this.loader.getHarness(
       MatProgressSpinnerHarness.with({ selector })
     );
-    
+
     const host = await spinner.host();
-    
+
     // Test Egyptian theming
     const strokeColor = await host.getCssValue('--mdc-circular-progress-indicator-color');
     const hasEgyptianStyling = await host.hasClass('egyptian-spinner');
-    
+
     return {
       strokeColor,
       hasEgyptianStyling,
@@ -185,7 +184,7 @@ export class EgyptianAccentTester {
     const ariaLabel = await host.getAttribute('aria-label');
     const role = await host.getAttribute('role');
     const tabIndex = await host.getAttribute('tabindex');
-    
+
     return {
       hasAriaLabel: !!ariaLabel,
       hasProperRole: role === 'button',
@@ -199,7 +198,7 @@ export class EgyptianAccentTester {
     const ariaLabel = await host.getAttribute('aria-label');
     const ariaDescribedBy = await host.getAttribute('aria-describedby');
     const required = await host.getAttribute('required');
-    
+
     return {
       hasAriaLabel: !!ariaLabel,
       hasDescription: !!ariaDescribedBy,
@@ -227,7 +226,7 @@ export class EgyptianAccentTester {
  * VS Code Theme Testing Utilities
  */
 export class VSCodeThemeTester {
-  
+
   constructor(private fixture: ComponentFixture<any>) {}
 
   /**
@@ -235,25 +234,25 @@ export class VSCodeThemeTester {
    */
   async testThemeSwitch(targetTheme: 'light' | 'dark' | 'high-contrast'): Promise<ThemeSwitchResult> {
     const startTime = performance.now();
-    
+
     // Simulate VS Code CSS variable change
     document.documentElement.style.setProperty(
       '--vscode-editor-background',
       targetTheme === 'dark' ? '#1e1e1e' : '#ffffff'
     );
-    
+
     document.documentElement.style.setProperty(
-      '--vscode-editor-foreground', 
+      '--vscode-editor-foreground',
       targetTheme === 'dark' ? '#d4d4d4' : '#000000'
     );
 
     // Trigger change detection
     this.fixture.detectChanges();
     await this.fixture.whenStable();
-    
+
     const endTime = performance.now();
     const switchTime = endTime - startTime;
-    
+
     return {
       switchTime,
       meetsPerformanceTarget: switchTime < 200,
@@ -264,11 +263,11 @@ export class VSCodeThemeTester {
 
   private async verifyThemeAdaptation(theme: string): Promise<boolean> {
     const elements = this.fixture.nativeElement.querySelectorAll('[class*="mat-"]');
-    
+
     for (let element of elements) {
       const backgroundColor = getComputedStyle(element).backgroundColor;
       const color = getComputedStyle(element).color;
-      
+
       // Verify theme colors are properly applied
       if (theme === 'dark') {
         if (backgroundColor.includes('rgb(255') || color.includes('rgb(0')) {
@@ -280,7 +279,7 @@ export class VSCodeThemeTester {
         }
       }
     }
-    
+
     return true;
   }
 }
@@ -289,7 +288,7 @@ export class VSCodeThemeTester {
  * Performance Testing Utilities
  */
 export class PerformanceTester {
-  
+
   /**
    * Measure component render time
    */
@@ -298,24 +297,24 @@ export class PerformanceTester {
     iterations: number = 100
   ): Promise<PerformanceResult> {
     const times: number[] = [];
-    
+
     for (let i = 0; i < iterations; i++) {
       const start = performance.now();
-      
+
       const testBed = TestBed.configureTestingModule({
         imports: [componentType, NoopAnimationsModule]
       });
-      
+
       await testBed.compileComponents();
       const fixture = TestBed.createComponent(componentType);
       fixture.detectChanges();
-      
+
       const end = performance.now();
       times.push(end - start);
-      
+
       TestBed.resetTestingModule();
     }
-    
+
     return {
       p50: this.calculatePercentile(times, 50),
       p95: this.calculatePercentile(times, 95),
@@ -334,10 +333,10 @@ export class PerformanceTester {
 }
 
 /**
- * Responsive Design Testing Utilities  
+ * Responsive Design Testing Utilities
  */
 export class ResponsiveTester {
-  
+
   constructor(private fixture: ComponentFixture<any>) {}
 
   /**
@@ -350,9 +349,9 @@ export class ResponsiveTester {
       { width: 600, name: 'medium' },
       { width: 800, name: 'large' }
     ];
-    
+
     const results: ResponsiveTestResult[] = [];
-    
+
     for (const breakpoint of breakpoints) {
       const result = await this.testAtWidth(breakpoint.width);
       results.push({
@@ -364,7 +363,7 @@ export class ResponsiveTester {
         textReadable: result.textReadable || false
       });
     }
-    
+
     return results;
   }
 
@@ -373,10 +372,10 @@ export class ResponsiveTester {
     const container = this.fixture.nativeElement;
     container.style.width = `${width}px`;
     container.style.maxWidth = `${width}px`;
-    
+
     this.fixture.detectChanges();
     await this.fixture.whenStable();
-    
+
     return {
       hasOverflow: this.checkForOverflow(container),
       touchTargetsValid: await this.validateTouchTargets(container),
@@ -391,39 +390,39 @@ export class ResponsiveTester {
 
   private async validateTouchTargets(container: HTMLElement): Promise<boolean> {
     const interactiveElements = container.querySelectorAll('button, input, [role="button"]');
-    
+
     for (let element of interactiveElements) {
       const rect = element.getBoundingClientRect();
       if (rect.width < 44 || rect.height < 44) {
         return false;
       }
     }
-    
+
     return true;
   }
 
   private checkElementVisibility(container: HTMLElement): boolean {
     const importantElements = container.querySelectorAll('[data-test-important]');
-    
+
     for (let element of importantElements) {
       if (getComputedStyle(element).display === 'none') {
         return false;
       }
     }
-    
+
     return true;
   }
 
   private checkTextReadability(container: HTMLElement): boolean {
     const textElements = container.querySelectorAll('p, span, div[class*="text-"]');
-    
+
     for (let element of textElements) {
       const fontSize = parseFloat(getComputedStyle(element).fontSize);
       if (fontSize < 12) {
         return false;
       }
     }
-    
+
     return true;
   }
 }

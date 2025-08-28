@@ -1,84 +1,191 @@
 import * as vscode from 'vscode';
-import { BaseWebviewMessageHandler } from './base-message-handler';
+import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
+import { StrictMessageType, MessagePayloadMap, MessageResponse, ContextUpdatePayload } from '../../types/message.types';
+import { CorrelationId } from '../../types/branded.types';
 import { ContextManager } from '../context-manager';
+
+/**
+ * Context Message Types - Strict type definition
+ */
+type ContextMessageTypes = 'context:getFiles' | 'context:includeFile' | 'context:excludeFile';
 
 /**
  * ContextMessageHandler - Single Responsibility: Handle context management messages
  */
-export class ContextMessageHandler extends BaseWebviewMessageHandler {
+export class ContextMessageHandler extends BaseWebviewMessageHandler<ContextMessageTypes> 
+  implements IWebviewMessageHandler<ContextMessageTypes> {
   readonly messageType = 'context:';
 
   constructor(
-    postMessage: (message: any) => void,
+    postMessage: StrictPostMessageFunction,
     private contextManager: ContextManager
   ) {
     super(postMessage);
   }
 
-  async handle(messageType: string, payload: any): Promise<any> {
-    const action = messageType.replace(this.messageType, '');
-    
-    switch (action) {
-      case 'getFiles':
-        return await this.handleGetContextFiles();
-      case 'includeFile':
-        return await this.handleIncludeFile(payload);
-      case 'excludeFile':
-        return await this.handleExcludeFile(payload);
-      default:
-        throw new Error(`Unknown context action: ${action}`);
+  async handle<K extends ContextMessageTypes>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse> {
+    try {
+      switch (messageType) {
+        case 'context:getFiles':
+          return await this.handleGetContextFiles();
+        case 'context:includeFile':
+          return await this.handleIncludeFile(payload as { filePath: string });
+        case 'context:excludeFile':
+          return await this.handleExcludeFile(payload as { filePath: string });
+        default:
+          throw new Error(`Unknown context message type: ${messageType}`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Context handler error';
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'CONTEXT_HANDLER_ERROR',
+          message: errorMessage
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     }
   }
 
-  private async handleGetContextFiles(): Promise<void> {
+  private async handleGetContextFiles(): Promise<MessageResponse> {
     try {
       const context = this.contextManager.getCurrentContext();
       const workspaceFiles = await this.getWorkspaceFiles();
       
+      const data = { 
+        files: workspaceFiles,
+        context: context 
+      };
+      
       this.postMessage({
         type: 'context:filesLoaded',
-        data: { 
-          files: workspaceFiles,
-          context: context 
-        }
+        payload: data
       });
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: true,
+        data,
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get context files';
       this.postMessage({
         type: 'context:error',
-        data: { message: error instanceof Error ? error.message : 'Failed to get context files' }
+        payload: { message: errorMessage }
       });
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'CONTEXT_FILES_ERROR',
+          message: errorMessage
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     }
   }
 
-  private async handleIncludeFile(data: { filePath: string }): Promise<void> {
+  private async handleIncludeFile(data: { filePath: string }): Promise<MessageResponse> {
     try {
       await this.contextManager.includeFile(vscode.Uri.file(data.filePath));
       
+      const responseData = { filePath: data.filePath };
+      
       this.postMessage({
         type: 'context:fileIncluded',
-        data: { filePath: data.filePath }
+        payload: responseData
       });
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: true,
+        data: responseData,
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to include file';
       this.postMessage({
         type: 'context:error',
-        data: { message: error instanceof Error ? error.message : 'Failed to include file' }
+        payload: { message: errorMessage }
       });
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'FILE_INCLUDE_ERROR',
+          message: errorMessage
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     }
   }
 
-  private async handleExcludeFile(data: { filePath: string }): Promise<void> {
+  private async handleExcludeFile(data: { filePath: string }): Promise<MessageResponse> {
     try {
       await this.contextManager.excludeFile(vscode.Uri.file(data.filePath));
       
+      const responseData = { filePath: data.filePath };
+      
       this.postMessage({
         type: 'context:fileExcluded',
-        data: { filePath: data.filePath }
+        payload: responseData
       });
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: true,
+        data: responseData,
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to exclude file';
       this.postMessage({
         type: 'context:error',
-        data: { message: error instanceof Error ? error.message : 'Failed to exclude file' }
+        payload: { message: errorMessage }
       });
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'FILE_EXCLUDE_ERROR',
+          message: errorMessage
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     }
   }
 

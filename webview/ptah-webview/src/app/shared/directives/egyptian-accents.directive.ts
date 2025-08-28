@@ -1,20 +1,18 @@
-import { 
-  Directive, 
-  ElementRef, 
-  Input, 
-  OnInit, 
-  OnDestroy, 
+import {
+  Directive,
+  ElementRef,
+  Input,
+  OnInit,
+  OnDestroy,
   inject,
   computed,
   effect,
   Renderer2
 } from '@angular/core';
 import { EgyptianThemeService } from '../../core/services/egyptian-theme.service';
-import { EgyptianVariant } from '../../core/services/material-config.service';
 
 /**
- * Egyptian Button Directive - Applies Egyptian theming to Material buttons
- * 
+ *
  * Usage: <button mat-raised-button egyptianButton="primary">Send</button>
  */
 @Directive({
@@ -22,7 +20,7 @@ import { EgyptianVariant } from '../../core/services/material-config.service';
   standalone: true
 })
 export class EgyptianButtonDirective implements OnInit, OnDestroy {
-  @Input() egyptianButton: EgyptianVariant = 'default';
+  @Input() egyptianButton = 'default';
   @Input() egyptianSize: 'sm' | 'md' | 'lg' = 'md';
 
   private readonly el = inject(ElementRef);
@@ -50,7 +48,7 @@ export class EgyptianButtonDirective implements OnInit, OnDestroy {
   // Effect to apply CSS classes when theme or variant changes
   private readonly classEffect = effect(() => {
     const classes = this.cssClasses();
-    
+
     // Remove old Egyptian classes
     const currentClasses = this.el.nativeElement.className.split(' ');
     currentClasses.forEach((cls: string) => {
@@ -78,7 +76,7 @@ export class EgyptianButtonDirective implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Initial setup - classes will be applied via effect
     this.renderer.setAttribute(this.el.nativeElement, 'data-egyptian-button', this.egyptianButton);
-    
+
     // Ensure accessibility attributes are preserved
     const existingAriaLabel = this.el.nativeElement.getAttribute('aria-label');
     if (!existingAriaLabel) {
@@ -92,8 +90,7 @@ export class EgyptianButtonDirective implements OnInit, OnDestroy {
 }
 
 /**
- * Egyptian Input Directive - Applies Egyptian theming to Material form fields
- * 
+ *
  * Usage: <mat-form-field egyptianInput="accent"><input matInput></mat-form-field>
  */
 @Directive({
@@ -101,7 +98,7 @@ export class EgyptianButtonDirective implements OnInit, OnDestroy {
   standalone: true
 })
 export class EgyptianInputDirective implements OnInit, OnDestroy {
-  @Input() egyptianInput: EgyptianVariant = 'default';
+  @Input() egyptianInput = 'default';
   @Input() egyptianGlow = false;
 
   private readonly el = inject(ElementRef);
@@ -128,7 +125,7 @@ export class EgyptianInputDirective implements OnInit, OnDestroy {
   // Effect to apply CSS classes and focus glow
   private readonly classEffect = effect(() => {
     const classes = this.cssClasses();
-    
+
     // Remove old Egyptian classes
     const currentClasses = this.el.nativeElement.className.split(' ');
     currentClasses.forEach((cls: string) => {
@@ -167,9 +164,9 @@ export class EgyptianInputDirective implements OnInit, OnDestroy {
   }
 
   private setupFocusGlow(): void {
-    const inputElement = this.el.nativeElement.querySelector('input') || 
+    const inputElement = this.el.nativeElement.querySelector('input') ||
                         this.el.nativeElement.querySelector('textarea');
-    
+
     if (inputElement) {
       this.renderer.listen(inputElement, 'focus', () => {
         this.renderer.addClass(this.el.nativeElement, 'egyptian-input-focused');
@@ -183,8 +180,7 @@ export class EgyptianInputDirective implements OnInit, OnDestroy {
 }
 
 /**
- * Egyptian Card Directive - Applies Egyptian theming to Material cards
- * 
+ *
  * Usage: <mat-card egyptianCard="papyrus">Content</mat-card>
  */
 @Directive({
@@ -192,7 +188,7 @@ export class EgyptianInputDirective implements OnInit, OnDestroy {
   standalone: true
 })
 export class EgyptianCardDirective implements OnInit, OnDestroy {
-  @Input() egyptianCard: EgyptianVariant = 'default';
+  @Input() egyptianCard = 'default';
   @Input() egyptianElevation = true;
 
   private readonly el = inject(ElementRef);
@@ -217,7 +213,7 @@ export class EgyptianCardDirective implements OnInit, OnDestroy {
     if (this.egyptianCard === 'papyrus') {
       baseClasses.push('egyptian-card-textured');
     }
-    
+
     if (this.egyptianCard === 'sacred') {
       baseClasses.push('egyptian-card-sacred-glow');
     }
@@ -228,7 +224,7 @@ export class EgyptianCardDirective implements OnInit, OnDestroy {
   // Effect to apply card styling
   private readonly classEffect = effect(() => {
     const classes = this.cssClasses();
-    
+
     // Remove old Egyptian classes
     const currentClasses = this.el.nativeElement.className.split(' ');
     currentClasses.forEach((cls: string) => {
@@ -253,7 +249,7 @@ export class EgyptianCardDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.renderer.setAttribute(this.el.nativeElement, 'data-egyptian-card', this.egyptianCard);
-    
+
     // Ensure proper accessibility
     const existingRole = this.el.nativeElement.getAttribute('role');
     if (!existingRole) {
@@ -267,8 +263,7 @@ export class EgyptianCardDirective implements OnInit, OnDestroy {
 }
 
 /**
- * Egyptian Icon Directive - Applies Egyptian theming to Material icons
- * 
+ *
  * Usage: <mat-icon egyptianIcon="hieroglyph">send</mat-icon>
  */
 @Directive({
@@ -276,7 +271,7 @@ export class EgyptianCardDirective implements OnInit, OnDestroy {
   standalone: true
 })
 export class EgyptianIconDirective implements OnInit, OnDestroy {
-  @Input() egyptianIcon: EgyptianVariant = 'default';
+  @Input() egyptianIcon = 'default';
   @Input() egyptianGlow = false;
 
   private readonly el = inject(ElementRef);
@@ -303,7 +298,7 @@ export class EgyptianIconDirective implements OnInit, OnDestroy {
   // Effect to apply icon styling
   private readonly classEffect = effect(() => {
     const classes = this.cssClasses();
-    
+
     // Remove old Egyptian classes
     const currentClasses = this.el.nativeElement.className.split(' ');
     currentClasses.forEach((cls: string) => {
@@ -336,8 +331,7 @@ export class EgyptianIconDirective implements OnInit, OnDestroy {
 }
 
 /**
- * Egyptian Spinner Directive - Applies Egyptian theming to Material progress spinners
- * 
+ *
  * Usage: <mat-progress-spinner egyptianSpinner="accent"></mat-progress-spinner>
  */
 @Directive({
@@ -345,7 +339,7 @@ export class EgyptianIconDirective implements OnInit, OnDestroy {
   standalone: true
 })
 export class EgyptianSpinnerDirective implements OnInit, OnDestroy {
-  @Input() egyptianSpinner: EgyptianVariant = 'default';
+  @Input() egyptianSpinner = 'default';
 
   private readonly el = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
@@ -371,7 +365,7 @@ export class EgyptianSpinnerDirective implements OnInit, OnDestroy {
   // Effect to apply spinner styling
   private readonly classEffect = effect(() => {
     const classes = this.cssClasses();
-    
+
     // Remove old Egyptian classes
     const currentClasses = this.el.nativeElement.className.split(' ');
     currentClasses.forEach((cls: string) => {
@@ -396,7 +390,7 @@ export class EgyptianSpinnerDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.renderer.setAttribute(this.el.nativeElement, 'data-egyptian-spinner', this.egyptianSpinner);
-    
+
     // Ensure accessibility for screen readers
     const existingAriaLabel = this.el.nativeElement.getAttribute('aria-label');
     if (!existingAriaLabel) {

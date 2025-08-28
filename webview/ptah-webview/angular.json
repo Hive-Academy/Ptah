@@ -56,10 +56,10 @@
               "namedChunks": true
             },
             "development": {
-              "optimization": true,
+              "optimization": false,
               "extractLicenses": true,
               "sourceMap": true,
-              "outputHashing": "all"
+              "outputHashing": "none"
             },
             "webview": {
               "optimization": true,

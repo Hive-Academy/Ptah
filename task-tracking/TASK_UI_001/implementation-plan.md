@@ -3,12 +3,14 @@
 ## 📊 Research Evidence Summary
 
 **Key Research Findings**:
+
 - **Current Architecture**: Angular 20.2 with Tailwind CSS 3.4.17 + Egyptian custom components (task-description.md, Section 1)
 - **CSS Analysis**: 169 lines of custom CSS across 3 SCSS files with Egyptian-themed utilities (codebase analysis)
 - **Component Structure**: 4 custom Egyptian components (EgyptianButton, EgyptianCard, EgyptianInput, LoadingSpinner) using Tailwind classes
 - **Theme Integration**: VS Code CSS custom properties already integrated with vscode-* utility classes (styles.scss, Lines 9-53)
 
 **Business Requirements Addressed**:
+
 - **Requirement 1**: Angular Material 18 Migration - Replace all custom components with Material equivalents (task-description.md, Section 11-19)
 - **Requirement 2**: VS Code Theme Integration - Automatic theme adaptation within 200ms (task-description.md, Section 20-28)
 - **Requirement 3**: Egyptian Identity Preservation - Maintain gold accents, hieroglyph icons, Egyptian color palette (task-description.md, Section 29-37)
@@ -265,6 +267,7 @@ Quality Attributes:
 **Requirements**: 1.1, 1.2, 2.1, 2.2 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **File**: `/webview/ptah-webview/package.json` - Add @angular/material@18 dependency
 - **File**: `/webview/ptah-webview/src/app/core/services/egyptian-theme.service.ts` - Create theme service
 - **Interface**: `EgyptianThemeService` with `adaptToVSCodeTheme()` method
@@ -272,6 +275,7 @@ Quality Attributes:
 - **Testing**: Theme switching within 200ms, signal reactivity tests
 
 **Acceptance Criteria**:
+
 - [ ] Angular Material 18 installed and configured
 - [ ] EgyptianThemeService created with Strategy pattern
 - [ ] VS Code theme detection working (<200ms response)
@@ -287,6 +291,7 @@ Quality Attributes:
 **Requirements**: 1.3, 3.4, 4.2 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **File**: `/webview/ptah-webview/src/app/core/services/material-config.service.ts`
 - **Interface**: `MaterialComponentFactory` with create methods for Button, Input, Card
 - **Dependencies**: `@angular/material/*`, EgyptianThemeService
@@ -317,6 +322,7 @@ export class MaterialConfigService {
 ```
 
 **Quality Gates**:
+
 - [ ] All factories produce consistent configurations
 - [ ] Egyptian class names follow naming convention
 - [ ] Material component configurations valid
@@ -333,6 +339,7 @@ export class MaterialConfigService {
 **Requirements**: 1.1, 3.1, 3.2, 4.1 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **Files to Modify**:
   - `/webview/ptah-webview/src/app/components/chat/chat.component.ts`
   - `/webview/ptah-webview/src/app/components/command-builder/command-builder.component.ts`
@@ -359,6 +366,7 @@ export class MaterialConfigService {
 ```
 
 **Quality Gates**:
+
 - [ ] All 4 custom components replaced
 - [ ] Material components maintain Egyptian visual identity
 - [ ] Accessibility features preserved (ARIA, keyboard navigation)
@@ -373,6 +381,7 @@ export class MaterialConfigService {
 **Requirements**: 3.1, 3.2, 3.3, 3.4 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **File**: `/webview/ptah-webview/src/app/shared/directives/egyptian-accents.directive.ts`
 - **Directives to Create**:
   - `egyptianButton` - Gold accent on Material buttons
@@ -420,6 +429,7 @@ export class EgyptianButtonDirective implements OnInit {
 ```
 
 **Quality Gates**:
+
 - [ ] Gold glow effect on focused inputs working
 - [ ] Hieroglyph icons integrated with Material icons
 - [ ] Egyptian color palette preserved
@@ -436,6 +446,7 @@ export class EgyptianButtonDirective implements OnInit {
 **Requirements**: 4.1, 4.2, 4.3, 4.4 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **Files to Delete**:
   - `/webview/ptah-webview/src/app/components/chat/chat.component.scss`
   - `/webview/ptah-webview/src/app/components/command-builder/command-builder.component.scss`
@@ -458,6 +469,7 @@ export class EgyptianButtonDirective implements OnInit {
 ```
 
 **Quality Gates**:
+
 - [ ] All component .scss files removed
 - [ ] Only global styles.scss remains (Tailwind + VS Code utilities)
 - [ ] All styling handled by Material theme + Egyptian directives
@@ -472,6 +484,7 @@ export class EgyptianButtonDirective implements OnInit {
 **Requirements**: 5.1, 5.2, 5.3, 5.4 (from task-description.md)
 
 **Frontend Developer Handoff**:
+
 - **Files to Modify**: All component templates to use Material responsive system
 - **Implementation**: Material Grid + Flex Layout for sidebar optimization
 - **Dependencies**: `@angular/flex-layout` (if needed), Material breakpoints
@@ -497,6 +510,7 @@ const EGYPTIAN_BREAKPOINTS = {
 ```
 
 **Quality Gates**:
+
 - [ ] 300px minimum width fully functional
 - [ ] >600px width scales appropriately
 - [ ] Touch targets meet 44px minimum
@@ -634,6 +648,7 @@ export class EgyptianStyleApplicator {
 **Decision**: Replace all custom Egyptian components with Material 18 components + Egyptian theming
 **Evidence**: Requirements 1.1-1.4 mandate Material Design compliance (task-description.md, Lines 15-19)
 **Consequences**:
+
 - (+) Professional appearance matching industry standards
 - (+) Built-in accessibility and keyboard navigation
 - (+) Reduced maintenance overhead for UI components
@@ -647,6 +662,7 @@ export class EgyptianStyleApplicator {
 **Decision**: Implement Strategy pattern for theme adaptation strategies
 **Evidence**: Requirement 2.1-2.4 mandate automatic VS Code theme adaptation (task-description.md, Lines 24-27)
 **Consequences**:
+
 - (+) Easy to add new theme variants
 - (+) Testable theme logic in isolation
 - (+) Clean separation of theme concerns
@@ -660,6 +676,7 @@ export class EgyptianStyleApplicator {
 **Decision**: Create Angular directives that apply Egyptian accents to Material components
 **Evidence**: Requirements 3.1-3.4 preserve Egyptian identity + 4.1 eliminate custom CSS (Lines 33-43)
 **Consequences**:
+
 - (+) No custom CSS files required
 - (+) Composable Egyptian styling
 - (+) CSP compliant implementation
@@ -673,6 +690,7 @@ export class EgyptianStyleApplicator {
 **Decision**: Use Angular Signals for reactive theme state management  
 **Evidence**: Performance requirement <200ms theme switching (Lines 59, 122)
 **Consequences**:
+
 - (+) Optimal performance with fine-grained reactivity
 - (+) Simplified component subscriptions to theme changes
 - (+) Automatic change detection optimization
@@ -774,21 +792,25 @@ interface UXMetrics {
 ## 🤝 Professional Implementation Timeline
 
 ### Phase 1: Foundation (Days 1-2)
+
 **Subtask 1.1**: Material 18 + Theme Service setup (4 hours)
 **Subtask 1.2**: Component Factory Service (3 hours)
 **Checkpoint**: Theme switching working, factory patterns tested
 
-### Phase 2: Component Migration (Days 3-4) 
+### Phase 2: Component Migration (Days 3-4)
+
 **Subtask 2.1**: Replace Egyptian components (6 hours)
 **Subtask 2.2**: Egyptian accent directives (4 hours)
 **Checkpoint**: All components migrated, visual identity preserved
 
 ### Phase 3: CSS Elimination & Optimization (Day 5)
+
 **Subtask 3.1**: Remove SCSS files (3 hours)
 **Subtask 3.2**: Responsive optimization (2 hours)
 **Checkpoint**: Zero custom CSS, responsive design validated
 
 ### Quality Assurance (Day 6)
+
 - Comprehensive testing all acceptance criteria
 - Performance benchmarking and optimization
 - Accessibility audit and compliance verification

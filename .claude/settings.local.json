@@ -37,7 +37,11 @@
       "Bash(npm run build:all:*)",
       "Bash(npm run compile:*)",
       "WebFetch(domain:tejas-variya.medium.com)",
-      "mcp__angular-cli__get_best_practices"
+      "mcp__angular-cli__get_best_practices",
+      "Bash(npm run lint)",
+      "Bash(npm run build:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm install:*)"
     ],
     "additionalDirectories": [
       "d:\\projects\\Ptah"

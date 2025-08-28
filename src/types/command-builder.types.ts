@@ -19,7 +19,7 @@ export interface TemplateParameter {
   required: boolean;
   description: string;
   placeholder?: string;
-  defaultValue?: any;
+  defaultValue?: string | number | boolean | readonly string[];
   options?: string[];
   validation?: {
     min?: number;
@@ -32,23 +32,23 @@ export interface TemplateParameter {
 export interface TemplateExample {
   title: string;
   description: string;
-  parameters: Record<string, any>;
+  parameters: Readonly<Record<string, string | number | boolean | readonly string[]>>;
 }
 
 export interface CommandBuilderMessage {
   type: 'getTemplates' | 'getTemplate' | 'executeCommand' | 'saveTemplate' | 'deleteTemplate' | 'trackUsage' | 'selectFile' | 'ready';
-  payload?: any;
+  payload?: unknown;
 }
 
 export interface CommandBuilderResponse {
   type: 'templates' | 'template' | 'commandResult' | 'error' | 'fileSelected' | 'ready';
-  payload?: any;
+  payload?: unknown;
   error?: string;
 }
 
 export interface ExecuteCommandRequest {
   templateId: string;
-  parameters: Record<string, any>;
+  parameters: Readonly<Record<string, string | number | boolean | readonly string[]>>;
   context?: {
     workspaceFolder?: string;
     activeFile?: string;
@@ -66,6 +66,6 @@ export interface CommandResult {
 
 export interface CommandBuildResult {
   command: string;
-  parameters: Record<string, any>;
+  parameters: Readonly<Record<string, string | number | boolean | readonly string[]>>;
   template: CommandTemplate;
 }

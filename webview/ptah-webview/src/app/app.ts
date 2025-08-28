@@ -2,10 +2,10 @@ import { Component, OnInit, OnDestroy, signal, computed, inject, ChangeDetection
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { StatusBarComponent } from './components/status-bar/status-bar.component';
 import { LoadingSpinnerComponent } from './shared';
-import { AppStateManager, ViewType } from './services/app-state.service';
-import { ViewManagerService } from './services/view-manager.service';
-import { VSCodeService } from './services/vscode.service';
-import { WebviewNavigationService } from './services/webview-navigation.service';
+import { AppStateManager, ViewType } from './core/services/app-state.service';
+import { ViewManagerService } from './core/services/view-manager.service';
+import { VSCodeService } from './core/services/vscode.service';
+import { WebviewNavigationService } from './core/services/webview-navigation.service';
 import { EgyptianThemeService } from './core/services/egyptian-theme.service';
 import { Subject } from 'rxjs';
 // Individual component imports for pure signal-based navigation

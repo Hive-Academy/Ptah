@@ -2,19 +2,15 @@ import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, filter } from 'rxjs';
-import { LucideAngularModule, SendIcon, PlusIcon, SettingsIcon, HistoryIcon, FileTextIcon, ZapIcon, CodeIcon, RefreshCwIcon } from 'lucide-angular';
+import { LucideAngularModule, SendIcon, PlusIcon, SettingsIcon, HistoryIcon, FileTextIcon, ZapIcon, CodeIcon, RefreshCwIcon, EditIcon, FileIcon, SearchIcon, FlaskConicalIcon, BookOpenIcon, TrendingUpIcon } from 'lucide-angular';
 
-import { 
-  MATERIAL_IMPORTS, 
-  EgyptianButtonDirective, 
-  EgyptianInputDirective,
-  EgyptianCardDirective,
-  EgyptianSpinnerDirective
-} from '../../shared';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { EgyptianButtonComponent } from '../../shared/components/egyptian-button.component';
+import { EgyptianInputComponent } from '../../shared/components/egyptian-input.component';
 import { EgyptianThemeService } from '../../core/services/egyptian-theme.service';
-import { MessageHandlerService } from '../../services/message-handler.service';
-import { VSCodeService, VSCodeMessage } from '../../services/vscode.service';
-import { AppStateManager } from '../../services/app-state.service';
+import { MessageHandlerService } from '../../core/services/message-handler.service';
+import { VSCodeService, VSCodeMessage } from '../../core/services/vscode.service';
+import { AppStateManager } from '../../core/services/app-state.service';
 
 interface ChatMessage {
   id: string;
@@ -42,13 +38,10 @@ interface ChatSession {
     CommonModule,
     FormsModule,
     LucideAngularModule,
-    ...MATERIAL_IMPORTS,
-    EgyptianButtonDirective,
-    EgyptianInputDirective,
-    EgyptianCardDirective,
-    EgyptianSpinnerDirective
+    EgyptianButtonComponent,
+    EgyptianInputComponent
   ],
-  templateUrl: './chat.component.html'
+  templateUrl: './chat.component.html',
 })
 export class ChatComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -66,6 +59,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   readonly ZapIcon = ZapIcon;
   readonly CodeIcon = CodeIcon;
   readonly RefreshCwIcon = RefreshCwIcon;
+  readonly EditIcon = EditIcon;
+  readonly FileIcon = FileIcon;
+  readonly SearchIcon = SearchIcon;
+  readonly FlaskConicalIcon = FlaskConicalIcon;
+  readonly BookOpenIcon = BookOpenIcon;
+  readonly TrendingUpIcon = TrendingUpIcon;
 
   // Signals
   currentMessage = signal('');
@@ -300,11 +299,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   getTokenUsageClasses(): string {
     const session = this.currentSession();
     if (!session?.tokenUsage) return '';
-    
+
     // Generate width class based on percentage without inline styles
     const percentage = session.tokenUsage.percentage;
     const width = Math.round(percentage);
-    
+
     // Create dynamic width class - this avoids CSP violation
     return `token-usage-width-${width}`;
   }
@@ -312,7 +311,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private scrollToBottom(): void {
     // Use setTimeout to ensure DOM updates are processed
     setTimeout(() => {
-      const messageContainer = document.querySelector('.message-list');
+      const messageContainer = document.querySelector('main');
       if (messageContainer) {
         messageContainer.scrollTop = messageContainer.scrollHeight;
       }

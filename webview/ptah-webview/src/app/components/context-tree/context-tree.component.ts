@@ -1,16 +1,16 @@
-import { 
-  Component, 
-  OnInit, 
-  OnDestroy, 
-  signal, 
-  computed, 
-  inject, 
-  ChangeDetectionStrategy 
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  signal,
+  computed,
+  inject,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import { VSCodeService } from '../../services/vscode.service';
-import { AppStateManager } from '../../services/app-state.service';
+import { VSCodeService } from '../../core/services/vscode.service';
+import { AppStateManager } from '../../core/services/app-state.service';
 import { EgyptianCardComponent, EgyptianButtonComponent, LoadingSpinnerComponent } from '../../shared';
 
 // Context Tree specific types
@@ -54,216 +54,7 @@ export interface TokenWarning {
     LoadingSpinnerComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="context-tree-container h-full flex flex-col">
-      <!-- Header with statistics -->
-      <app-egyptian-card 
-        title="Project Context" 
-        subtitle="Manage files included in Claude context"
-        variant="compact"
-        class="mb-4">
-        
-        <div class="flex justify-between items-center mb-4" slot="content">
-          <div class="stats flex gap-4 text-sm">
-            <span class="token-info">
-              <strong>{{ currentTokens() }}</strong> / {{ maxTokens() }} tokens
-            </span>
-            <span class="file-count text-hieroglyph-600">
-              {{ includedFilesCount() }} files included
-            </span>
-          </div>
-          
-          <div class="actions flex gap-2">
-            <app-egyptian-button
-              (clicked)="refreshContext()"
-              [disabled]="isLoading()"
-              size="sm"
-              variant="secondary">
-              @if (isLoading()) {
-                <app-loading-spinner size="sm" />
-              } @else {
-                Refresh
-              }
-            </app-egyptian-button>
-            
-            <app-egyptian-button
-              (clicked)="clearAll()"
-              [disabled]="isLoading() || includedFilesCount() === 0"
-              size="sm"
-              variant="tertiary">
-              Clear All
-            </app-egyptian-button>
-          </div>
-        </div>
-
-        <!-- Token usage bar -->
-        <div class="token-usage-bar mb-4">
-          <div class="bg-papyrus-200 rounded-full h-2 overflow-hidden">
-            <div 
-              class="h-full transition-all duration-300"
-              [class]="tokenUsageBarClass()"
-              [style.width.%]="tokenUsagePercentage()">
-            </div>
-          </div>
-          
-          @if (tokenWarning()) {
-            <div class="mt-2 p-2 rounded-egyptian text-sm" [class]="tokenWarningClass()">
-              <strong>{{ tokenWarning()!.level | titlecase }}:</strong> {{ tokenWarning()!.message }}
-              @if (tokenWarning()!.suggestion) {
-                <br><em>{{ tokenWarning()!.suggestion }}</em>
-              }
-            </div>
-          }
-        </div>
-      </app-egyptian-card>
-
-      <!-- File tree -->
-      <app-egyptian-card 
-        title="File Tree" 
-        variant="default" 
-        class="flex-1 overflow-hidden">
-        
-        <div class="tree-container overflow-auto h-full" slot="content">
-          @if (isLoading()) {
-            <div class="flex items-center justify-center h-32">
-              <app-loading-spinner message="Loading workspace files..." />
-            </div>
-          } @else if (error()) {
-            <div class="error-state text-center text-red-600 p-4">
-              <div class="text-lg font-semibold mb-2">Error loading files</div>
-              <div class="text-sm mb-4">{{ error() }}</div>
-              <app-egyptian-button (clicked)="refreshContext()" size="sm">
-                Try Again
-              </app-egyptian-button>
-            </div>
-          } @else if (filteredFiles().length === 0) {
-            <div class="empty-state text-center text-hieroglyph-600 p-8">
-              <div class="text-lg font-semibold mb-2">No files found</div>
-              <div class="text-sm">Your workspace appears to be empty or no files are accessible.</div>
-            </div>
-          } @else {
-            <div class="file-tree">
-              @for (file of filteredFiles(); track file.path) {
-                <div 
-                  class="file-node"
-                  [class.selected]="selectedFiles().has(file.path)"
-                  [style.margin-left.px]="file.depth * 20">
-                  
-                  <div class="node-content flex items-center py-1 px-2 hover:bg-papyrus-100 rounded transition-colors">
-                    <!-- Expand/collapse button for directories -->
-                    @if (file.type === 'directory') {
-                      <button 
-                        class="expand-button w-4 h-4 mr-2 flex items-center justify-center text-hieroglyph-600 hover:text-hieroglyph-800"
-                        (click)="toggleDirectory(file.path)"
-                        [attr.aria-label]="expandedFolders().has(file.path) ? 'Collapse folder' : 'Expand folder'">
-                        @if (expandedFolders().has(file.path)) {
-                          ▼
-                        } @else {
-                          ▶
-                        }
-                      </button>
-                    } @else {
-                      <div class="w-4 h-4 mr-2"></div>
-                    }
-
-                    <!-- File/folder icon -->
-                    <div class="icon mr-2 text-sm">
-                      @if (file.type === 'directory') {
-                        📁
-                      } @else {
-                        📄
-                      }
-                    </div>
-
-                    <!-- File name -->
-                    <div class="file-name flex-1 text-sm font-medium">
-                      {{ file.name }}
-                    </div>
-
-                    <!-- Inclusion status -->
-                    <div class="inclusion-status flex items-center gap-2 ml-2">
-                      @if (file.type === 'file') {
-                        <!-- Token estimate -->
-                        @if (file.tokenEstimate) {
-                          <span class="token-estimate text-xs text-hieroglyph-500">
-                            {{ file.tokenEstimate }} tokens
-                          </span>
-                        }
-
-                        <!-- Inclusion toggle -->
-                        <button 
-                          class="inclusion-toggle w-5 h-5 rounded border-2 flex items-center justify-center transition-all"
-                          [class]="getInclusionToggleClass(file)"
-                          (click)="toggleFileInclusion(file.path)"
-                          [attr.aria-label]="getInclusionToggleLabel(file)">
-                          @if (file.isIncluded) {
-                            ✓
-                          }
-                        </button>
-                      }
-                    </div>
-
-                    <!-- Context menu trigger -->
-                    <button 
-                      class="context-menu-trigger w-6 h-6 ml-2 text-hieroglyph-400 hover:text-hieroglyph-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                      (click)="showContextMenu($event, file)"
-                      [attr.aria-label]="'More options for ' + file.name">
-                      ⋯
-                    </button>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        </div>
-      </app-egyptian-card>
-
-      <!-- Context menu (simplified - just show actions) -->
-      @if (contextMenuFile() && showContextMenuFlag()) {
-        <div 
-          class="context-menu fixed z-50 bg-white border border-papyrus-300 rounded-egyptian shadow-lg py-2 min-w-48"
-          [style.left.px]="contextMenuPosition().x"
-          [style.top.px]="contextMenuPosition().y">
-          
-          @if (contextMenuFile()!.type === 'file') {
-            @if (!contextMenuFile()!.isIncluded) {
-              <button 
-                class="menu-item w-full text-left px-4 py-2 hover:bg-papyrus-100 text-sm"
-                (click)="includeFileFromMenu()">
-                Include in Context
-              </button>
-            } @else {
-              <button 
-                class="menu-item w-full text-left px-4 py-2 hover:bg-papyrus-100 text-sm"
-                (click)="excludeFileFromMenu()">
-                Exclude from Context
-              </button>
-            }
-          }
-          
-          @if (contextMenuFile()!.type === 'directory') {
-            <button 
-              class="menu-item w-full text-left px-4 py-2 hover:bg-papyrus-100 text-sm"
-              (click)="includeDirectoryFromMenu()">
-              Include All Files
-            </button>
-            <button 
-              class="menu-item w-full text-left px-4 py-2 hover:bg-papyrus-100 text-sm"
-              (click)="excludeDirectoryFromMenu()">
-              Exclude All Files
-            </button>
-          }
-          
-          <hr class="my-1 border-papyrus-200">
-          <button 
-            class="menu-item w-full text-left px-4 py-2 hover:bg-papyrus-100 text-sm text-hieroglyph-600"
-            (click)="hideContextMenu()">
-            Cancel
-          </button>
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './context-tree.component.html',
   styles: [`
     .context-tree-container {
       @apply min-h-full;
@@ -345,7 +136,7 @@ export interface TokenWarning {
 })
 export class ContextTreeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   // Services
   private vscodeService = inject(VSCodeService);
   private appState = inject(AppStateManager);
@@ -377,11 +168,11 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
   readonly contextMenuPosition = computed(() => this._contextMenuPosition());
 
   // Computed values for UI
-  readonly includedFilesCount = computed(() => 
+  readonly includedFilesCount = computed(() =>
     this.files().filter(f => f.type === 'file' && f.isIncluded).length
   );
 
-  readonly tokenUsagePercentage = computed(() => 
+  readonly tokenUsagePercentage = computed(() =>
     Math.min(100, (this.currentTokens() / this.maxTokens()) * 100)
   );
 
@@ -396,7 +187,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     const percentage = this.tokenUsagePercentage();
     const current = this.currentTokens();
     const max = this.maxTokens();
-    
+
     if (percentage >= 95) {
       return {
         level: 'error',
@@ -404,15 +195,15 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
         suggestion: 'Exclude some files to avoid hitting the token limit'
       };
     }
-    
+
     if (percentage >= 80) {
       return {
-        level: 'warning', 
+        level: 'warning',
         message: `High usage: ${current} tokens (${percentage.toFixed(1)}% of limit)`,
         suggestion: 'Consider excluding test files or build artifacts'
       };
     }
-    
+
     if (percentage >= 60) {
       return {
         level: 'info',
@@ -420,14 +211,14 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
         suggestion: 'Token usage is within normal range'
       };
     }
-    
+
     return null;
   });
 
   readonly tokenWarningClass = computed(() => {
     const warning = this.tokenWarning();
     if (!warning) return '';
-    
+
     switch (warning.level) {
       case 'error': return 'bg-red-100 text-red-800 border border-red-300';
       case 'warning': return 'bg-yellow-100 text-yellow-800 border border-yellow-300';
@@ -507,7 +298,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
   clearAll(): void {
     console.log('ContextTreeComponent: Clearing all included files...');
     const includedFiles = this.files().filter(f => f.type === 'file' && f.isIncluded);
-    
+
     for (const file of includedFiles) {
       this.vscodeService.excludeFile(file.path);
     }
@@ -527,20 +318,20 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
   toggleDirectory(dirPath: string): void {
     const expanded = this.expandedFolders();
     const newExpanded = new Set(expanded);
-    
+
     if (expanded.has(dirPath)) {
       newExpanded.delete(dirPath);
     } else {
       newExpanded.add(dirPath);
     }
-    
+
     this.updateExpandedFolders(newExpanded);
   }
 
   showContextMenu(event: MouseEvent, file: FileTreeNode): void {
     event.preventDefault();
     event.stopPropagation();
-    
+
     this._contextMenuFile.set(file);
     this._contextMenuPosition.set({ x: event.clientX, y: event.clientY });
     this._showContextMenu.set(true);
@@ -572,10 +363,10 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     if (file && file.type === 'directory') {
       // Find all files in this directory and include them
       const allFiles = this.flattenTree(this.files());
-      const directoryFiles = allFiles.filter(f => 
+      const directoryFiles = allFiles.filter(f =>
         f.type === 'file' && f.path.startsWith(file.path + '/')
       );
-      
+
       for (const dirFile of directoryFiles) {
         if (!dirFile.isIncluded) {
           this.vscodeService.includeFile(dirFile.path);
@@ -590,10 +381,10 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     if (file && file.type === 'directory') {
       // Find all files in this directory and exclude them
       const allFiles = this.flattenTree(this.files());
-      const directoryFiles = allFiles.filter(f => 
+      const directoryFiles = allFiles.filter(f =>
         f.type === 'file' && f.path.startsWith(file.path + '/')
       );
-      
+
       for (const dirFile of directoryFiles) {
         if (dirFile.isIncluded) {
           this.vscodeService.excludeFile(dirFile.path);
@@ -628,7 +419,7 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
 
   private handleContextFilesLoaded(data: any): void {
     console.log('Processing loaded context files:', data);
-    
+
     if (data.files && Array.isArray(data.files)) {
       const treeFiles = this.buildFileTree(data.files, data.context || {});
       this.updateContextState({
@@ -670,35 +461,35 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
   }
 
   private updateFileInclusion(filePath: string, isIncluded: boolean, isExcluded: boolean): void {
-    const files = this.files().map(file => 
+    const files = this.files().map(file =>
       this.updateFileInclusionRecursive(file, filePath, isIncluded, isExcluded)
     );
-    
+
     // Recalculate total tokens
     const totalTokens = this.calculateTotalTokens(files);
-    
+
     this.updateContextState({ files, totalTokens });
   }
 
   private updateFileInclusionRecursive(
-    file: FileTreeNode, 
-    targetPath: string, 
-    isIncluded: boolean, 
+    file: FileTreeNode,
+    targetPath: string,
+    isIncluded: boolean,
     isExcluded: boolean
   ): FileTreeNode {
     if (file.path === targetPath) {
       return { ...file, isIncluded, isExcluded };
     }
-    
+
     if (file.children) {
       return {
         ...file,
-        children: file.children.map(child => 
+        children: file.children.map(child =>
           this.updateFileInclusionRecursive(child, targetPath, isIncluded, isExcluded)
         )
       };
     }
-    
+
     return file;
   }
 
@@ -731,15 +522,15 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
     for (const fileData of sortedFiles) {
       const pathParts = fileData.path.split('/').filter(Boolean);
       let currentPath = '';
-      
+
       for (let i = 0; i < pathParts.length; i++) {
         const part = pathParts[i];
         const parentPath = currentPath;
         currentPath = currentPath ? `${currentPath}/${part}` : part;
-        
+
         if (!fileMap.has(currentPath)) {
           const isFile = i === pathParts.length - 1 && fileData.type === 'file';
-          
+
           const node: FileTreeNode = {
             path: currentPath,
             name: part,
@@ -771,14 +562,14 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
 
   private flattenTree(files: FileTreeNode[]): FileTreeNode[] {
     const result: FileTreeNode[] = [];
-    
+
     const addToResult = (file: FileTreeNode) => {
       result.push(file);
-      
-      if (file.type === 'directory' && 
-          file.children && 
+
+      if (file.type === 'directory' &&
+          file.children &&
           this.expandedFolders().has(file.path)) {
-        
+
         for (const child of file.children) {
           addToResult(child);
         }
@@ -794,12 +585,12 @@ export class ContextTreeComponent implements OnInit, OnDestroy {
 
   private calculateTotalTokens(files: FileTreeNode[]): number {
     let total = 0;
-    
+
     const countTokens = (file: FileTreeNode) => {
       if (file.type === 'file' && file.isIncluded && file.tokenEstimate) {
         total += file.tokenEstimate;
       }
-      
+
       if (file.children) {
         for (const child of file.children) {
           countTokens(child);

@@ -1,9 +1,11 @@
 import { Component, Input, Output, EventEmitter, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { LucideAngularModule, LucideIconData, X } from 'lucide-angular';
 
 @Component({
   selector: 'app-egyptian-input',
   standalone: true,
+  imports: [LucideAngularModule],
   template: `
     <div class="egyptian-input-wrapper">
       @if (label) {
@@ -18,24 +20,43 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       <div class="relative">
         @if (icon) {
           <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i [class]="'icon-' + icon" class="text-hieroglyph-500"></i>
+            <lucide-angular [img]="icon" class="w-4 h-4 text-hieroglyph-500"></lucide-angular>
           </div>
         }
 
-        <input
-          [id]="inputId"
-          [type]="type"
-          [class]="'hieroglyph-input w-full ' + (icon ? 'pl-10' : '') + ' ' + additionalClasses"
-          [placeholder]="placeholder"
-          [disabled]="disabled"
-          [required]="required"
-          [value]="value"
-          (input)="onInput($event)"
-          (blur)="onBlur()"
-          (focus)="onFocus()"
-          [attr.aria-describedby]="errorId"
-          [attr.aria-invalid]="hasError"
-        />
+        @if (multiline) {
+          <textarea
+            [id]="inputId"
+            [class]="'hieroglyph-input w-full ' + (icon ? 'pl-10' : '') + ' ' + additionalClasses"
+            [placeholder]="placeholder"
+            [disabled]="disabled"
+            [required]="required"
+            [rows]="rows"
+            [value]="value"
+            (input)="onInput($event)"
+            (blur)="onBlur()"
+            (focus)="onFocus()"
+            (keydown)="onKeyDown($event)"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="hasError">
+          </textarea>
+        } @else {
+          <input
+            [id]="inputId"
+            [type]="type"
+            [class]="'hieroglyph-input w-full ' + (icon ? 'pl-10' : '') + ' ' + additionalClasses"
+            [placeholder]="placeholder"
+            [disabled]="disabled"
+            [required]="required"
+            [value]="value"
+            (input)="onInput($event)"
+            (blur)="onBlur()"
+            (focus)="onFocus()"
+            (keydown)="onKeyDown($event)"
+            [attr.aria-describedby]="errorId"
+            [attr.aria-invalid]="hasError"
+          />
+        }
 
         @if (clearable && value) {
           <button
@@ -43,7 +64,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
             class="absolute inset-y-0 right-0 pr-3 flex items-center"
             (click)="clear()"
             aria-label="Clear input">
-            <i class="icon-x text-hieroglyph-400 hover:text-hieroglyph-600"></i>
+            <lucide-angular [img]="X" class="w-4 h-4 text-hieroglyph-400 hover:text-hieroglyph-600"></lucide-angular>
           </button>
         }
       </div>
@@ -101,21 +122,27 @@ export class EgyptianInputComponent implements ControlValueAccessor {
   @Input() label?: string;
   @Input() placeholder?: string;
   @Input() type: string = 'text';
-  @Input() icon?: string;
+  @Input() icon?: LucideIconData;
   @Input() required: boolean = false;
   @Input() disabled: boolean = false;
   @Input() clearable: boolean = false;
   @Input() errorMessage?: string;
   @Input() helpText?: string;
   @Input() inputId: string = 'input-' + Math.random().toString(36).substring(2);
+  @Input() multiline: boolean = false;  // Support textarea mode
+  @Input() rows: number = 1;  // Support custom rows
 
   @Output() inputChange = new EventEmitter<string>();
   @Output() focused = new EventEmitter<void>();
   @Output() blurred = new EventEmitter<void>();
+  @Output() keyDown = new EventEmitter<KeyboardEvent>();  // Add keydown event
 
   value: string = '';
   private onChange = (value: string) => {};
   private onTouched = () => {};
+
+  // Public icons for template
+  readonly X = X;
 
   get errorId(): string {
     return this.inputId + '-error';
@@ -166,6 +193,10 @@ export class EgyptianInputComponent implements ControlValueAccessor {
   onBlur(): void {
     this.onTouched();
     this.blurred.emit();
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    this.keyDown.emit(event);
   }
 
   clear(): void {

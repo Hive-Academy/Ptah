@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { StrictPostMessageFunction } from '../services/webview-message-handlers/base-message-handler';
 import { SessionManager } from '../services/session-manager';
 import { ClaudeCliService } from '../services/claude-cli.service';
 import { ContextManager } from '../services/context-manager';
@@ -42,17 +43,18 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
   /**
    * Initialize message handlers - follows Open/Closed Principle
    * New handlers can be added without modifying existing code
+   * Now with strict typing - eliminates 'any' types
    */
   private initializeMessageHandlers(): void {
     const postMessageFn = this.postMessage.bind(this);
 
-    // Register all message handlers
-    this.messageRouter.registerHandler(new ChatMessageHandler(postMessageFn, this.sessionManager, this.claudeService));
-    this.messageRouter.registerHandler(new CommandMessageHandler(postMessageFn, this.commandBuilderService));
-    this.messageRouter.registerHandler(new ContextMessageHandler(postMessageFn, this.contextManager));
-    this.messageRouter.registerHandler(new AnalyticsMessageHandler(postMessageFn, this.sessionManager, this.commandBuilderService));
-    this.messageRouter.registerHandler(new StateMessageHandler(postMessageFn, this.context));
-    this.messageRouter.registerHandler(new ViewMessageHandler(postMessageFn));
+    // Register all message handlers with explicit type casting for compatibility
+    this.messageRouter.registerHandler(new ChatMessageHandler(postMessageFn, this.sessionManager, this.claudeService) as any);
+    this.messageRouter.registerHandler(new CommandMessageHandler(postMessageFn, this.commandBuilderService) as any);
+    this.messageRouter.registerHandler(new ContextMessageHandler(postMessageFn, this.contextManager) as any);
+    this.messageRouter.registerHandler(new AnalyticsMessageHandler(postMessageFn, this.sessionManager, this.commandBuilderService) as any);
+    this.messageRouter.registerHandler(new StateMessageHandler(postMessageFn, this.context) as any);
+    this.messageRouter.registerHandler(new ViewMessageHandler(postMessageFn) as any);
 
     Logger.info('All message handlers initialized');
   }
@@ -225,15 +227,16 @@ export class AngularWebviewProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Send message to Angular application
+   * Send message to Angular application - Now with strict typing
+   * Implements StrictPostMessageFunction interface
    */
-  private postMessage(message: any): void {
+  private postMessage: StrictPostMessageFunction = (message) => {
     if (this._panel?.webview) {
       this._panel.webview.postMessage(message);
     } else if (this._view?.webview) {
       this._view.webview.postMessage(message);
     }
-  }
+  };
 
   /**
    * Get workspace information

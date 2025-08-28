@@ -1,38 +1,126 @@
-import { BaseWebviewMessageHandler } from './base-message-handler';
+import { BaseWebviewMessageHandler, StrictPostMessageFunction, IWebviewMessageHandler } from './base-message-handler';
+import { StrictMessageType, MessagePayloadMap, MessageResponse, AnalyticsEventPayload } from '../../types/message.types';
+import { CorrelationId } from '../../types/branded.types';
 import { SessionManager } from '../session-manager';
 import { CommandBuilderService } from '../command-builder.service';
 
 /**
+ * Analytics Message Types - Strict type definition
+ */
+type AnalyticsMessageTypes = 'analytics:trackEvent' | 'analytics:getData';
+
+/**
  * AnalyticsMessageHandler - Single Responsibility: Handle analytics and reporting messages
  */
-export class AnalyticsMessageHandler extends BaseWebviewMessageHandler {
+export class AnalyticsMessageHandler extends BaseWebviewMessageHandler<AnalyticsMessageTypes> 
+  implements IWebviewMessageHandler<AnalyticsMessageTypes> {
   readonly messageType = 'analytics:';
 
   constructor(
-    postMessage: (message: any) => void,
+    postMessage: StrictPostMessageFunction,
     private sessionManager: SessionManager,
     private commandBuilderService: CommandBuilderService
   ) {
     super(postMessage);
   }
 
-  async handle(messageType: string, payload: any): Promise<any> {
-    const action = messageType.replace(this.messageType, '');
-    
-    switch (action) {
-      case 'getData':
-        return await this.handleGetAnalyticsData();
-      default:
-        throw new Error(`Unknown analytics action: ${action}`);
+  async handle<K extends AnalyticsMessageTypes>(messageType: K, payload: MessagePayloadMap[K]): Promise<MessageResponse> {
+    try {
+      switch (messageType) {
+        case 'analytics:trackEvent':
+          return await this.handleTrackEvent(payload as AnalyticsEventPayload);
+        case 'analytics:getData':
+          return await this.handleGetAnalyticsData();
+        default:
+          throw new Error(`Unknown analytics message type: ${messageType}`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Analytics handler error';
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'ANALYTICS_HANDLER_ERROR',
+          message: errorMessage
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     }
   }
 
-  private async handleGetAnalyticsData(): Promise<void> {
+  private async handleTrackEvent(payload: AnalyticsEventPayload): Promise<MessageResponse> {
+    try {
+      // Here you would implement event tracking logic
+      // For now, just log the event
+      console.log('Tracking analytics event:', payload.event, payload.properties);
+      
+      const responseData = { tracked: true, event: payload.event };
+      this.sendSuccessResponse('analytics:eventTracked', responseData);
+      
+      return {
+        requestId: CorrelationId.create(),
+        success: true,
+        data: responseData,
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to track event';
+      this.sendErrorResponse('analytics:trackEvent', errorMessage);
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'TRACK_EVENT_ERROR',
+          message: errorMessage
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
+    }
+  }
+
+  private async handleGetAnalyticsData(): Promise<MessageResponse> {
     try {
       const analyticsData = await this.calculateAnalyticsData();
-      this.sendSuccessResponse('analytics:data', { data: analyticsData });
+      const responseData = { data: analyticsData };
+      this.sendSuccessResponse('analytics:data', responseData);
+      return {
+        requestId: CorrelationId.create(),
+        success: true,
+        data: responseData,
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     } catch (error) {
-      this.sendErrorResponse('analytics:getData', error instanceof Error ? error.message : 'Failed to get analytics data');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get analytics data';
+      this.sendErrorResponse('analytics:getData', errorMessage);
+      return {
+        requestId: CorrelationId.create(),
+        success: false,
+        error: {
+          code: 'GET_ANALYTICS_ERROR',
+          message: errorMessage
+        },
+        metadata: {
+          timestamp: Date.now(),
+          source: 'extension',
+          version: '1.0.0'
+        }
+      };
     }
   }
 

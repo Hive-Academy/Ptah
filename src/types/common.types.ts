@@ -1,3 +1,10 @@
+import { SessionId, MessageId } from './branded.types';
+import { StrictChatMessage, StrictChatSession } from './message.types';
+
+/**
+ * @deprecated Use StrictChatMessage from message.types.ts for type safety
+ * This interface is kept for backward compatibility only
+ */
 export interface ChatMessage {
   id: string;
   sessionId: string;
@@ -10,6 +17,15 @@ export interface ChatMessage {
   isError?: boolean;
 }
 
+/**
+ * Strict replacement for ChatMessage - use this for new code
+ */
+export { StrictChatMessage };
+
+/**
+ * @deprecated Use StrictChatSession from message.types.ts for type safety
+ * This interface is kept for backward compatibility only
+ */
 export interface ChatSession {
   id: string;
   name: string;
@@ -23,6 +39,11 @@ export interface ChatSession {
     total: number;
   };
 }
+
+/**
+ * Strict replacement for ChatSession - use this for new code
+ */
+export { StrictChatSession };
 
 export interface CommandTemplate {
   id: string;
@@ -39,7 +60,7 @@ export interface CommandParameter {
   type: 'string' | 'file' | 'directory' | 'select' | 'boolean' | 'auto-detect';
   required: boolean;
   description: string;
-  defaultValue?: any;
+  defaultValue?: string | number | boolean | readonly string[];
   options?: string[];
   validation?: string;
 }
@@ -47,7 +68,7 @@ export interface CommandParameter {
 export interface CommandExample {
   title: string;
   description: string;
-  parameters: Record<string, any>;
+  parameters: Readonly<Record<string, string | number | boolean | readonly string[]>>;
 }
 
 export interface ContextInfo {
