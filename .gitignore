@@ -45,3 +45,4 @@ jspm_packages/
 # VS Code workspace settings
 .vscode/settings.json
 /log.txt
+/docs/screenshots

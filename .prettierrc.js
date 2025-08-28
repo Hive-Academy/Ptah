@@ -1,0 +1,28 @@
+module.exports = {
+  printWidth: 100,
+  tabWidth: 2,
+  useTabs: false,
+  semi: true,
+  singleQuote: true,
+  quoteProps: 'as-needed',
+  trailingComma: 'es5',
+  bracketSpacing: true,
+  bracketSameLine: false,
+  arrowParens: 'always',
+  endOfLine: 'lf',
+  overrides: [
+    {
+      files: '*.html',
+      options: {
+        parser: 'angular',
+        printWidth: 120
+      }
+    },
+    {
+      files: '*.json',
+      options: {
+        printWidth: 80
+      }
+    }
+  ]
+};
